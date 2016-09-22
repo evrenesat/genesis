@@ -15,17 +15,28 @@ RELATION = ((1, _('Self')),
 class Institution(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     governmental = models.BooleanField(_('Government Agency?'), default=False)
-    surname = models.CharField(_('Surname'), max_length=50)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
-    relation = models.SmallIntegerField(_('Patient Relation'), choices=RELATION)
-    birthdate = models.DateField(_('Birthdate'))
 
     class Meta:
-        verbose_name = _('Patient')
-        verbose_name_plural = _('Patients')
+        verbose_name = _('Institution')
+        verbose_name_plural = _('Institutions')
 
-    def __unicode__(self):
+    def __str__(self):
+        return self.name
+
+class Doctor(models.Model):
+    name = models.CharField(_('Name'), max_length=50)
+    surname = models.CharField(_('Surname'), max_length=50)
+    institution = models.ForeignKey(Institution, models.PROTECT)
+    timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+
+    class Meta:
+        verbose_name = _('Doctor')
+        verbose_name_plural = _('Doctors')
+
+    def __str__(self):
         return self.name
 
 class Patient(models.Model):
@@ -43,7 +54,7 @@ class Patient(models.Model):
         verbose_name = _('Patient')
         verbose_name_plural = _('Patients')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class PatientAdmission(models.Model):
@@ -56,18 +67,6 @@ class PatientAdmission(models.Model):
         verbose_name = _('Patient Admission')
         verbose_name_plural = _('Patient Admissions')
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %s" (self.patient, self.timestamp)
 
-
-class Analyse(models.Model):
-    admission = models.ForeignKey(PatientAdmission, models.PROTECT)
-    name = models.CharField(max_length=100)
-    timestamp = models.DateTimeField(_('Definition Date'), editable=False, auto_now_add=True)
-
-    class Meta:
-        verbose_name = _('Analyse')
-        verbose_name_plural = _('Analysis')
-
-    def __unicode__(self):
-        return self.name

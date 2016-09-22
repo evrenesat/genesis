@@ -3,54 +3,90 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-22 12:13+0000\n"
+"POT-Creation-Date: 2016-09-22 19:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: lab/models/analysis.py:12
+#: lab/models/analysis.py:13
 msgid "Medium Type"
 msgstr "Ortam Tip"
 
-#: lab/models/analysis.py:13
+#: lab/models/analysis.py:14
 msgid "Medium Types"
 msgstr "Ortam Türleri"
 
-#: lab/models/analysis.py:25
+#: lab/models/analysis.py:26
 msgid "Sample Type"
 msgstr "Örnek Türü"
 
-#: lab/models/analysis.py:26
+#: lab/models/analysis.py:27
 msgid "Sample Types"
 msgstr "Örnek Türleri"
 
-#: lab/models/analysis.py:37
+#: lab/models/analysis.py:38
 msgid "Analyse Method"
 msgstr "Analiz Yöntemi"
 
-#: lab/models/analysis.py:38
+#: lab/models/analysis.py:39
 msgid "Analyse Methods"
 msgstr "Analiz Yöntemleri "
 
-#: lab/models/analysis.py:49 lab/models/analysis.py:62
-#: lab/models/patient.py:69
+#: lab/models/analysis.py:50
+msgid "Analyse Group"
+msgstr "Analiz Grubu"
+
+#: lab/models/analysis.py:51
+msgid "Analyse Groups"
+msgstr "Analiz Grupları"
+
+#: lab/models/analysis.py:63
+msgid "Analyse Type"
+msgstr "Analiz Tipi"
+
+#: lab/models/analysis.py:64
+msgid "Analyse Types"
+msgstr "Analiz Tipleri"
+
+#: lab/models/analysis.py:78
+msgid "Analyse State Definition"
+msgstr "Analiz Durum Tanımı"
+
+#: lab/models/analysis.py:79
+#| msgid "Analyse Methods"
+msgid "Analyse State Definitions"
+msgstr "Analiz Durum Tanımları"
+
+#: lab/models/analysis.py:89
+msgid "Definition Date"
+msgstr "Tanımlanma Tarihi"
+
+#: lab/models/analysis.py:92
 msgid "Analyse"
 msgstr "Analiz"
 
-#: lab/models/analysis.py:50 lab/models/analysis.py:63
-#: lab/models/patient.py:70
+#: lab/models/analysis.py:93
 msgid "Analysis"
-msgstr "Analiz"
+msgstr "Analizler"
+
+#: lab/models/analysis.py:103
+#| msgid "Analyse Method"
+msgid "Analyse State Entry"
+msgstr "Analiz Durum Girdisi"
+
+#: lab/models/analysis.py:104
+#| msgid "Analyse Methods"
+msgid "Analyse State Entries"
+msgstr "Analiz Durum Girdileri"
 
 #: lab/models/patient.py:4
 msgid "Female"
@@ -72,7 +108,7 @@ msgstr "Baba"
 msgid "Mother"
 msgstr "Anne"
 
-#: lab/models/patient.py:16 lab/models/patient.py:33
+#: lab/models/patient.py:16 lab/models/patient.py:29 lab/models/patient.py:44
 msgid "Name"
 msgstr "İsim"
 
@@ -80,55 +116,68 @@ msgstr "İsim"
 msgid "Government Agency?"
 msgstr "Devlet kurumu?"
 
-#: lab/models/patient.py:18 lab/models/patient.py:35
-msgid "Surname"
-msgstr "Soyadı"
-
-#: lab/models/patient.py:19 lab/models/patient.py:20 lab/models/patient.py:37
-#: lab/models/patient.py:38 lab/models/patient.py:53
+#: lab/models/patient.py:18 lab/models/patient.py:19 lab/models/patient.py:32
+#: lab/models/patient.py:33 lab/models/patient.py:48 lab/models/patient.py:49
+#: lab/models/patient.py:64
 msgid "Timestamp"
 msgstr "Zaman damgası"
 
-#: lab/models/patient.py:21 lab/models/patient.py:39
-msgid "Patient Relation"
-msgstr "Hasta Yakınlığı"
+#: lab/models/patient.py:22
+msgid "Institution"
+msgstr "Kurum"
 
-#: lab/models/patient.py:22 lab/models/patient.py:40
-msgid "Birthdate"
-msgstr "Doğum tarihi"
+#: lab/models/patient.py:23
+msgid "Institutions"
+msgstr "Kurumlar"
 
-#: lab/models/patient.py:25 lab/models/patient.py:43
-msgid "Patient"
-msgstr "Hasta"
+#: lab/models/patient.py:30 lab/models/patient.py:46
+msgid "Surname"
+msgstr "Soyadı"
 
-#: lab/models/patient.py:26 lab/models/patient.py:44
-msgid "Patients"
-msgstr "Hastalar"
+#: lab/models/patient.py:36
+msgid "Doctor"
+msgstr "Doktor"
 
-#: lab/models/patient.py:32
+#: lab/models/patient.py:37
+msgid "Doctors"
+msgstr "Doktorlar"
+
+#: lab/models/patient.py:43
 msgid "TC No"
 msgstr "TC No"
 
-#: lab/models/patient.py:34
+#: lab/models/patient.py:45
 msgid "Is newborn?"
 msgstr "Yenidoğan mı?"
 
-#: lab/models/patient.py:36
+#: lab/models/patient.py:47
 msgid "Sex"
 msgstr "Cinsiyet"
 
-#: lab/models/patient.py:52
+#: lab/models/patient.py:50
+msgid "Patient Relation"
+msgstr "Hasta Yakınlığı"
+
+#: lab/models/patient.py:51
+msgid "Birthdate"
+msgstr "Doğum tarihi"
+
+#: lab/models/patient.py:54
+msgid "Patient"
+msgstr "Hasta"
+
+#: lab/models/patient.py:55
+msgid "Patients"
+msgstr "Hastalar"
+
+#: lab/models/patient.py:63
 msgid "Creation Date"
 msgstr "Oluşturulma tarihi"
 
-#: lab/models/patient.py:56
+#: lab/models/patient.py:67
 msgid "Patient Admission"
 msgstr "Hasta Kabul"
 
-#: lab/models/patient.py:57
+#: lab/models/patient.py:68
 msgid "Patient Admissions"
 msgstr "Hasta Kabülleri"
-
-#: lab/models/patient.py:66
-msgid "Definition Date"
-msgstr "Tanımlanma tarihi"
