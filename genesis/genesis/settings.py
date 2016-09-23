@@ -73,7 +73,9 @@ ROOT_URLCONF = 'genesis.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,6 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'tr-TR'
+# LANGUAGE_CODE = 'en-EN'
 
 TIME_ZONE = 'UTC'
 
@@ -143,4 +146,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-GRAPPELLI_ADMIN_TITLE = 'Genesis'
+GRAPPELLI_ADMIN_TITLE = 'GENESIS'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass

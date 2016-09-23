@@ -2,12 +2,12 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # Create your models here.
-from .patient import PatientAdmission
+from .patient import Admission
 
 
 class MediumType(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=3)
+    name = models.CharField(_('Name'), max_length=100)
+    code = models.CharField(_('Code'), max_length=3)
 
     class Meta:
         verbose_name = _('Medium Type')
@@ -18,9 +18,9 @@ class MediumType(models.Model):
 
 
 class SampleType(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=3)
-    medium = models.ManyToManyField(MediumType)
+    name = models.CharField(_('Name'), max_length=100)
+    code = models.CharField(_('Code'), max_length=3)
+    medium = models.ManyToManyField(MediumType, verbose_name=_('Medium Type'))
 
     class Meta:
         verbose_name = _('Sample Type')
@@ -31,8 +31,8 @@ class SampleType(models.Model):
 
 
 class Method(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=5, null=True, blank=True)
+    name = models.CharField(_('Name'), max_length=100)
+    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
 
     class Meta:
         verbose_name = _('Analyse Method')
@@ -42,9 +42,9 @@ class Method(models.Model):
         return self.name
 
 
-class AnalyseGroup(models.Model):
-    name = models.CharField(max_length=30)
-    code = models.CharField(max_length=5, null=True, blank=True)
+class Category(models.Model):
+    name = models.CharField(_('Name'), max_length=30)
+    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
 
     class Meta:
         verbose_name = _('Analyse Group')
@@ -55,9 +55,13 @@ class AnalyseGroup(models.Model):
 
 
 class AnalyseType(models.Model):
-    group = models.ForeignKey(AnalyseGroup, models.PROTECT)
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=5, null=True, blank=True)
+    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Group'))
+    method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'))
+    sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
+    name = models.CharField(_('Name'), max_length=100)
+    code = models.CharField(_('Code'), max_length=10, null=True, blank=True)
+    price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
+    process_time = models.SmallIntegerField(_('Process Time'))
 
     class Meta:
         verbose_name = _('Analyse Type')
@@ -70,9 +74,10 @@ class AnalyseType(models.Model):
     def autocomplete_search_fields():
         return ("id__iexact", "name__icontains",)
 
-class AnalyseStateDefinition(models.Model):
-    type = models.ForeignKey(AnalyseType, models.PROTECT, )
-    name = models.CharField(max_length=50)
+
+class StateDefinition(models.Model):
+    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
+    name = models.CharField(_('Name'), max_length=50)
 
     class Meta:
         verbose_name = _('Analyse State Definition')
@@ -83,25 +88,51 @@ class AnalyseStateDefinition(models.Model):
 
 
 class Analyse(models.Model):
-    type = models.ForeignKey(AnalyseType, models.PROTECT)
-    admission = models.ForeignKey(PatientAdmission, models.PROTECT)
-    name = models.CharField(max_length=100)
+    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
+    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Definition Date'), editable=False, auto_now_add=True)
+
 
     class Meta:
         verbose_name = _('Analyse')
         verbose_name_plural = _('Analysis')
 
     def __str__(self):
-        return self.name
+        return "%s %s" % (self.type, self.admission)
 
-class AnalyseState(models.Model):
-    type = models.ForeignKey(Analyse, models.PROTECT)
-    comment = models.CharField(max_length=50)
+
+class State(models.Model):
+    type = models.ForeignKey(Analyse, models.PROTECT, verbose_name=_('Analyse'))
+    comment = models.CharField(_('Comment'), max_length=50)
+    timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+
 
     class Meta:
-        verbose_name = _('Analyse State Entry')
-        verbose_name_plural = _('Analyse State Entries')
+        verbose_name = _('Analyse State')
+        verbose_name_plural = _('Analyse States')
+
+    def __str__(self):
+        return self.type
+
+
+
+
+class ParameterDefinition(models.Model):
+    analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
+    name = models.CharField(_('Name'), max_length=50)
+    process_logic = models.TextField(_('Process Logic Code'))
+    updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+
+
+    class Meta:
+        verbose_name = _('Parameter Definition')
+        verbose_name_plural = _('Parameter Definitions')
 
     def __str__(self):
         return self.name
+
+
+APO_E = [
+    [1, 2, 3, 4],
+]

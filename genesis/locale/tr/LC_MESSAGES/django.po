@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-22 19:52+0000\n"
+"POT-Creation-Date: 2016-09-23 12:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: lab/models/analysis.py:13
+#: lab/models/analysis.py:9 lab/models/analysis.py:21 lab/models/analysis.py:34
+#: lab/models/analysis.py:46 lab/models/analysis.py:60
+#: lab/models/analysis.py:77 lab/models/patient.py:16 lab/models/patient.py:34
+#: lab/models/patient.py:53
+msgid "Name"
+msgstr "İsim"
+
+#: lab/models/analysis.py:10 lab/models/analysis.py:22
+#: lab/models/analysis.py:35 lab/models/analysis.py:47
+#: lab/models/analysis.py:61 lab/models/patient.py:17
+msgid "Code"
+msgstr "Kod"
+
+#: lab/models/analysis.py:13 lab/models/analysis.py:23
 msgid "Medium Type"
 msgstr "Ortam Tip"
 
@@ -25,7 +38,7 @@ msgstr "Ortam Tip"
 msgid "Medium Types"
 msgstr "Ortam Türleri"
 
-#: lab/models/analysis.py:26
+#: lab/models/analysis.py:26 lab/models/analysis.py:59
 msgid "Sample Type"
 msgstr "Örnek Türü"
 
@@ -49,44 +62,64 @@ msgstr "Analiz Grubu"
 msgid "Analyse Groups"
 msgstr "Analiz Grupları"
 
-#: lab/models/analysis.py:63
+#: lab/models/analysis.py:58
+msgid "Group"
+msgstr "Grup"
+
+#: lab/models/analysis.py:64 lab/models/analysis.py:76
+#: lab/models/analysis.py:88
 msgid "Analyse Type"
 msgstr "Analiz Tipi"
 
-#: lab/models/analysis.py:64
+#: lab/models/analysis.py:65
 msgid "Analyse Types"
 msgstr "Analiz Tipleri"
 
-#: lab/models/analysis.py:78
+#: lab/models/analysis.py:80
 msgid "Analyse State Definition"
 msgstr "Analiz Durum Tanımı"
 
-#: lab/models/analysis.py:79
-#| msgid "Analyse Methods"
+#: lab/models/analysis.py:81
 msgid "Analyse State Definitions"
 msgstr "Analiz Durum Tanımları"
 
-#: lab/models/analysis.py:89
+#: lab/models/analysis.py:89 lab/models/patient.py:86
+msgid "Patient Admission"
+msgstr "Hasta Kabülü"
+
+#: lab/models/analysis.py:90
 msgid "Definition Date"
 msgstr "Tanımlanma Tarihi"
 
-#: lab/models/analysis.py:92
+#: lab/models/analysis.py:94 lab/models/analysis.py:102
 msgid "Analyse"
 msgstr "Analiz"
 
-#: lab/models/analysis.py:93
+#: lab/models/analysis.py:95
 msgid "Analysis"
 msgstr "Analizler"
 
 #: lab/models/analysis.py:103
-#| msgid "Analyse Method"
-msgid "Analyse State Entry"
-msgstr "Analiz Durum Girdisi"
+msgid "Comment"
+msgstr "Yorum"
 
-#: lab/models/analysis.py:104
-#| msgid "Analyse Methods"
-msgid "Analyse State Entries"
-msgstr "Analiz Durum Girdileri"
+#: lab/models/analysis.py:104 lab/models/patient.py:19 lab/models/patient.py:37
+#: lab/models/patient.py:38 lab/models/patient.py:57 lab/models/patient.py:58
+#: lab/models/patient.py:83
+msgid "Timestamp"
+msgstr "Zaman damgası"
+
+#: lab/models/analysis.py:105 lab/models/patient.py:20
+msgid "Update date"
+msgstr "Güncellme "
+
+#: lab/models/analysis.py:109
+msgid "Analyse State"
+msgstr "Analiz Durum"
+
+#: lab/models/analysis.py:110
+msgid "Analyse States"
+msgstr "Analiz Durumları"
 
 #: lab/models/patient.py:4
 msgid "Female"
@@ -108,76 +141,136 @@ msgstr "Baba"
 msgid "Mother"
 msgstr "Anne"
 
-#: lab/models/patient.py:16 lab/models/patient.py:29 lab/models/patient.py:44
-msgid "Name"
-msgstr "İsim"
-
-#: lab/models/patient.py:17
+#: lab/models/patient.py:18
 msgid "Government Agency?"
 msgstr "Devlet kurumu?"
 
-#: lab/models/patient.py:18 lab/models/patient.py:19 lab/models/patient.py:32
-#: lab/models/patient.py:33 lab/models/patient.py:48 lab/models/patient.py:49
-#: lab/models/patient.py:64
-msgid "Timestamp"
-msgstr "Zaman damgası"
-
-#: lab/models/patient.py:22
+#: lab/models/patient.py:23 lab/models/patient.py:75
 msgid "Institution"
 msgstr "Kurum"
 
-#: lab/models/patient.py:23
+#: lab/models/patient.py:24
 msgid "Institutions"
 msgstr "Kurumlar"
 
-#: lab/models/patient.py:30 lab/models/patient.py:46
+#: lab/models/patient.py:35 lab/models/patient.py:55
 msgid "Surname"
 msgstr "Soyadı"
 
-#: lab/models/patient.py:36
+#: lab/models/patient.py:41 lab/models/patient.py:76
 msgid "Doctor"
 msgstr "Doktor"
 
-#: lab/models/patient.py:37
+#: lab/models/patient.py:42
 msgid "Doctors"
 msgstr "Doktorlar"
 
-#: lab/models/patient.py:43
+#: lab/models/patient.py:52
 msgid "TC No"
 msgstr "TC No"
 
-#: lab/models/patient.py:45
+#: lab/models/patient.py:54
 msgid "Is newborn?"
 msgstr "Yenidoğan mı?"
 
-#: lab/models/patient.py:47
+#: lab/models/patient.py:56
 msgid "Sex"
 msgstr "Cinsiyet"
 
-#: lab/models/patient.py:50
+#: lab/models/patient.py:59
 msgid "Patient Relation"
 msgstr "Hasta Yakınlığı"
 
-#: lab/models/patient.py:51
+#: lab/models/patient.py:60
 msgid "Birthdate"
 msgstr "Doğum tarihi"
 
-#: lab/models/patient.py:54
+#: lab/models/patient.py:63 lab/models/patient.py:74
 msgid "Patient"
 msgstr "Hasta"
 
-#: lab/models/patient.py:55
+#: lab/models/patient.py:64
 msgid "Patients"
 msgstr "Hastalar"
 
-#: lab/models/patient.py:63
+#: lab/models/patient.py:77
+msgid "Indications"
+msgstr "Endikasyon"
+
+#: lab/models/patient.py:78
+msgid "Reproductive story / Family Tree"
+msgstr "Üreme geçmişi / Soy Ağacı"
+
+#: lab/models/patient.py:79
+msgid "Pregnancy week"
+msgstr "Gebelik haftası"
+
+#: lab/models/patient.py:80
+msgid "UPD"
+msgstr "USG"
+
+#: lab/models/patient.py:81
+msgid "LMP"
+msgstr "SAT"
+
+#: lab/models/patient.py:82
 msgid "Creation Date"
 msgstr "Oluşturulma tarihi"
 
-#: lab/models/patient.py:67
-msgid "Patient Admission"
-msgstr "Hasta Kabul"
-
-#: lab/models/patient.py:68
+#: lab/models/patient.py:87
 msgid "Patient Admissions"
 msgstr "Hasta Kabülleri"
+
+#: templates/admin/base.html:10
+msgid "Dashboard"
+msgstr "Ana Ekran"
+
+#: templates/admin/base.html:20
+msgid "User"
+msgstr "Kullanıcı"
+
+#: templates/admin/base.html:24
+msgid "Change password"
+msgstr "Parola değiştir"
+
+#: templates/admin/base.html:27
+msgid "Log out"
+msgstr "Çıkış Yap"
+
+#: templates/admin/base.html:35
+msgid "Documentation"
+msgstr "Belgeler"
+
+#: templates/admin/index.html:22
+msgid "Home"
+msgstr "Ana Ekran"
+
+#: templates/admin/index.html:46
+msgid "Add"
+msgstr "Ekle"
+
+#: templates/admin/index.html:55
+msgid "You don´t have permission to edit anything."
+msgstr "Yetkiniz yok"
+
+#: templates/admin/index.html:60
+msgid "Custom Views"
+msgstr "Özel Görünümler"
+
+#: templates/admin/index.html:72
+msgid "Recent actions"
+msgstr "Son işlemler"
+
+#: templates/admin/index.html:74
+msgid "My actions"
+msgstr "Benim işlemlerim"
+
+#: templates/admin/index.html:77
+msgid "None available"
+msgstr "Mevcut değil"
+
+#~ msgid "History"
+#~ msgstr "Öyküsü"
+
+#~ msgid "Date of pregnancy"
+#~ msgstr "Gebelik tarihi"

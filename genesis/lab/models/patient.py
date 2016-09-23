@@ -11,12 +11,22 @@ RELATION = ((1, _('Self')),
             # (3, _('Child')),
             )
 
+INSTITUTION_TYPE = ((10, _('Government Hospital')),
+                    (20, _('Private Hospital')),
+                    (30, _('Clinic')),
+                    (99, _('Internal')),
+                    )
+
 
 class Institution(models.Model):
-    name = models.CharField(_('Name'), max_length=50)
-    governmental = models.BooleanField(_('Government Agency?'), default=False)
+    name = models.CharField(_('Name'), max_length=100)
+    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
+    type = models.SmallIntegerField(_('Institution type'), choices=INSTITUTION_TYPE)
+    phone = models.CharField(_('Phone'), max_length=30, null=True, blank=True)
+    cellular = models.CharField(_('Cellular phone'), max_length=30, null=True, blank=True)
+    address = models.CharField(_('Cellular phone'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
-    updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+    updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
 
     class Meta:
         verbose_name = _('Institution')
@@ -25,10 +35,15 @@ class Institution(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "name__icontains", "code__startswith")
+
+
 class Doctor(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     surname = models.CharField(_('Surname'), max_length=50)
-    institution = models.ForeignKey(Institution, models.PROTECT)
+    institution = models.ForeignKey(Institution, models.PROTECT, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
 
@@ -38,6 +53,11 @@ class Doctor(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "name__icontains", "surname__icontains")
+
 
 class Patient(models.Model):
     tcno = models.CharField(_('TC No'), max_length=11)
@@ -55,11 +75,23 @@ class Patient(models.Model):
         verbose_name_plural = _('Patients')
 
     def __str__(self):
-        return self.name
+        return "%s %s | %s | %s " % (self.name, self.surname, self.tcno, self.id)
 
-class PatientAdmission(models.Model):
-    patient = models.ForeignKey(Patient, models.PROTECT)
-    institution = models.ForeignKey(Institution, models.PROTECT)
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "tcno__startswith", "name__icontains", "surname__icontains")
+
+
+class Admission(models.Model):
+    patient = models.ForeignKey(Patient, models.PROTECT, verbose_name=_('Patient'))
+    institution = models.ForeignKey(Institution, models.PROTECT, verbose_name=_('Institution'))
+    doctor = models.ForeignKey(Doctor, models.PROTECT, verbose_name=_('Doctor'), null=True,
+                               blank=True)
+    indications = models.TextField(_('Indications'), null=True, blank=True)
+    history = models.TextField(_('Reproductive story / Family Tree'), null=True, blank=True)
+    week = models.CharField(_('Pregnancy week'), null=True, blank=True, max_length=7)
+    upd_week = models.CharField(_('UPD'), null=True, blank=True, max_length=7)
+    lmp_date = models.DateField(_('LMP'), null=True, blank=True)
     timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
 
@@ -68,5 +100,4 @@ class PatientAdmission(models.Model):
         verbose_name_plural = _('Patient Admissions')
 
     def __str__(self):
-        return "%s %s" (self.patient, self.timestamp)
-
+        return "%s %s" % (self.patient, str(self.timestamp)[:19])

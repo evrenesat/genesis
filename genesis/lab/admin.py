@@ -6,7 +6,7 @@ from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 
-from .models import Analyse, PatientAdmission, AnalyseType
+from .models import *
 
 
 class AnalyseInline(admin.TabularInline):
@@ -16,7 +16,7 @@ class AnalyseInline(admin.TabularInline):
     #     'type_fk': ['type'],
     # }
     raw_id_fields = ("type",)
-    list_filter = ('group__name',)
+    # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
@@ -24,26 +24,52 @@ class AnalyseInline(admin.TabularInline):
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
-    list_filter = ('group__name',)
-    search_fields = ('name', )
+    list_filter = ('category__name',)
+    search_fields = ('name',)
+
 
 @admin.register(Analyse)
 class AnalyseAdmin(admin.ModelAdmin):
     raw_id_fields = ("type",)
-    search_fields = ('name',)
+    search_fields = ('admission__id',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
 
 
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'id', 'surname', 'tcno')
 
-# class AnalyseTypeAdmin(admin.ModelAdmin):
-#     autocomplete_lookup_fields = {
-#         'fk': ['type'],
-#     }
+@admin.register(Doctor)
+class DoctorAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'surname')
 
-@admin.register(PatientAdmission)
-class PatientAdmissionAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        if not obj.institution:
+            ins = Institution(name=obj.name, type=30)
+            ins.save()
+            obj.institution = ins
+        obj.save()
+
+
+@admin.register(Institution)
+class InstitutionAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'id', 'code')
+
+
+@admin.register(Admission)
+class AdmissionAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+    raw_id_fields = ('patient', 'institution', 'doctor')
+    fields = ('id', 'patient', ('institution', 'doctor'),
+              ('week','upd_week', 'lmp_date'),
+              ('indications', 'history'),
+              )
+    autocomplete_lookup_fields = {
+        'fk': ['patient', 'institution', 'doctor'],
+    }
+
     inlines = [
         AnalyseInline,
     ]
