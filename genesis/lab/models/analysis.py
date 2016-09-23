@@ -6,7 +6,7 @@ from .patient import Admission
 
 
 class MediumType(models.Model):
-    name = models.CharField(_('Name'), max_length=100)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code'), max_length=3)
 
     class Meta:
@@ -14,12 +14,13 @@ class MediumType(models.Model):
         verbose_name_plural = _('Medium Types')
 
     def __str__(self):
-        return self.code
+        return self.name
 
 
 class SampleType(models.Model):
-    name = models.CharField(_('Name'), max_length=100)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code'), max_length=3)
+    amount = models.CharField(_('Amount'), max_length=20, null=True, blank=True)
     medium = models.ManyToManyField(MediumType, verbose_name=_('Medium Type'))
 
     class Meta:
@@ -27,11 +28,11 @@ class SampleType(models.Model):
         verbose_name_plural = _('Sample Types')
 
     def __str__(self):
-        return self.code
+        return self.name
 
 
 class Method(models.Model):
-    name = models.CharField(_('Name'), max_length=100)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
 
     class Meta:
@@ -43,7 +44,7 @@ class Method(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(_('Name'), max_length=30)
+    name = models.CharField(_('Name'), max_length=30, unique=True)
     code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
 
     class Meta:
@@ -58,7 +59,7 @@ class AnalyseType(models.Model):
     category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Group'))
     method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'))
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
-    name = models.CharField(_('Name'), max_length=100)
+    name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code'), max_length=10, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
     process_time = models.SmallIntegerField(_('Process Time'))
@@ -80,6 +81,7 @@ class StateDefinition(models.Model):
     name = models.CharField(_('Name'), max_length=50)
 
     class Meta:
+        unique_together = ('type', 'name')
         verbose_name = _('Analyse State Definition')
         verbose_name_plural = _('Analyse State Definitions')
 
@@ -133,6 +135,3 @@ class ParameterDefinition(models.Model):
         return self.name
 
 
-APO_E = [
-    [1, 2, 3, 4],
-]
