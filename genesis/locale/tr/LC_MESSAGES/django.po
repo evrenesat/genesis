@@ -32,19 +32,19 @@ msgstr "Kod"
 
 #: lab/models/analysis.py:13 lab/models/analysis.py:23
 msgid "Medium Type"
-msgstr "Ortam Tip"
+msgstr "Ortam Tipi"
 
 #: lab/models/analysis.py:14
 msgid "Medium Types"
-msgstr "Ortam Türleri"
+msgstr "Ortam Tipleri"
 
 #: lab/models/analysis.py:26 lab/models/analysis.py:59
 msgid "Sample Type"
-msgstr "Örnek Türü"
+msgstr "Örnek Tipi"
 
 #: lab/models/analysis.py:27
 msgid "Sample Types"
-msgstr "Örnek Türleri"
+msgstr "Örnek Tipleri"
 
 #: lab/models/analysis.py:38
 msgid "Analyse Method"
@@ -111,7 +111,7 @@ msgstr "Zaman damgası"
 
 #: lab/models/analysis.py:105 lab/models/patient.py:20
 msgid "Update date"
-msgstr "Güncellme "
+msgstr "Güncelleme "
 
 #: lab/models/analysis.py:109
 msgid "Analyse State"
@@ -251,7 +251,7 @@ msgstr "Ekle"
 
 #: templates/admin/index.html:55
 msgid "You don´t have permission to edit anything."
-msgstr "Yetkiniz yok"
+msgstr "Düzenleme yapma yetkiniz yok"
 
 #: templates/admin/index.html:60
 msgid "Custom Views"
