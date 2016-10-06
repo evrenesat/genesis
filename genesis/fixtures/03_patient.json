@@ -1,0 +1,50 @@
+[
+  {
+    "model": "lab.institution",
+    "pk": 1,
+    "fields": {
+      "name": "Ege Do\u011fumevi",
+      "code": "egd",
+      "type": 10,
+      "phone": "",
+      "cellular": "",
+      "address": "",
+      "timestamp": "2016-09-23T20:55:09.065Z",
+      "updated_at": "2016-09-23T20:55:09.065Z",
+      "operator": 1
+    }
+  },
+  {
+    "model": "lab.patient",
+    "pk": 1,
+    "fields": {
+      "tcno": "10642736380",
+      "name": "Evren Esat",
+      "newborn": false,
+      "surname": "\u00d6zkan",
+      "sex": 2,
+      "timestamp": "2016-09-23T20:54:45.179Z",
+      "updated_at": "2016-09-23T20:54:45.179Z",
+      "relation": 1,
+      "birthdate": "2016-09-28",
+      "operator": 1
+    }
+  },
+  {
+    "model": "lab.admission",
+    "pk": 1,
+    "fields": {
+      "patient": 1,
+      "institution": 1,
+      "doctor": null,
+      "indications": "",
+      "history": "",
+      "week": "20",
+      "upd_week": "",
+      "lmp_date": null,
+      "timestamp": "2016-09-23T20:56:05.772Z",
+      "updated_at": "2016-09-23T20:56:05.772Z",
+      "operator": 1
+    }
+  }
+]
