@@ -77,6 +77,20 @@ class AnalyseType(models.Model):
         return ("id__iexact", "name__icontains",)
 
 
+class ReportTemplate(models.Model):
+    analyse_type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
+    name = models.CharField(_('Name'), max_length=20, null=True, blank=True)
+    template = models.TextField(_('Template'))
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
+
+    class Meta:
+        verbose_name = _('Report Template')
+        verbose_name_plural = _('Report Templates')
+
+    def __str__(self):
+        return "%s %s" % (self.patient, str(self.timestamp)[:19])
+
+
 class StateDefinition(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=50)
