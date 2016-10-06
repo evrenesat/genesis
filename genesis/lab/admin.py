@@ -22,6 +22,16 @@ class AnalyseInline(admin.TabularInline):
     }
 
 
+class ParameterValueInline(admin.TabularInline):
+    model = ParameterValue
+
+    # raw_id_fields = ("type",)
+    # list_filter = ('category__name',)
+    # autocomplete_lookup_fields = {
+    #     'fk': ['type'],
+    # }
+
+
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
     list_filter = ('category__name',)
@@ -36,6 +46,10 @@ class AnalyseAdmin(admin.ModelAdmin):
         'fk': ['type'],
     }
 
+    inlines = [
+        ParameterValueInline,
+    ]
+
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
@@ -47,6 +61,8 @@ class DoctorAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.institution:
+            # create a clinic record for doctors who doesn't
+            #  belong to an institution
             ins = Institution(name=obj.name, type=30)
             ins.save()
             obj.institution = ins

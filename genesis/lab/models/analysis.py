@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -94,7 +95,6 @@ class Analyse(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Definition Date'), editable=False, auto_now_add=True)
 
-
     class Meta:
         verbose_name = _('Analyse')
         verbose_name_plural = _('Analysis')
@@ -104,11 +104,11 @@ class Analyse(models.Model):
 
 
 class State(models.Model):
-    type = models.ForeignKey(Analyse, models.PROTECT, verbose_name=_('Analyse'))
+    analyse = models.ForeignKey(Analyse, models.PROTECT, verbose_name=_('Analyse'))
+    definition = models.ForeignKey(StateDefinition, models.PROTECT, verbose_name=_('Analyse'))
     comment = models.CharField(_('Comment'), max_length=50)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
-
 
     class Meta:
         verbose_name = _('Analyse State')
@@ -118,14 +118,23 @@ class State(models.Model):
         return self.type
 
 
+PARAMETER_TYPES = (
+    (1, _('Simple Key & Value')),
+    (5, _('Boolean Matrix')),
+    (10, _('Preset Selection Matrix')),
+    (15, _('Numeric Matrix')),
+)
 
 
-class ParameterDefinition(models.Model):
-    analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
+class Parameter(models.Model):
     name = models.CharField(_('Name'), max_length=50)
-    process_logic = models.TextField(_('Process Logic Code'))
+    type = models.SmallIntegerField(_('Parameter type'), choices=PARAMETER_TYPES)
+    analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
-
+    process_logic = models.TextField(_('Process logic code'))
+    matrix_definition = models.TextField(_('Matrix definition'), null=True, blank=True,
+                                         help_text="x = N/N, Mt/N, Mt/Mt<br />"
+                                                   "y = Faktör V Leiden PCR, Faktör V HR2 PCR")
 
     class Meta:
         verbose_name = _('Parameter Definition')
@@ -135,3 +144,53 @@ class ParameterDefinition(models.Model):
         return self.name
 
 
+PARAMETER_VALUE_TYPES = (
+    (1, _('String')),
+    (5, _('Integer')),
+    (10, _('Float')),
+    (15, _('Boolean')),
+)
+
+
+class ParameterKey(models.Model):
+    parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
+    name = models.CharField(_('Name'), max_length=30)
+    code = models.CharField(_('Code name'), max_length=6, null=True, blank=True)
+    help = models.CharField(_('Help text'), max_length=255, blank=True, null=True)
+    type = models.SmallIntegerField(_('Parameter type'), choices=PARAMETER_VALUE_TYPES, default=1)
+
+    class Meta:
+        verbose_name = _('Parameter Key')
+        verbose_name_plural = _('Parameter Keys')
+
+    def __str__(self):
+        return self.name
+
+
+class ParameterValue(models.Model):
+    parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
+    key = models.ForeignKey(ParameterKey, verbose_name=_('Parameter Key'))
+    analyse = models.ForeignKey(Analyse, verbose_name=_('Analyse'))
+    name = models.CharField(_('Name'), max_length=30)
+    value = models.CharField(_('Value'), max_length=30, blank=True)
+    value_int = models.IntegerField(_('Int Value'), editable=False, default=0)
+    value_float = models.IntegerField(_('Float Value'), editable=False, default=.0)
+
+    type = models.SmallIntegerField(_('Parameter type'), choices=PARAMETER_TYPES)
+
+    def _sync_values(self):
+        if self.value_float:
+            self.value = str(self.value_float)
+        elif self.value_int:
+            self.value = str(self.value_int)
+
+    def save(self, *args, **kwargs):
+        self._sync_values()
+        super(ParameterValue, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _('Result Value')
+        verbose_name_plural = _('Result Values')
+
+    def __str__(self):
+        return self.name
