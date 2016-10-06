@@ -1,0 +1,29 @@
+[
+  {
+    "model": "lab.analyse",
+    "pk": 1,
+    "fields": {
+      "type": 22,
+      "admission": 1,
+      "timestamp": "2016-09-23T20:56:05.774Z"
+    }
+  },
+  {
+    "model": "lab.analyse",
+    "pk": 2,
+    "fields": {
+      "type": 23,
+      "admission": 1,
+      "timestamp": "2016-09-23T20:56:05.775Z"
+    }
+  },
+  {
+    "model": "lab.analyse",
+    "pk": 3,
+    "fields": {
+      "type": 4,
+      "admission": 1,
+      "timestamp": "2016-09-23T20:56:05.775Z"
+    }
+  }
+]
