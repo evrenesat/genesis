@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -27,6 +28,7 @@ class Institution(models.Model):
     address = models.CharField(_('Cellular phone'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
         verbose_name = _('Institution')
@@ -46,6 +48,7 @@ class Doctor(models.Model):
     institution = models.ForeignKey(Institution, models.PROTECT, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
         verbose_name = _('Doctor')
@@ -69,6 +72,7 @@ class Patient(models.Model):
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     relation = models.SmallIntegerField(_('Patient Relation'), choices=RELATION)
     birthdate = models.DateField(_('Birthdate'))
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
         verbose_name = _('Patient')
@@ -94,6 +98,7 @@ class Admission(models.Model):
     lmp_date = models.DateField(_('LMP'), null=True, blank=True)
     timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
         verbose_name = _('Patient Admission')

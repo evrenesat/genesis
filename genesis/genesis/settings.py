@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 LOCALE_PATHS = [
-    BASE_DIR + '/locale'
+    os.path.join(BASE_DIR, 'locale')
 ]
 
 # Application definition
@@ -36,7 +36,7 @@ LOCALE_PATHS = [
 INSTALLED_APPS = [
     # 'dal',
     # 'dal_select2',
-    'autotranslate',
+    # 'autotranslate',
     'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
