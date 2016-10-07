@@ -55,6 +55,13 @@ class AnalyseAdmin(admin.ModelAdmin):
 class PatientAdmin(admin.ModelAdmin):
     search_fields = ('name', 'id', 'surname', 'tcno')
 
+@admin.register(ReportTemplate)
+class PatientAdmin(admin.ModelAdmin):
+    class Media:
+        js = [
+            '/static/tinymce/tinymce.min.js',
+            '/static/tinymce/setup.js',
+        ]
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     search_fields = ('name', 'surname')
