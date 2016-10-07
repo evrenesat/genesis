@@ -78,7 +78,7 @@ class AnalyseType(models.Model):
 
 
 class ReportTemplate(models.Model):
-    analyse_type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
+    analyse_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=20, null=True, blank=True)
     template = models.TextField(_('Template'))
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
