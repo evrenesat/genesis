@@ -10,8 +10,7 @@
       "cellular": "",
       "address": "",
       "timestamp": "2016-09-23T20:55:09.065Z",
-      "updated_at": "2016-09-23T20:55:09.065Z",
-      "operator": 1
+      "updated_at": "2016-09-23T20:55:09.065Z"
     }
   },
   {
@@ -26,8 +25,7 @@
       "timestamp": "2016-09-23T20:54:45.179Z",
       "updated_at": "2016-09-23T20:54:45.179Z",
       "relation": 1,
-      "birthdate": "2016-09-28",
-      "operator": 1
+      "birthdate": "2016-09-28"
     }
   },
   {
@@ -43,8 +41,7 @@
       "upd_week": "",
       "lmp_date": null,
       "timestamp": "2016-09-23T20:56:05.772Z",
-      "updated_at": "2016-09-23T20:56:05.772Z",
-      "operator": 1
+      "updated_at": "2016-09-23T20:56:05.772Z"
     }
   }
 ]
