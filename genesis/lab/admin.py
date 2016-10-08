@@ -25,6 +25,9 @@ class AnalyseInline(admin.TabularInline):
 class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
 
+class StateInline(admin.TabularInline):
+    model = State
+
     # raw_id_fields = ("type",)
     # list_filter = ('category__name',)
     # autocomplete_lookup_fields = {
@@ -47,7 +50,7 @@ class AnalyseAdmin(admin.ModelAdmin):
     }
 
     inlines = [
-        ParameterValueInline,
+        StateInline, ParameterValueInline
     ]
 
 

@@ -92,7 +92,7 @@ class ReportTemplate(models.Model):
 
 
 class StateDefinition(models.Model):
-    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
+    type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=50)
 
     class Meta:
