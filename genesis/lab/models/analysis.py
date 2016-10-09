@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -81,6 +82,7 @@ class ReportTemplate(models.Model):
     analyse_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=20, null=True, blank=True)
     template = models.TextField(_('Template'))
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
@@ -96,7 +98,6 @@ class StateDefinition(models.Model):
     name = models.CharField(_('Name'), max_length=50)
 
     class Meta:
-        unique_together = ('type', 'name')
         verbose_name = _('Analyse State Definition')
         verbose_name_plural = _('Analyse State Definitions')
 
@@ -107,7 +108,9 @@ class StateDefinition(models.Model):
 class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
-    timestamp = models.DateTimeField(_('Definition Date'), editable=False, auto_now_add=True)
+    timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
+    result = models.TextField(_('Analyse result'), blank=True, null=True    )
+
 
     class Meta:
         verbose_name = _('Analyse')
@@ -132,12 +135,26 @@ class State(models.Model):
         return self.type
 
 
+
 PARAMETER_TYPES = (
     (1, _('Simple Key & Value')),
+    (2, _('Tabular Key & Value')),
     (5, _('Boolean Matrix')),
-    (10, _('Preset Selection Matrix')),
+    (10, _('String Matrix')),
     (15, _('Numeric Matrix')),
 )
+PARAM_DEF_HELP_TEXT = _("""
+<hr />
+<strong>Data Definition Help</strong><br />
+Matrices:<br />
+x = N/N, Mt/N, Mt/Mt<br />
+y = Faktör V Leiden PCR, Faktör V HR2 PCR<br />
+<hr />
+Key/Values:<br />
+key<br />
+key2<br />
+key_with_preset=val1,val2,val3
+""")
 
 
 class Parameter(models.Model):
@@ -146,9 +163,18 @@ class Parameter(models.Model):
     analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     process_logic = models.TextField(_('Process logic code'))
-    matrix_definition = models.TextField(_('Matrix definition'), null=True, blank=True,
-                                         help_text="x = N/N, Mt/N, Mt/Mt<br />"
-                                                   "y = Faktör V Leiden PCR, Faktör V HR2 PCR")
+    parameter_definition = models.TextField(_('Parameter definition'), null=True, blank=True,
+                                            help_text=PARAM_DEF_HELP_TEXT)
+
+    def _handle_matrix_kv(self):
+        pass
+
+    def _handle_simple_kv(self):
+        pass
+
+    def create_update_parameter_keys(self):
+        for lines in self.parameter_definition.split('\n'):
+            pass
 
     class Meta:
         verbose_name = _('Parameter Definition')
@@ -172,6 +198,7 @@ class ParameterKey(models.Model):
     code = models.CharField(_('Code name'), max_length=6, null=True, blank=True)
     help = models.CharField(_('Help text'), max_length=255, blank=True, null=True)
     type = models.SmallIntegerField(_('Parameter type'), choices=PARAMETER_VALUE_TYPES, default=1)
+    presets = models.TextField(_('Presets'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('Parameter Key')

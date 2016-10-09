@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 
 # Register your models here.
 
@@ -25,20 +26,49 @@ class AnalyseInline(admin.TabularInline):
 class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
 
+
 class StateInline(admin.TabularInline):
     model = State
 
-    # raw_id_fields = ("type",)
-    # list_filter = ('category__name',)
-    # autocomplete_lookup_fields = {
-    #     'fk': ['type'],
-    # }
+
+class ParameterKeyInline(admin.TabularInline):
+    model = ParameterKey
+    classes = ('grp-collapse grp-closed',)
 
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
     list_filter = ('category__name',)
     search_fields = ('name',)
+
+
+@admin.register(Parameter)
+class ParameterAdmin(admin.ModelAdmin):
+    # list_filter = (,)
+    # search_fields = (,)
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        if obj.parameter_definition.strip():
+            obj.create_update_parameter_keys()
+
+    filter_horizontal = ('analyze_type',)
+
+    inlines = (ParameterKeyInline,)
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'type', 'analyze_type')
+        }),
+        (_('Quick parameter definition'), {
+            'classes': ('grp-collapse',), # grp-closed
+            'fields': ('parameter_definition',),
+        }),
+        ('Edit result calculation logic', {
+            'classes': ('grp-collapse grp-closed',),
+            'fields': ('process_logic',),
+        }),
+    )
 
 
 @admin.register(Analyse)
@@ -58,6 +88,7 @@ class AnalyseAdmin(admin.ModelAdmin):
 class PatientAdmin(admin.ModelAdmin):
     search_fields = ('name', 'id', 'surname', 'tcno')
 
+
 @admin.register(ReportTemplate)
 class PatientAdmin(admin.ModelAdmin):
     class Media:
@@ -65,6 +96,8 @@ class PatientAdmin(admin.ModelAdmin):
             '/static/tinymce/tinymce.min.js',
             '/static/tinymce/setup.js',
         ]
+
+
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     search_fields = ('name', 'surname')
@@ -89,7 +122,7 @@ class AdmissionAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     raw_id_fields = ('patient', 'institution', 'doctor')
     fields = ('id', 'patient', ('institution', 'doctor'),
-              ('week','upd_week', 'lmp_date'),
+              ('week', 'upd_week', 'lmp_date'),
               ('indications', 'history'),
               )
     autocomplete_lookup_fields = {
