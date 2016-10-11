@@ -45,7 +45,7 @@ class Institution(models.Model):
 class Doctor(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     surname = models.CharField(_('Surname'), max_length=50)
-    institution = models.ForeignKey(Institution, models.PROTECT, blank=True)
+    institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
@@ -55,7 +55,7 @@ class Doctor(models.Model):
         verbose_name_plural = _('Doctors')
 
     def __str__(self):
-        return self.name
+        return "%s %s" % (self.name, self.surname)
 
     @staticmethod
     def autocomplete_search_fields():
