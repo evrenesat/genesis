@@ -106,3 +106,16 @@ class Admission(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.patient, str(self.timestamp)[:19])
+
+class AdmissionSample(models.Model):
+    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
+    timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+    # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
+
+    class Meta:
+        verbose_name = _('Patient Admission')
+        verbose_name_plural = _('Patient Admissions')
+
+    def __str__(self):
+        return "%s %s" % (self.patient, str(self.timestamp)[:19])
