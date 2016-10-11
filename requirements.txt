@@ -7,3 +7,5 @@ goslate==1.5.1
 polib==1.0.7
 psycopg2==2.6.2
 six==1.10.0
+pyBarcode
+Pillow
