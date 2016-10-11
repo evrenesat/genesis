@@ -33,6 +33,7 @@ class StateInline(admin.TabularInline):
 
 class ParameterKeyInline(admin.TabularInline):
     model = ParameterKey
+    extra = 0
     classes = ('grp-collapse grp-closed',)
 
 
@@ -61,10 +62,10 @@ class ParameterAdmin(admin.ModelAdmin):
             'fields': ('name', 'type', 'analyze_type')
         }),
         (_('Quick parameter definition'), {
-            'classes': ('grp-collapse',), # grp-closed
+            'classes': ('grp-collapse',),  # grp-closed
             'fields': ('parameter_definition',),
         }),
-        ('Edit result calculation logic', {
+        (_('Edit result calculation logic'), {
             'classes': ('grp-collapse grp-closed',),
             'fields': ('process_logic',),
         }),
