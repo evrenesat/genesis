@@ -100,10 +100,12 @@ class ReportTemplate(models.Model):
 class StateDefinition(models.Model):
     type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=50)
+    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
 
     class Meta:
         verbose_name = _('Analyse State Definition')
         verbose_name_plural = _('Analyse State Definitions')
+        ordering = ('order', )
 
     def __str__(self):
         return self.name
@@ -114,6 +116,10 @@ class Analyse(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     result = models.TextField(_('Analyse result'), blank=True, null=True)
+    finished = models.BooleanField(_('Finished'), default=False)
+
+    def applicable_states_ids(self):
+        return self.type.statedefinition_set.values_list('id', flat=True)
 
     class Meta:
         verbose_name = _('Analyse')
@@ -125,17 +131,18 @@ class Analyse(models.Model):
 
 class State(models.Model):
     analyse = models.ForeignKey(Analyse, models.PROTECT, verbose_name=_('Analyse'))
-    definition = models.ForeignKey(StateDefinition, models.PROTECT, verbose_name=_('Analyse'))
-    comment = models.CharField(_('Comment'), max_length=50)
+    definition = models.ForeignKey(StateDefinition, models.PROTECT, verbose_name=_('State'))
+    comment = models.CharField(_('Comment'), max_length=50, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
 
     class Meta:
         verbose_name = _('Analyse State')
         verbose_name_plural = _('Analyse States')
+        ordering = ('timestamp',)
 
     def __str__(self):
-        return self.type
+        return "%s %s" % (self.analyse, self.definition)
 
 
 PARAMETER_TYPES = (
@@ -217,6 +224,11 @@ class Parameter(models.Model):
             if line:
                 getattr(self, '_handle_%s_params' % self.type[:6])(line, i)
 
+
+    def create_empty_values(self, analyse):
+        for pk in self.parameterkey_set.all():
+            pk.create_empty_value(analyse)
+
     class Meta:
         verbose_name = _('Parameter Definition')
         verbose_name_plural = _('Parameter Definitions')
@@ -243,6 +255,11 @@ class ParameterKey(models.Model):
     row_no = models.IntegerField(_('Row number'), default=0)
     col_no = models.IntegerField(_('Row number'), null=True, blank=True)
 
+    def create_empty_value(self, analyse):
+        ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
+                                             name=self.name, analyse=analyse,
+                                             type=self.type)
+
     def _jsonify_presets(self):
         if self.presets and self.presets.strip():
             try:
@@ -266,12 +283,12 @@ class ParameterValue(models.Model):
     parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
     key = models.ForeignKey(ParameterKey, verbose_name=_('Parameter Key'))
     analyse = models.ForeignKey(Analyse, verbose_name=_('Analyse'))
-    name = models.CharField(_('Name'), max_length=30)
-    value = models.CharField(_('Value'), max_length=30, blank=True)
+    name = models.CharField(_('Name'), max_length=30, editable=False)
+    value = models.CharField(_('Value'), max_length=30, blank=True, null=True)
     value_int = models.IntegerField(_('Int Value'), editable=False, default=0)
     value_float = models.IntegerField(_('Float Value'), editable=False, default=.0)
 
-    type = models.SmallIntegerField(_('Parameter type'), choices=PARAMETER_TYPES)
+    type = models.CharField(_('Parameter type'), max_length=5, choices=PARAMETER_VALUE_TYPES)
 
     def _sync_values(self):
         if self.value_float:

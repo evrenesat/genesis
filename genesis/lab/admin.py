@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 
 # Register your models here.
@@ -25,10 +26,27 @@ class AnalyseInline(admin.TabularInline):
 
 class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
+    extra = 0
+    readonly_fields = ('key',)
+    max_num = 0
+    fields = ('key', 'value')
 
 
 class StateInline(admin.TabularInline):
     model = State
+    extra = 1
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        if db_field.name == 'definition':
+            if request._obj_ is not None:
+                field.queryset = field.queryset.filter(id__in=request._obj_.applicable_states_ids())
+            else:
+                field.queryset = field.queryset.none()
+
+        return field
 
 
 class ParameterKeyInline(admin.TabularInline):
@@ -41,6 +59,12 @@ class ParameterKeyInline(admin.TabularInline):
 class AnalyseTypeAdmin(admin.ModelAdmin):
     list_filter = ('category__name',)
     search_fields = ('name',)
+
+@admin.register(StateDefinition)
+class AnalyseTypeAdmin(admin.ModelAdmin):
+    list_filter = ('type',)
+    search_fields = ('name',)
+    filter_horizontal = ('type',)
 
 
 @admin.register(Parameter)
@@ -75,14 +99,35 @@ class ParameterAdmin(admin.ModelAdmin):
 @admin.register(Analyse)
 class AnalyseAdmin(admin.ModelAdmin):
     raw_id_fields = ("type",)
-    search_fields = ('admission__id',)
+    date_hierarchy = 'timestamp'
+    search_fields = ('admission__id', 'type')
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
 
+    list_filter = ('finished', 'timestamp', 'type')
     inlines = [
         StateInline, ParameterValueInline
     ]
+
+    def save_model(self, request, obj, form, change):
+        is_new = True  # bool(obj.id)
+        obj.save()
+        if is_new:
+               for prm in obj.type.parameter_set.all():
+                   prm.create_empty_values(obj)
+
+
+    def get_form(self, request, obj=None, **kwargs):
+        # just save obj reference for future processing in Inline
+        request._obj_ = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def changelist_view(self, request, extra_context=None):
+        if not request.META['QUERY_STRING'] and \
+                not request.META.get('HTTP_REFERER', '').startswith(request.build_absolute_uri()):
+            return HttpResponseRedirect(request.path + "?finished__exact=0")
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Patient)
@@ -107,7 +152,7 @@ class DoctorAdmin(admin.ModelAdmin):
         if not obj.institution:
             # create a clinic record for doctors who doesn't
             #  belong to an institution
-            ins = Institution(name=obj.name, type=30)
+            ins = Institution(name="%s %s" % (obj.name, obj.surname), type=30)
             ins.save()
             obj.institution = ins
         obj.save()
