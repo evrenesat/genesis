@@ -97,7 +97,7 @@ class ReportTemplate(models.Model):
         verbose_name_plural = _('Report Templates')
 
     def __str__(self):
-        return "%s %s" % (self.patient, str(self.timestamp)[:19])
+        return "%s" % (self.name, )
 
 
 class StateDefinition(models.Model):
@@ -108,7 +108,7 @@ class StateDefinition(models.Model):
     class Meta:
         verbose_name = _('Analyse State Definition')
         verbose_name_plural = _('Analyse State Definitions')
-        ordering = ('order', )
+        ordering = ('order',)
 
     def __str__(self):
         return self.name
@@ -118,7 +118,10 @@ class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
-    result = models.TextField(_('Analyse result'), blank=True, null=True)
+    result = models.TextField(_('Result data'), blank=True, null=True,
+                              help_text="key=val<br />key2=val2")
+    comment = models.TextField(_('Comment'), blank=True, null=True)
+    result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
     finished = models.BooleanField(_('Finished'), default=False)
 
     @lazy_property
@@ -129,7 +132,18 @@ class Analyse(models.Model):
         return d
 
     def calculate_result(self):
-        pass
+        result = {}
+        exec(self.type.process_logic, {'data': self.result_dict})
+        return result or self.result_dict
+
+    def save_result(self):
+        if self.result.strip():
+            self.result_json = json.dumps(dict([tuple(line.split('=')) for line in
+                                                self.result.strip().split('\n')]))
+        elif self.type.process_logic:
+            result = self.calculate_result()
+            self.result_json = json.dumps(result)
+            self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result.values()])
 
     def applicable_states_ids(self):
         return self.type.statedefinition_set.values_list('id', flat=True)
@@ -235,7 +249,6 @@ class Parameter(models.Model):
             line = line.strip()
             if line:
                 getattr(self, '_handle_%s_params' % self.type[:6])(line, i)
-
 
     def create_empty_values(self, analyse):
         for pk in self.parameterkey_set.all():

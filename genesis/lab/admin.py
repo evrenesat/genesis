@@ -119,11 +119,14 @@ class AnalyseAdmin(admin.ModelAdmin):
     ]
 
     def save_model(self, request, obj, form, change):
-        is_new = True  # bool(obj.id)
+        is_new = bool(obj.id)
         obj.save()
         if is_new:
             for prm in obj.type.parameter_set.all():
                 prm.create_empty_values(obj)
+        else:
+            if obj.finished and not obj.result:
+                obj.result = obj.calculate_result()
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
