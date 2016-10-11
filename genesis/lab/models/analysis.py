@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # Create your models here.
-from ..utils import pythonize
+from ..utils import pythonize, lazy_property
 
 from .patient import Admission
 
@@ -62,12 +62,15 @@ class Category(models.Model):
 
 
 class AnalyseType(models.Model):
-    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Group'))
+    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'))
     method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'))
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
     name = models.CharField(_('Name'), max_length=100, unique=True)
-    code = models.CharField(_('Code'), max_length=10, null=True, blank=True)
+    code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
+    process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
+                                     help_text=_('This code will be used to calculate the analyse '
+                                                 'result according to entered data'))
     process_time = models.SmallIntegerField(_('Process Time'))
 
     class Meta:
@@ -117,6 +120,16 @@ class Analyse(models.Model):
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     result = models.TextField(_('Analyse result'), blank=True, null=True)
     finished = models.BooleanField(_('Finished'), default=False)
+
+    @lazy_property
+    def result_dict(self):
+        d = {}
+        for par_val in self.parametervalue_set.all():
+            d[par_val.code] = par_val.val
+        return d
+
+    def calculate_result(self):
+        pass
 
     def applicable_states_ids(self):
         return self.type.statedefinition_set.values_list('id', flat=True)
@@ -171,7 +184,6 @@ class Parameter(models.Model):
     type = models.CharField(_('Parameter type'), max_length=12, choices=PARAMETER_TYPES)
     analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
-    process_logic = models.TextField(_('Process logic code'), null=True, blank=True)
     parameter_definition = models.TextField(_('Parameter definition'), null=True, blank=True,
                                             help_text=PARAM_DEF_HELP_TEXT)
 
@@ -257,7 +269,7 @@ class ParameterKey(models.Model):
 
     def create_empty_value(self, analyse):
         ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
-                                             name=self.name, analyse=analyse,
+                                             code=self.code, analyse=analyse,
                                              type=self.type)
 
     def _jsonify_presets(self):
@@ -283,12 +295,16 @@ class ParameterValue(models.Model):
     parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
     key = models.ForeignKey(ParameterKey, verbose_name=_('Parameter Key'))
     analyse = models.ForeignKey(Analyse, verbose_name=_('Analyse'))
-    name = models.CharField(_('Name'), max_length=30, editable=False)
+    code = models.CharField(_('Code name'), max_length=30, )
     value = models.CharField(_('Value'), max_length=30, blank=True, null=True)
     value_int = models.IntegerField(_('Int Value'), editable=False, default=0)
     value_float = models.IntegerField(_('Float Value'), editable=False, default=.0)
 
     type = models.CharField(_('Parameter type'), max_length=5, choices=PARAMETER_VALUE_TYPES)
+
+    @property
+    def val(self):
+        return self.value_float or self.value_int or self.value
 
     def _sync_values(self):
         if self.value_float:
@@ -305,4 +321,4 @@ class ParameterValue(models.Model):
         verbose_name_plural = _('Result Values')
 
     def __str__(self):
-        return self.name
+        return "%s: %s" % (self.code, self.value)

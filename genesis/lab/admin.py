@@ -18,6 +18,7 @@ class AnalyseInline(admin.TabularInline):
     #     'type_fk': ['type'],
     # }
     raw_id_fields = ("type",)
+    readonly_fields = ('result', 'finished')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
@@ -27,9 +28,9 @@ class AnalyseInline(admin.TabularInline):
 class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
     extra = 0
-    readonly_fields = ('key',)
+    readonly_fields = ('key', 'code')
     max_num = 0
-    fields = ('key', 'value')
+    fields = ('key', 'code', 'value')
 
 
 class StateInline(admin.TabularInline):
@@ -57,8 +58,18 @@ class ParameterKeyInline(admin.TabularInline):
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
-    list_filter = ('category__name',)
+    list_filter = ('category',)
     search_fields = ('name',)
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'category', 'method', 'sample_type', 'code', 'process_time', 'price')
+        }),
+        (_('Advanced'),
+         {'classes': ('grp-collapse', 'grp-closed'),
+          'fields': ('process_logic', )
+          })
+    )
+
 
 @admin.register(StateDefinition)
 class AnalyseTypeAdmin(admin.ModelAdmin):
@@ -89,10 +100,7 @@ class ParameterAdmin(admin.ModelAdmin):
             'classes': ('grp-collapse',),  # grp-closed
             'fields': ('parameter_definition',),
         }),
-        (_('Edit result calculation logic'), {
-            'classes': ('grp-collapse grp-closed',),
-            'fields': ('process_logic',),
-        }),
+
     )
 
 
@@ -114,9 +122,8 @@ class AnalyseAdmin(admin.ModelAdmin):
         is_new = True  # bool(obj.id)
         obj.save()
         if is_new:
-               for prm in obj.type.parameter_set.all():
-                   prm.create_empty_values(obj)
-
+            for prm in obj.type.parameter_set.all():
+                prm.create_empty_values(obj)
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
