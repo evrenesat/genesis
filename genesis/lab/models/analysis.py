@@ -69,8 +69,7 @@ class AnalyseType(models.Model):
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
     process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
-                                     help_text=_('This code will be used to calculate the analyse '
-                                                 'result according to entered data'))
+    help_text=_('This code will be used to calculate the analyse result according to entered data'))
     process_time = models.SmallIntegerField(_('Process Time'))
 
     class Meta:
@@ -122,6 +121,9 @@ class Analyse(models.Model):
                               help_text="key=val<br />key2=val2")
     comment = models.TextField(_('Comment'), blank=True, null=True)
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
+    sample_amount = models.CharField(_('Sample Amount'), max_length=20, null=True, blank=True)
+    sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
+                                    null=True, blank=True)
     finished = models.BooleanField(_('Finished'), default=False)
 
     @lazy_property
@@ -144,7 +146,7 @@ class Analyse(models.Model):
         if self.result.strip():
             self.result_json = json.dumps(dict([tuple(line.split('=')) for line in
                                                 self.result.strip().split('\n')]))
-        elif self.type.process_logic:
+        elif self.type.process_logic.strip():
             result = self.calculate_result()
             self.result_json = json.dumps(result)
             self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result.values()])

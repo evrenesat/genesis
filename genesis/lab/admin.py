@@ -116,36 +116,39 @@ class ParameterAdmin(admin.ModelAdmin):
 class AnalyseAdmin(admin.ModelAdmin):
     raw_id_fields = ("type",)
     date_hierarchy = 'timestamp'
-    search_fields = ('admission__id', 'type')
+    search_fields = ('admission__id', 'type__name')
+    readonly_fields = ('id', 'result_json')
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
 
     list_filter = ('finished', 'timestamp', 'type')
+    list_display = ('type', 'admission',  'timestamp', 'finished')
     inlines = [
         StateInline, ParameterValueInline
     ]
 
     def save_model(self, request, obj, form, change):
-        is_new = bool(obj.id)
+        is_new = not bool(obj.id)
         obj.save()
         if is_new:
             for prm in obj.type.parameter_set.all():
                 prm.create_empty_values(obj)
         else:
-            if obj.finished and not obj.result:
-                obj.result = obj.calculate_result()
+            if obj.finished:
+                obj.save_result()
+                obj.save()
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
         request._obj_ = obj
         return super().get_form(request, obj, **kwargs)
 
-    def changelist_view(self, request, extra_context=None):
-        if not request.META['QUERY_STRING'] and \
-                not request.META.get('HTTP_REFERER', '').startswith(request.build_absolute_uri()):
-            return HttpResponseRedirect(request.path + "?finished__exact=0")
-        return super().changelist_view(request, extra_context=extra_context)
+    # def changelist_view(self, request, extra_context=None):
+    #     if not request.META['QUERY_STRING'] and \
+    #             not request.META.get('HTTP_REFERER', '').startswith(request.build_absolute_uri()):
+    #         return HttpResponseRedirect(request.path + "?finished__exact=0")
+    #     return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Patient)

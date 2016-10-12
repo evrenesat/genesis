@@ -27,7 +27,9 @@ input[type="url"], input[type="email"], input.vTextField, input.vURLField, input
 #parameterkey_set-group > div.tabular.inline-related.grp-module.grp-table textarea{
     width: auto;
 }
-
+td, a{
+    font-size:larger !important;
+}
 .grp-module .grp-row:not(tr) {
     zoom:1.1;
 }
