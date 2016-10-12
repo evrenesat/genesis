@@ -125,6 +125,10 @@ class Analyse(models.Model):
     finished = models.BooleanField(_('Finished'), default=False)
 
     @lazy_property
+    def get_code(self):
+        return self.type.code or self.type.name[:2]
+
+    @lazy_property
     def result_dict(self):
         d = {}
         for par_val in self.parametervalue_set.all():

@@ -74,6 +74,10 @@ class Patient(models.Model):
     birthdate = models.DateField(_('Birthdate'))
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
+    @property
+    def full_name(self):
+        return '%s %s' % (self.name, self.surname)
+
     class Meta:
         verbose_name = _('Patient')
         verbose_name_plural = _('Patients')
@@ -111,11 +115,13 @@ class AdmissionSample(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+    amount = models.PositiveSmallIntegerField(_('Amount'), default=1)
+    type = models.ForeignKey('SampleType', models.PROTECT, verbose_name=_('Sample type'))
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
-        verbose_name = _('Patient Admission')
-        verbose_name_plural = _('Patient Admissions')
+        verbose_name = _('Sample')
+        verbose_name_plural = _('Samples')
 
     def __str__(self):
         return "%s %s" % (self.patient, str(self.timestamp)[:19])

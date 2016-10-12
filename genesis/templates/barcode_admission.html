@@ -1,0 +1,6 @@
+{% extends barcode_base.html %}
+{% block barcode %}
+    <strong>{{ admission.id }} </strong><br/>
+        {{ admission.patient.full_name }}<br/>
+        {{ admission.timestamp|date:"d.m.Y" }}
+{% endblock %}
