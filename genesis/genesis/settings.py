@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # 'dal_select2',
     # 'autotranslate',
     'grappelli',
+    'grappelli_autocomplete_fk_edit_link',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

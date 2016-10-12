@@ -7,18 +7,21 @@ from django.utils.translation import ugettext_lazy as _
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
+from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
 
 
-class AnalyseInline(admin.TabularInline):
+class AnalyseInline(AutocompleteEditLinkAdminMixin, admin.TabularInline):
     model = Analyse
-
+    classes = ('grp-collapse',)
     # autocomplete_lookup_fields = {
     #     'type_fk': ['type'],
     # }
+    # show_change_link = True
     raw_id_fields = ("type",)
-    readonly_fields = ('result', 'finished')
+    readonly_fields = ('finished', )
+    fields = ('type', 'finished')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
@@ -54,6 +57,11 @@ class ParameterKeyInline(admin.TabularInline):
     model = ParameterKey
     extra = 0
     classes = ('grp-collapse grp-closed',)
+
+class AdmissionSampleInline(admin.TabularInline):
+    model = AdmissionSample
+    extra = 1
+    classes = ('grp-collapse',)
 
 
 @admin.register(AnalyseType)
@@ -186,7 +194,7 @@ class AdmissionAdmin(admin.ModelAdmin):
     }
 
     inlines = [
-        AnalyseInline,
+        AnalyseInline, AdmissionSampleInline
     ]
 
 
