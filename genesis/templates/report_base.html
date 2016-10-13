@@ -5,23 +5,69 @@
     <title></title>
     <style>
 
-        body, table, tr, td, img {
-            margin:0;
-            padding:0;
-        }
-        table{
-            position:absolute;
-            top:-5px;
-            left:-5px;
+        div#logo {
+            background-image: url(/static/images/gentan_logo.jpg);
+            width: 265px;
+            height: 172px;
+            background-size: 100%;
+            background-repeat: no-repeat;
         }
 
+        div#title {
+            font-size:1em;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body style="font-family: sans-serif">
-
+<header>
+    <div id="logo"></div>
+</header>
+<div id="title">{{ analyse_type }}</div>
+<table>
+    <tbody>
+    <tr>
+        <td>HASTANIN ADI SOYADI</td>
+        <td>:&nbsp; {{ patient_name }}</td>
+        <td>RAPOR TARİHİ</td>
+        <td>:&nbsp; {{ report_date }}</td>
+    </tr>
+    <tr>
+        <td>DOĞUM TARİHİ</td>
+        <td>:&nbsp; {{ patient_brithdate }}</td>
+        <td>BAŞVURU TARİHİ</td>
+        <td>:&nbsp; {{ admission_date }}</td>
+    </tr>
+    <tr>
+        <td>İNCELENEN MATERYAL</td>
+        <td>:&nbsp; {{ material_type }}</td>
+        <td>PROTOKOL NO</td>
+        <td>:&nbsp; {{ amission_id }}</td>
+    </tr>
+    <tr>
+        <td>MATERYAL MİKTARI</td>
+        <td>:&nbsp; {{ material_amount }}</td>
+        <td>ANALİZ NO</td>
+        <td>:&nbsp; {{ analyse_id }}</td>
+    </tr>
+    <tr>
+        <td>ENDİKASYON</td>
+        <td>:&nbsp; {{ indications }}</td>
+        <td>GÖN. MERKEZ / HEKİM</td>
+        <td>:&nbsp; {{ instituion_doctor }}</td>
+    </tr>
+    </tbody>
+</table>
 {report_template}
 
+<footer>
+    <div id="biolog">
+        {{ biolog_name }}<br/>
+        {{ biolog_title }}
+    </div>
 
+</footer>
 
 <script>window.parent.print_iframe();</script>
 </body>

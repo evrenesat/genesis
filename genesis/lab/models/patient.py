@@ -124,4 +124,4 @@ class AdmissionSample(models.Model):
         verbose_name_plural = _('Samples')
 
     def __str__(self):
-        return "%s %s" % (self.patient, str(self.timestamp)[:19])
+        return "%s %s" % (self.admission, str(self.timestamp)[:19])

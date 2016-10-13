@@ -69,7 +69,8 @@ class AnalyseType(models.Model):
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
     process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
-    help_text=_('This code will be used to calculate the analyse result according to entered data'))
+                                     help_text=_(
+                                         'This code will be used to calculate the analyse result according to entered data'))
     process_time = models.SmallIntegerField(_('Process Time'))
 
     class Meta:
@@ -96,7 +97,7 @@ class ReportTemplate(models.Model):
         verbose_name_plural = _('Report Templates')
 
     def __str__(self):
-        return "%s" % (self.name, )
+        return "%s" % (self.name,)
 
 
 class StateDefinition(models.Model):
@@ -117,6 +118,7 @@ class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
+    result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result data'), blank=True, null=True,
                               help_text="key=val<br />key2=val2")
     comment = models.TextField(_('Comment'), blank=True, null=True)
@@ -125,6 +127,7 @@ class Analyse(models.Model):
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
     finished = models.BooleanField(_('Finished'), default=False)
+
 
     @lazy_property
     def get_code(self):
@@ -137,19 +140,32 @@ class Analyse(models.Model):
             d[par_val.code] = par_val.val
         return d
 
+    def create_empty_values(self):
+        for prm in self.type.parameter_set.all():
+            prm.create_empty_values(self)
+
     def calculate_result(self):
+        """executes result process logic with result"""
         result = {}
-        exec(self.type.process_logic, {'data': self.result_dict})
+        if self.type.process_logic:
+            exec(self.type.process_logic, {'data': self.result_dict})
         return result or self.result_dict
 
     def save_result(self):
-        if self.result.strip():
-            self.result_json = json.dumps(dict([tuple(line.split('=')) for line in
-                                                self.result.strip().split('\n')]))
-        elif self.type.process_logic.strip():
-            result = self.calculate_result()
-            self.result_json = json.dumps(result)
-            self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result.values()])
+        """saves serialized calculation result to self.result_json
+        allows manual result data entry through self.result to override calculation result"""
+        result_data = self.calculate_result()
+        if self.result.strip() and self.result != self.result_copy:
+            manual_result_data = json.dumps(dict([tuple(line.split('=')) for line in
+                                                  self.result.strip().split('\n')]))
+            result_data.update(manual_result_data)
+        elif result_data:
+            self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result_data.items()])
+        self.result_copy = self.result
+        self.result_json = json.dumps(result_data)
+        self.save()
+        # if self.type.process_logic.strip():
+        #     self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result_data.values()])
 
     def applicable_states_ids(self):
         return self.type.statedefinition_set.values_list('id', flat=True)
