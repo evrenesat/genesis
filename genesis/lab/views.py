@@ -39,6 +39,6 @@ def analyse_report(request, pk):
 def admission_barcode(request, pk):
     admission = Admission.objects.get(pk=pk)
     return render(request, 'barcode_admission.html', {
-        'analyse': admission,
+        'admission': admission,
         'barcode': str(admission.id).zfill(13)
     })
