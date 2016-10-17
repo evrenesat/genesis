@@ -100,7 +100,7 @@ class Admission(models.Model):
     week = models.CharField(_('Pregnancy week'), null=True, blank=True, max_length=7)
     upd_week = models.CharField(_('UPD'), null=True, blank=True, max_length=7)
     lmp_date = models.DateField(_('LMP'), null=True, blank=True)
-    timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
+    timestamp = models.DateTimeField(_('Admission date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 

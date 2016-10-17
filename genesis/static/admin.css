@@ -1,43 +1,193 @@
-header#grp-header #grp-navigation ul#grp-user-tools>li.grp-user-options-container {
+header#grp-header #grp-navigation ul#grp-user-tools > li.grp-user-options-container {
     width: auto;
 }
 
-.grp-row input[type="url"], .grp-row input[type="email"], .grp-row .vTextField, .grp-row .vURLField, .grp-row .vFileBrowseField, .grp-row textarea, .grp-row .vLargeTextField, .grp-row .vXMLLargeTextField, .grp-autocomplete-wrapper-m2m{
+.grp-row input[type="url"], .grp-row input[type="email"], .grp-row .vTextField, .grp-row .vURLField, .grp-row .vFileBrowseField, .grp-row textarea, .grp-row .vLargeTextField, .grp-row .vXMLLargeTextField, .grp-autocomplete-wrapper-m2m {
     max-width: 400px;
 }
 
-fieldset.grp-module .grp-row label{
-    font-size:13px;
+fieldset.grp-module .grp-row label {
+    font-size: 13px;
 }
 
-.grp-autocomplete-wrapper-m2m, .grp-autocomplete-wrapper-fk input.ui-autocomplete-input{
+.grp-autocomplete-wrapper-m2m, .grp-autocomplete-wrapper-fk input.ui-autocomplete-input {
     font-size: 14px;
 }
 
-input[type="url"], input[type="email"], input.vTextField, input.vURLField, input.vFileBrowseField, textarea, .vLargeTextField, .vXMLLargeTextField{
+input[type="url"], input[type="email"], input.vTextField, input.vURLField, input.vFileBrowseField, textarea, .vLargeTextField, .vXMLLargeTextField {
     max-width: 350px;
 }
 
-.grp-module.grp-table select, .grp-module.grp-table .grp-autocomplete-wrapper-m2m, .grp-module.grp-table .grp-autocomplete-wrapper-fk{
-    max-width:350px;
+.grp-module.grp-table select, .grp-module.grp-table .grp-autocomplete-wrapper-m2m, .grp-module.grp-table .grp-autocomplete-wrapper-fk {
+    max-width: 350px;
 }
-
 
 #parameterkey_set-group > div.tabular.inline-related.grp-module.grp-table input,
-#parameterkey_set-group > div.tabular.inline-related.grp-module.grp-table textarea{
+#parameterkey_set-group > div.tabular.inline-related.grp-module.grp-table textarea {
     width: auto;
 }
-td, a{
-    font-size:larger !important;
+
+td, a {
+    font-size: larger !important;
 }
+
 .grp-module .grp-row:not(tr) {
-    zoom:1.1;
+    zoom: 1.1;
 }
 
 body.dashboard .grp-module .grp-row:not(tr) {
-    zoom:1.3;
+    zoom: 1.3;
 }
 
-#grp-recent-actions-module{
+#grp-recent-actions-module {
     width: 440px;
+}
+
+div[id='app_kimlik doğrulama ve yetkilendirme'], div[id='app_lab'] {
+    display: none;
+}
+
+div.big_app_icon:hover span {
+    color: black;
+}
+div.big_app_icon:hover {
+    background-color: rgba(81, 233, 99, 0.1);
+}
+div.big_app_icon:hover img {
+    opacity: 1;
+}
+div.big_app_icon img {
+    width: 90px;
+    padding-left: 20px;
+    opacity: 0.7;
+}
+
+div.big_app_icon span {
+    position: absolute;
+    top: 96px;
+    width: 125px;
+    left: 0;
+    font-size: 13px;
+    color: #837a7a;
+    text-align: center;
+}
+
+div.big_app_icon {
+    position: relative;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 3px #ccc;
+    border: 1px solid #c5c5c5;
+    width: 125px;
+    float: left;
+    height: 130px;
+
+}
+
+
+h1#grp-admin-title {
+    cursor: pointer;
+    padding-left: 50px !important;
+    background-image: url(/static/icons/genesis-logo.png) !important;
+    background-attachment: fixed;
+    background-size: 40px;
+    background-position: 20px -1px ;
+    background-repeat: no-repeat;
+    font-size: 18px !important;
+}
+
+
+div#search-box{
+    width:400px;
+    float:left;
+}
+.container-1{
+  width: 100%;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+}
+
+.container-1 input#search{
+  width: 100%;
+  height: 50px;
+  background: #f8f8f8;
+  border: none;
+  font-size: 12pt;
+  float: left;
+  color: #63717f;
+  padding-left: 45px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+    -webkit-transition: background .55s ease;
+    -moz-transition: background .55s ease;
+    -ms-transition: background .55s ease;
+    -o-transition: background .55s ease;
+    transition: background .55s ease;
+}
+
+.container-1 input#search::-webkit-input-placeholder {
+   color: #65737e;
+}
+
+.container-1 input#search::-moz-placeholder {  /* Firefox 19+ */
+   color: #65737e;
+}
+.container-1 .icon{
+  position: absolute;
+  top: 50%;
+  margin-left: 17px;
+  margin-top: 17px;
+  z-index: 1;
+  color: #4f5b66;
+}
+
+.container-1 input#search:hover, .container-1 input#search:focus, .container-1 input#search:active{
+    outline:none;
+    background: rgba(81, 233, 99, 0.1);
+    box-shadow: 2px 0px 4px #eaeaea;
+    color:#000000;
+    font-size:12pt;
+  }
+
+div#footer_modules{
+    float: left;
+    width: 100%;
+}
+
+div.small-icon img {
+    width: 30px;
+    padding-top:5px;
+    padding-left: 25px;
+}
+
+div.small-icon span {
+    position: absolute;
+    top: 40px;
+    width: 80px;
+    left: 0;
+    font-size: 10px;
+    color: black;
+    text-align: center;
+}
+
+div.small-icon:hover {
+    opacity: 1;
+}
+div.small-icon {
+    opacity: .4;
+    position: relative;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 2px #e4e4e4;
+    border: 1px solid #dedede;
+    width: 80px;
+    float: left;
+    height: 75px;
+}
+
+div.small-icon{
+    cursor: pointer;
 }

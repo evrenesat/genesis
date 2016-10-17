@@ -12,7 +12,7 @@ from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 from .models import *
 
 
-class AnalyseInline(AutocompleteEditLinkAdminMixin, admin.TabularInline):
+class AnalyseInline(admin.TabularInline):
     model = Analyse
     classes = ('grp-collapse',)
     # autocomplete_lookup_fields = {
@@ -184,7 +184,9 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 
 @admin.register(Admission)
-class AdmissionAdmin(admin.ModelAdmin):
+class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+    search_fields = ('patient__name', 'patient__tcno', 'patient__surname')
+    list_display = ('patient', 'institution', 'timestamp')
     readonly_fields = ('id',)
     raw_id_fields = ('patient', 'institution', 'doctor')
     fields = ('id', 'patient', ('institution', 'doctor'),

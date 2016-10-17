@@ -69,10 +69,22 @@ function handle_admission_edit() {
     }
 
 }
+function handle_dashboard() {
+
+
+    grp.jQuery("div#advanced_settings").click(function () {
+        grp.jQuery("div[id='app_kimlik doğrulama ve yetkilendirme'], div[id='app_lab']").toggle();
+    })
+
+
+}
 
 grp.jQuery('document').ready(function () {
 
     handle_analyse_edit();
     handle_admission_edit();
-
+    handle_dashboard();
+    grp.jQuery('h1#grp-admin-title').click(function () {
+        window.location = '/admin'
+    })
 });

@@ -2,8 +2,6 @@
 {% load i18n static grp_tags log %}
 
 
-
-
 <!-- LOADING -->
 {% load i18n grp_tags log %}
 
@@ -27,11 +25,47 @@
 
 <!-- CONTENT -->
 {% block content %}
+
+
+
     <div class="g-d-c">
         <div class="g-d-12 g-d-f">
+            <div id="search-box">
+                <form action="/admin/lab/admission/" method="get">
+                    <div class="container-1">
+                        <span class="icon"><i class="fa fa-search"></i></span>
+                        <input type="search" id="search" name="q"
+                               placeholder="Hasta Adı ya da TC No ile ara"/>
+                    </div>
+                </form>
+            </div>
+            <div class="big_app_icon">
+                <a href="/admin/lab/admission/add">
+                    <img src="/static/icons/patient_admission.svg">
+                    <span>Yeni Hasta Kabülü</span>
+                </a>
+            </div>
+
+            <div class="big_app_icon">
+                <a href="/admin/lab/">
+                    <img src="/static/icons/microscope1.svg">
+                    <span>Analizler</span>
+                </a>
+            </div>
+
+            <div id="footer_modules">
+                            <div class="small-icon" id="advanced_settings">
+
+                                <img src="/static/icons/settings.svg">
+                                <span>Gelişmiş<br>Ayarlar</span>
+
+                            </div>
+                        </div>
+
             {% for app in app_list %}
                 <div class="grp-module" id="app_{{ app.name|lower }}">
-                    <h2><a href="{{ app.app_url }}" class="grp-section">{% trans app.name %}</a></h2>
+                    <h2><a href="{{ app.app_url }}" class="grp-section">{% trans app.name %}</a>
+                    </h2>
                     {% for model in app.models %}
                         <div class="grp-row" id="model-{{ model.object_name|lower }}">
                             {% if model.admin_url %}
@@ -43,7 +77,8 @@
                                 <ul class="grp-actions">
                                     {% if model.add_url %}
                                         <li class="grp-icon grp-add-link">
-                                            <a href="{{ model.add_url }}" title="{% trans "Add" %}">&nbsp;</a>
+                                            <a href="{{ model.add_url }}" title="{% trans "Add" %}">
+                                                &nbsp;</a>
                                         </li>
                                     {% endif %}
                                 </ul>
@@ -66,8 +101,9 @@
                     </div>
                 {% endif %}
             {% endblock %}
+
         </div>
-        <div class="g-d-6 g-d-l">
+        <div class="g-d-6 g-d-l" style="float:right !important;">
             <div class="grp-module" id="grp-recent-actions-module">
                 <h2>{% trans 'Recent actions' %}</h2>
                 <div class="grp-module">
@@ -84,7 +120,8 @@
                                     {% else %}
                                         <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
                                     {% endif %}
-                                    <span class="grp-font-color-quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span>
+                                    <span class="grp-font-color-quiet">{% filter capfirst %}
+                                        {% trans entry.content_type.name %}{% endfilter %}</span>
                                 </li>
                             {% endfor %}
                         </ul>

@@ -37,11 +37,14 @@ INSTALLED_APPS = [
     # 'dal',
     # 'dal_select2',
     # 'autotranslate',
+    # 'grappelli_menu',
+    'django.contrib.contenttypes',
     'grappelli',
+    # 'grappelli.dashboard',
     'grappelli_autocomplete_fk_edit_link',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -90,6 +93,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'genesis.wsgi.application'
+
 
 
 # Database
@@ -146,7 +150,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
+# GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 GRAPPELLI_ADMIN_TITLE = 'GENESIS'
 
 STATICFILES_DIRS = [
@@ -157,3 +161,4 @@ try:
     from .local_settings import *
 except ImportError:
     pass
+
