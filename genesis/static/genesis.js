@@ -18,9 +18,9 @@ function get_editing_id() {
     return parseInt(document.documentURI.split('/change/')[0].split('/').pop())
 }
 
-function print_iframe() {
+function print_barcode_iframe() {
     // this method will be called from iframe
-    // ie: window.parent.print_iframe()
+    // ie: window.parent.print_barcode_iframe()
 
     // set portrait orientation
     jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
@@ -65,6 +65,7 @@ function handle_analyse_edit() {
 function handle_admission_edit() {
 
     if (is_editing('admission') && object_id) {
+        add_footer_button('/lab/admission_barcode/' + object_id, 'Barkod Yazdır');
         add_footer_button('/admin/lab/analyse/?admission__id__exact=' + object_id, 'Analizleri Listele', '_self');
     }
 

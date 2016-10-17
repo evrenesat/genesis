@@ -51,7 +51,7 @@ div.big_app_icon:hover span {
     color: black;
 }
 div.big_app_icon:hover {
-    background-color: rgba(81, 233, 99, 0.1);
+    background-color: #4fb2d3;
 }
 div.big_app_icon:hover img {
     opacity: 1;
@@ -98,7 +98,7 @@ h1#grp-admin-title {
 
 
 div#search-box{
-    width:400px;
+    width:100%;
     float:left;
 }
 .container-1{
@@ -111,12 +111,12 @@ div#search-box{
 .container-1 input#search{
   width: 100%;
   height: 50px;
-  background: #f8f8f8;
+  background: #ededed;
   border: none;
   font-size: 12pt;
   float: left;
   color: #63717f;
-  padding-left: 45px;
+  padding-left: 55px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -136,17 +136,22 @@ div#search-box{
    color: #65737e;
 }
 .container-1 .icon{
-  position: absolute;
-  top: 50%;
-  margin-left: 17px;
-  margin-top: 17px;
-  z-index: 1;
-  color: #4f5b66;
+    position: absolute;
+    top: -10px;
+    margin-left: 17px;
+    margin-top: 17px;
+    z-index: 1;
+    color: #4f5b66;
+    left: -14px;
+    display: block;
+    width: 40px;
+    height: 42px;
+    opacity: .5;
 }
 
 .container-1 input#search:hover, .container-1 input#search:focus, .container-1 input#search:active{
     outline:none;
-    background: rgba(81, 233, 99, 0.1);
+    background: #fff;
     box-shadow: 2px 0px 4px #eaeaea;
     color:#000000;
     font-size:12pt;
@@ -181,8 +186,8 @@ div.small-icon {
     position: relative;
     margin: 10px;
     border-radius: 10px;
-    box-shadow: 1px 1px 2px #e4e4e4;
-    border: 1px solid #dedede;
+    box-shadow: 2px 2px 3px #ccc;
+    border: 1px solid #c5c5c5;
     width: 80px;
     float: left;
     height: 75px;
@@ -190,4 +195,8 @@ div.small-icon {
 
 div.small-icon{
     cursor: pointer;
+}
+div.small-icon:hover {
+    border:1px solid #ccc;
+    background-color: #4fb2d3;
 }
