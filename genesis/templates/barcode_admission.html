@@ -1,6 +1,21 @@
 {% extends "barcode_base.html" %}
 {% block barcode %}
-    <strong>{{ admission.id }} </strong><br/>
-        {{ admission.patient.full_name }}<br/>
-        {{ admission.timestamp|date:"d.m.Y" }}
+
+    <div id="acodes">
+    {% for acode in analyses %}
+    {{ acode }}
+    {% endfor %}
+    </div>
+    <div id="bid">P{{ id }} </div>
+    <div id="aid">TC{{ person_id }} </div>
+
+    {% if is_urgent %}
+    <div id="urgent" class="invertedtext">|| ACİL ||</div>
+    {% endif %}
+
+    <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.Y" }}</div>
+
+    <div id="name" class="invertedtext">{{ patient_name }}</div>
+
 {% endblock %}
+

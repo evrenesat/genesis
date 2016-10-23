@@ -2,16 +2,22 @@
  * Created by evren on 12/10/16.
  */
 
-function add_footer_button(url, name, target) {
-    target = target || '_ifrm';
-    grp.jQuery('footer ul').append('<li><a class="grp-button" href="' + url + '" target="' + target + '">' + name + '</a></li>');
+function add_footer_button(params) {
+    params.id = params.id || Math.random().toString().substring(2);
+    params.target = params.target || '_ifrm';
+    if (params.onclick) {
+        params.url = 'javascript:void(0);'
+    }
+    grp.jQuery('footer ul:first').append('<li><a id="' + params.id + '" class="grp-button" href="' + params.url + '" target="' + params.target + '">' + params.name + '</a></li>');
+    grp.jQuery('#' + params.id).click(params.onclick);
+
 }
 
 function is_editing(name) {
     return grp.jQuery('body').hasClass('lab-' + name);
 }
 function is_listing(name) {
-    return Boolean(grp.jQuery('a[href$="/admin/lab/' + name + '/add/"]').length)
+    return Boolean(grp.jQuery('a[href*="/admin/lab/' + name + '/add/"].grp-add-link').length && grp.jQuery('body.grp-change-list').length)
 }
 
 function get_editing_id() {
@@ -23,12 +29,13 @@ function print_barcode_iframe() {
     // ie: window.parent.print_barcode_iframe()
 
     // set portrait orientation
-    jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+    jsPrintSetup.setPrinter('ZDesigner GC420t');
+    // jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
     // set top margins in millimeters
-    jsPrintSetup.setOption('marginTop', -4);
-    jsPrintSetup.setOption('marginBottom', -4);
-    jsPrintSetup.setOption('marginLeft', -4);
-    jsPrintSetup.setOption('marginRight', -4);
+    jsPrintSetup.setOption('marginTop', 0);
+    jsPrintSetup.setOption('marginBottom', 0);
+    jsPrintSetup.setOption('marginLeft', 0);
+    jsPrintSetup.setOption('marginRight', 0);
     // set page header
     jsPrintSetup.setOption('headerStrLeft', '');
     jsPrintSetup.setOption('headerStrCenter', '');
@@ -48,44 +55,124 @@ function print_barcode_iframe() {
     jsPrintSetup.printWindow(window.frames[0]);
     // next commands
 }
+function print_report_iframe() {
+    // this method will be called from iframe
+    // ie: window.parent.print_barcode_iframe()
+
+    // set portrait orientation
+    jsPrintSetup.setPrinter('report');
+    // jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+    // jsPrintSetup.setPaperSizeData(9);
+    console.log(jsPrintSetup.getPaperMeasure());
+    // set top margins in millimeters
+    // jsPrintSetup.setOption('marginTop', -4);
+    // jsPrintSetup.setOption('marginBottom', -4);
+    // jsPrintSetup.setOption('marginLeft', -4);
+    // jsPrintSetup.setOption('marginRight', -4);
+    // set page header
+    jsPrintSetup.setOption('headerStrLeft', '');
+    jsPrintSetup.setOption('headerStrCenter', '');
+    jsPrintSetup.setOption('headerStrRight', '');
+    // set empty page footer
+    jsPrintSetup.setOption('footerStrLeft', '');
+    jsPrintSetup.setOption('footerStrCenter', '');
+    jsPrintSetup.setOption('footerStrRight', '');
+    // clears user preferences always silent print value
+    // to enable using 'printSilent' option
+    jsPrintSetup.clearSilentPrint();
+    // Suppress print dialog (for this context only)
+    // jsPrintSetup.setOption('printSilent', 1);
+    // Do Print
+    // When print is submitted it is executed asynchronous and
+    // script flow continues after print independently of completetion of print process!
+    jsPrintSetup.printWindow(window.frames[0]);
+    // next commands
+}
 var object_id = get_editing_id();
 
-function handle_analyse_edit() {
+function patch_edit_views() {
+    // get rid of those empty cells
+    grp.jQuery('div.c-1').map(function(){
+        self = grp.jQuery(this);
+        if(self.html() == "&nbsp;")self.hide();
+    })
 
     if (is_editing('analyse') && object_id) {
-        add_footer_button('/lab/analyse_barcode/' + object_id, 'Barkod Yazdır');
+        add_footer_button({url: '/lab/analyse_barcode/' + object_id, name: 'Barkod Yazdır'});
         var is_finished = grp.jQuery('#id_finished')[0].checked;
-        if(is_finished){
-            add_footer_button('/lab/analyse_report/' + object_id, 'Rapor Yazdır');
+        if (is_finished) {
+            add_footer_button({url: '/lab/analyse_report/' + object_id, name: 'Rapor Yazdır'});
         }
     }
+    if (is_editing('admission')) {
+        if (object_id) {
+            add_footer_button({url: '/lab/admission_barcode/' + object_id, name: 'Barkod Yazdır'});
+            add_footer_button({
+                url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
+                name: 'Analizleri Listele',
+                target: '_self'
+            });
+        }else{
 
-}
+            grp.jQuery('.tamamland, .finished, .onayland, .approved').hide()
 
-function handle_admission_edit() {
+        }
 
-    if (is_editing('admission') && object_id) {
-        add_footer_button('/lab/admission_barcode/' + object_id, 'Barkod Yazdır');
-        add_footer_button('/admin/lab/analyse/?admission__id__exact=' + object_id, 'Analizleri Listele', '_self');
+    }
+    if (is_editing('reporttemplate')) {
+        add_footer_button({
+            onclick: function () {
+                tinyMCE.remove()
+            }, name: 'Editörü Kapat'
+        });
     }
 
 }
+
+
 function handle_dashboard() {
 
 
     grp.jQuery("div#advanced_settings").click(function () {
-        grp.jQuery("div[id='app_kimlik doğrulama ve yetkilendirme'], div[id='app_lab']").toggle();
+        grp.jQuery("div.hide_it").toggleClass('show_it');
     })
 
 
 }
 
-grp.jQuery('document').ready(function () {
+function print_multi_report() {
+    analyzes = grp.jQuery('input.action-select:checked').map(function () {
+        return this.value;
+    }).get().join(',')
+    grp.jQuery('#_ifrm').attr('src', '/lab/multiple_reports/?ids=' + analyzes)
+}
 
-    handle_analyse_edit();
-    handle_admission_edit();
-    handle_dashboard();
+function patch_list_views() {
+    if (is_listing('analyse')) {
+        add_footer_button({
+            onclick: function () {
+                print_multi_report()
+            }, name: 'Seçili Analizler İçin Rapor Yazdır'
+        });
+
+
+    }
+}
+
+function patch_everywhere() {
+    // add link to dashboard for admin logo
     grp.jQuery('h1#grp-admin-title').click(function () {
         window.location = '/admin'
-    })
+    });
+
+    // align True/False checks to center
+    grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
+}
+grp.jQuery('document').ready(function () {
+    grp.jQuery('#_ifrm').attr('src', '');
+    patch_list_views();
+    patch_edit_views();
+    handle_dashboard();
+
+    patch_everywhere();
 });

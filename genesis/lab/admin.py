@@ -12,21 +12,6 @@ from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 from .models import *
 
 
-class AnalyseInline(admin.TabularInline):
-    model = Analyse
-    classes = ('grp-collapse',)
-    # autocomplete_lookup_fields = {
-    #     'type_fk': ['type'],
-    # }
-    # show_change_link = True
-    raw_id_fields = ("type",)
-    readonly_fields = ('finished', )
-    fields = ('type', 'finished')
-    # list_filter = ('category__name',)
-    autocomplete_lookup_fields = {
-        'fk': ['type'],
-    }
-
 
 class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
@@ -113,14 +98,20 @@ class ParameterAdmin(admin.ModelAdmin):
 
 
 @admin.register(Analyse)
-class AnalyseAdmin(admin.ModelAdmin):
+class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     raw_id_fields = ("type",)
     date_hierarchy = 'timestamp'
-    search_fields = ('admission__id', 'type__name')
-    readonly_fields = ('id', )
+    search_fields = ('admission__id', 'type__name', 'admission__patient__name',
+                     'admission__patient__tcno', 'admission__patient__surname')
+    readonly_fields = ('id', 'approver')
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
+    fields = ('id', 'type', 'admission', ('result', 'comment'),
+              ('sample_type', 'sample_amount',),
+              ('analyser', 'finished'),
+              ('approver', 'approved'),
+              )
 
     list_filter = ('finished', 'timestamp', 'type')
     list_display = ('type', 'admission',  'timestamp', 'finished')
@@ -183,13 +174,29 @@ class InstitutionAdmin(admin.ModelAdmin):
     search_fields = ('name', 'id', 'code')
 
 
+class AnalyseInline(admin.TabularInline):
+    model = Analyse
+    classes = ('grp-collapse',)
+    # autocomplete_lookup_fields = {
+    #     'type_fk': ['type'],
+    # }
+    # show_change_link = True
+    raw_id_fields = ("type",)
+    readonly_fields = ('finished', 'approved')
+    fields = ('finished', 'approved', 'type',  'sample_type')
+    # list_filter = ('category__name',)
+    autocomplete_lookup_fields = {
+        'fk': ['type'],
+    }
+
+
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     search_fields = ('patient__name', 'patient__tcno', 'patient__surname')
-    list_display = ('patient', 'institution', 'timestamp')
+    list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
     readonly_fields = ('id',)
     raw_id_fields = ('patient', 'institution', 'doctor')
-    fields = ('id', 'patient', ('institution', 'doctor'),
+    fields = ('id', ('patient', 'is_urgent'), ('institution', 'doctor'),
               ('week', 'upd_week', 'lmp_date'),
               ('indications', 'history'),
               )

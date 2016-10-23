@@ -76,7 +76,15 @@ class Patient(models.Model):
 
     @property
     def full_name(self):
-        return '%s %s' % (self.name, self.surname)
+        full_name = "%s %s" % (self.name, self.surname)
+        if len(full_name) <= 20:
+            return full_name
+        names = full_name.split(' ')
+        first_name = names.pop(0)
+        last_name = names.pop(-1)
+        middle = ''.join(['%s.'% a[0] for a in names])
+
+        return '%s %s %s' % (first_name, middle, last_name)
 
     class Meta:
         verbose_name = _('Patient')
@@ -95,6 +103,7 @@ class Admission(models.Model):
     institution = models.ForeignKey(Institution, models.PROTECT, verbose_name=_('Institution'))
     doctor = models.ForeignKey(Doctor, models.PROTECT, verbose_name=_('Doctor'), null=True,
                                blank=True)
+    is_urgent = models.BooleanField(_('Urgent'), default=False)
     indications = models.TextField(_('Indications'), null=True, blank=True)
     history = models.TextField(_('Reproductive story / Family Tree'), null=True, blank=True)
     week = models.CharField(_('Pregnancy week'), null=True, blank=True, max_length=7)
@@ -103,6 +112,12 @@ class Admission(models.Model):
     timestamp = models.DateTimeField(_('Admission date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
+
+
+    def analyse_state(self):
+        states = list(self.analyse_set.values_list('finished', flat=True))
+        return "{}/{}".format(states.count(True), len(states))
+    analyse_state.short_description = _('Analyse State')
 
     class Meta:
         verbose_name = _('Patient Admission')

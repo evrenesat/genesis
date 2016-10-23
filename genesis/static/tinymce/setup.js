@@ -1,7 +1,6 @@
 /**
  * Created by evren on 07/10/16.
  */
-
 tinymce.init({
   selector: 'textarea',
   height: 700,

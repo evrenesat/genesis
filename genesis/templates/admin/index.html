@@ -36,7 +36,7 @@
                         <div class="container-1">
                             <span class="icon"><img src="/static/icons/magnifier_dna.svg"></span>
                             <input type="search" id="search" name="q"
-                                   placeholder="Hasta Adı ya da TC No ile ara"/>
+                                   placeholder="Hasta Adı ya da TC No ile ara" autofocus/>
                         </div>
                     </form>
                 </div>
@@ -75,7 +75,7 @@
             </div>
 
             {% for app in app_list %}
-                <div class="grp-module" id="app_{{ app.name|lower }}">
+                <div class="grp-module hide_it" id="app_{{ app.name|lower }}">
                     <h2><a href="{{ app.app_url }}" class="grp-section">{% trans app.name %}</a>
                     </h2>
                     {% for model in app.models %}
