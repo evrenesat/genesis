@@ -264,5 +264,29 @@ div.small-icon:hover {
 
 body.lab-reporttemplate textarea#id_template {
     height: 400px;
+    width:700px !important;
+}
+
+#id_admission-autocomplete, #id_patient-autocomplete{
+    width:440px !important;
+    max-width: none;
+}
+div.grp-related-widget-wrapper div.selector > div{
+    width: 388px !important;
+
+}
+div.grp-related-widget-wrapper div.selector select{
+    margin-left: 11px !important;
+}
+div.grp-related-widget-wrapper div.selector {
+    width: 820px;
+}
+div[id^=parametervalue_set] div.code > div {
+    color:#ccc !important;
+}
+
+body.lab-analyse.grp-change-form textarea#id_result{
+    background-color: rgb(238, 238, 238);
+    border: 1px inset #fff;
 }
 

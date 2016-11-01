@@ -28,6 +28,7 @@ class Institution(models.Model):
     address = models.CharField(_('Cellular phone'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
@@ -48,6 +49,7 @@ class Doctor(models.Model):
     institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
@@ -72,17 +74,17 @@ class Patient(models.Model):
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     relation = models.SmallIntegerField(_('Patient Relation'), choices=RELATION)
     birthdate = models.DateField(_('Birthdate'))
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
-    @property
-    def full_name(self):
+    def full_name(self, abr_limit=20):
         full_name = "%s %s" % (self.name, self.surname)
-        if len(full_name) <= 20:
+        if len(full_name) <= abr_limit:
             return full_name
         names = full_name.split(' ')
         first_name = names.pop(0)
         last_name = names.pop(-1)
-        middle = ''.join(['%s.'% a[0] for a in names])
+        middle = ''.join(['%s.' % a[0] for a in names])
 
         return '%s %s %s' % (first_name, middle, last_name)
 
@@ -91,7 +93,7 @@ class Patient(models.Model):
         verbose_name_plural = _('Patients')
 
     def __str__(self):
-        return "%s %s | %s | %s " % (self.name, self.surname, self.tcno, self.id)
+        return "%s | %s | %s " % (self.full_name(15), self.tcno, self.id)
 
     @staticmethod
     def autocomplete_search_fields():
@@ -111,12 +113,14 @@ class Admission(models.Model):
     lmp_date = models.DateField(_('LMP'), null=True, blank=True)
     timestamp = models.DateTimeField(_('Admission date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
 
     def analyse_state(self):
         states = list(self.analyse_set.values_list('finished', flat=True))
         return "{}/{}".format(states.count(True), len(states))
+
     analyse_state.short_description = _('Analyse State')
 
     class Meta:
@@ -126,12 +130,14 @@ class Admission(models.Model):
     def __str__(self):
         return "%s %s" % (self.patient, str(self.timestamp)[:19])
 
+
 class AdmissionSample(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
     timestamp = models.DateTimeField(_('Creation Date'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     amount = models.PositiveSmallIntegerField(_('Amount'), default=1)
     type = models.ForeignKey('SampleType', models.PROTECT, verbose_name=_('Sample type'))
+
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:

@@ -1,0 +1,58 @@
+div#logo {
+    background-image: url(/static/images/gentan_logo.jpg);
+    width: 265px;
+    height: 172px;
+    background-size: 70%;
+    background-repeat: no-repeat;
+}
+
+div#title {
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+}
+
+div.boxed_data > div > div {
+    display: inline-block;
+    padding: 0 0 3px 6px;
+}
+
+div.boxed_data > div > span {
+    padding-top: 6px;
+    width: 150px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+div.boxed_data > div > div:before {
+    content: ' : '
+}
+
+div.boxed_data > div {
+    width: 48%;
+    float: left;
+}
+
+div.boxed_data {
+    width: 100%;
+    float: left;
+}
+footer >div > img{
+    position: relative;
+    z-index: 99;
+    bottom:10px;
+
+}
+footer >div{
+    float:left;
+    width:48%;
+    position: relative;
+    text-align: center;
+}
+footer{
+    width: 99%;
+}
+main{
+    min-height:40em;
+    display: block;
+}

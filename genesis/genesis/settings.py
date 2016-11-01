@@ -25,7 +25,7 @@ SECRET_KEY = '3ppc!k=ybs7av5ci*stn^_@$5=t$nh765gb4ag(7#pz7y@=!c6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '*']
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale')
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'grappelli',
     # 'grappelli.dashboard',
     'grappelli_autocomplete_fk_edit_link',
+    # 'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
 
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lab',
+    # 'dbtemplates',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -74,22 +76,49 @@ MIDDLEWARE_CLASSES = [
 # ]
 ROOT_URLCONF = 'genesis.urls'
 
+# TEMPLATES = [
+#     {
+#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+#         'DIRS': [
+#             os.path.join(BASE_DIR, 'templates')
+#         ],
+#         'APP_DIRS': True,
+#         'OPTIONS': {
+#             'context_processors': [
+#                 'django.template.context_processors.debug',
+#                 'django.template.context_processors.request',
+#                 'django.contrib.auth.context_processors.auth',
+#                 'django.contrib.messages.context_processors.messages',
+#             ],
+#         },
+#     },
+SITE_ID = 1
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates')
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+  {
+      'BACKEND': 'django.template.backends.django.DjangoTemplates',
+      'DIRS': [ # your template dirs here
+          os.path.join(BASE_DIR, 'templates'),
+      ],
+      'APP_DIRS': False,
+      'OPTIONS': {
+          'context_processors': [
+              'django.contrib.auth.context_processors.auth',
+              'django.template.context_processors.debug',
+              'django.template.context_processors.i18n',
+              'django.template.context_processors.media',
+              'django.template.context_processors.static',
+              'django.template.context_processors.tz',
+              'django.contrib.messages.context_processors.messages',
+              'django.template.context_processors.request',
+          ],
+          'loaders': [
+              'django.template.loaders.filesystem.Loader',
+              'django.template.loaders.app_directories.Loader',
+              # 'dbtemplates.loader.Loader',
+
+          ],
+      },
+  },
 ]
 
 WSGI_APPLICATION = 'genesis.wsgi.application'
@@ -106,6 +135,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'genesis',
         'PASSWORD': 'gsis',
+        'USER': 'evren',
         # 'HOST': 'localhost'
     }
 }
@@ -133,7 +163,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'tr-TR'
+LANGUAGE_CODE = 'tr'
 # LANGUAGE_CODE = 'en-EN'
 
 TIME_ZONE = 'UTC'
@@ -162,3 +192,5 @@ try:
 except ImportError:
     pass
 
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static_serve/")

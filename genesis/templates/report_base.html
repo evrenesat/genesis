@@ -1,77 +1,220 @@
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Gentan Analyse Report</title>
+    <style media="screen">
+        body{
+            background-color: #4f5b66;
+        }
+        div#container {
+            background-color: #fff;
+            width: 1000px !important;
+        }
+        header, main, footer, div#title{
+            margin-left:auto;
+            margin-right:auto;
+            width:900px !important;
+        }
+
+    </style>
     <style>
 
-        div#logo {
-            background-image: url(/static/images/gentan_logo.jpg);
-            width: 265px;
-            height: 172px;
-            background-size: 70%;
-            background-repeat: no-repeat;
+        table.result_table th{
+            text-align: left;
+        }
+        table.result_table{
+            width:98%;
+
+        }
+        div#container {
+            width:100%;
+        }
+        div#logo > img {
+
+            width: 205px;
+
         }
 
         div#title {
-            font-size:1em;
+            font-size: 1.2em;
             font-weight: bold;
             text-align: center;
+            margin-bottom: 2em;
+        }
+
+        div.boxed_data > div > div {
+            display: inline-block;
+            padding: 0 0 3px 6px;
+            font-size:0.8em;
+        }
+
+        div.boxed_data > div > span {
+            font-size:0.8em;
+            padding-top: 6px;
+            width: 150px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        div.boxed_data > div > div:before {
+            content: ' : '
+        }
+
+        div.boxed_data > div {
+            width: 48%;
+            float: left;
+        }
+
+        div.boxed_data {
+            width: 100%;
+            float: left;
+            margin-bottom: 2em;
+        }
+
+        footer > div > img {
+            position: relative;
+            z-index: 99;
+            bottom: 10px;
+
+        }
+
+        footer > div {
+            float: left;
+            width: 48%;
+            position: relative;
+            text-align: center;
+        }
+
+        footer {
+            width: 99%;
+            height: 6em;
+        }
+
+        main {
+            min-height: 40em;
+            display: block;
+        }
+        main div > div.multi_analyse_title > span{
+            font-size:smaller;
+            font-weight: normal;
+        }
+        main div > div.multi_analyse_title{
+{#            width: 100%;#}
+{#            font-weight: bold;#}
+{#            font-size:1em;#}
+            width: 90%;
+            font-size: 1em;
+            border-bottom: 1px dotted;
+            color: #655d5d;
+
         }
     </style>
+    {#    <link href="{% static "report.css" %}" rel="stylesheet" type="text/css" media="screen"/>#}
 </head>
+<div id="container">
 <body style="font-family: sans-serif">
 <header>
-    <div id="logo"></div>
+    <div id="logo"><img src="/static/images/gentan_logo.jpg"></div>
 </header>
-<div id="title">{{ analyse_type }}</div>
-<table>
-    <tbody>
-    <tr>
-        <td>HASTANIN ADI SOYADI</td>
-        <td>:&nbsp; {{ patient_name }}</td>
-        <td>RAPOR TARİHİ</td>
-        <td>:&nbsp; {{ report_date }}</td>
-    </tr>
-    <tr>
-        <td>DOĞUM TARİHİ</td>
-        <td>:&nbsp; {{ patient_brithdate }}</td>
-        <td>BAŞVURU TARİHİ</td>
-        <td>:&nbsp; {{ admission_date }}</td>
-    </tr>
-    <tr>
-        <td>İNCELENEN MATERYAL</td>
-        <td>:&nbsp; {{ material_type }}</td>
-        <td>PROTOKOL NO</td>
-        <td>:&nbsp; {{ amission_id }}</td>
-    </tr>
-    <tr>
-        <td>MATERYAL MİKTARI</td>
-        <td>:&nbsp; {{ material_amount }}</td>
-        <td>ANALİZ NO</td>
-        <td>:&nbsp; {{ analyse_id }}</td>
-    </tr>
-    <tr>
-        <td>ENDİKASYON</td>
-        <td>:&nbsp; {{ indications }}</td>
-        <td>GÖN. MERKEZ / HEKİM</td>
-        <td>:&nbsp; {{ instituion_doctor }}</td>
-    </tr>
-    </tbody>
-</table>
-{report_template}
+<main>
+    <div id="title">
+        {% if report_title %}
+        {{ report_title }}
+        {% else %}
+        {{ title }} Analiz Raporu
+        {% endif %}
+    </div>
 
+    <div class="boxed_data">
+        <div><span>Hastanın Adı</span>
+            <div>{{ patient_name }}</div>
+        </div>
+        {% if report_date %}
+            <div><span>Rapor Tarihi</span>
+                <div>{{ report_date }}</div>
+            </div>{% endif %}
+        <div><span>Doğum Tarihi</span>
+            <div>{{ birthdate }}</div>
+        </div>
+        <div><span>Başvuru Tarihi</span>
+            <div>{{ admission_date }}</div>
+        </div>
+        <div><span>Protokol No</span>
+            <div>{{ admission_id }}</div>
+        </div>
+        {% if analyse_id %}
+            <div><span>Analiz No</span>
+                <div>{{ analyse_id }}</div>
+            </div>{% endif %}
+        {% if institution %}
+            <div><span>Gönderen Merkez</span>
+                <div>{{ institution }}</div>
+            </div>{% endif %}
+        {% if pregnancy_week %}
+            <div><span>Gebelik Haftası</span>
+                <div>{{ pregnancy_week }}</div>
+            </div>{% endif %}
+        {% if doctor %}
+            <div><span>Gönderen Doktor</span>
+                <div>{{ doctor }}</div>
+            </div>{% endif %}
+        {% if indications %}
+            <div><span>Endikasyonlar</span>
+                <div>{{ indications }}</div>
+            </div>{% endif %}
+        <div><span>İncelenen Materyal</span>
+            <div>{{ sample_type }}</div>
+        </div>
+        {% if sample_amount %}
+            <div><span>Materyal Miktarı</span>
+                <div>{{ sample_amount }}</div>
+            </div>{% endif %}
+        {% if short_result %}
+            <div><span>Sonuç</span>
+                <div>{{ short_result }}</div>
+            </div>{% endif %}
+
+
+    </div>
+
+    {report_template}
+
+    <p>{{ comment }}</p>
+
+    {#{{ results }}#}
+</main>
 <footer>
-    <div id="biolog">
-        {{ expert_name }}<br/>
-        {{ expert_title }}
-    </div>
-    <div id="doctor">
-        {{ doctor_name }}<br/>
-        {{ doctor_title }}
-    </div>
+    {% if finished %}
+        <div id="analyser">
+            {{ analyser.prefix }} {{ analyser.user.get_full_name }}<br/>
+            {{ analyser.title }}<br>
+            {% if analyser.signature %}<img src="/{{ analyser.signature.url }}">{% endif %}
+        </div>
+    {% endif %}
+    {% if approved %}
+        <div id="approver">
+            {{ approver.prefix }} {{ approver.user.get_full_name }}<br/>
+            {{ approver.title }}<br>
+            {% if approver.signature %}<img src="/{{ approver.signature.url }}">{% endif %}
+        </div>
+    {% endif %}
 </footer>
 
+</div>
 <script>window.parent.print_report_iframe();</script>
 </body>
 </html>
+
+{#<div class="boxed_data">#}
+{#    {% for result in results %}#}
+{#        {% for k, v in result.items %}#}
+{#            {% if v.value %}#}
+{#                <div><span>{{ v.title }}</span>#}
+{#                    <div>{{ v.value }}</div>#}
+{#                </div>#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{#</div>#}

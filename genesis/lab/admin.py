@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from django.contrib import admin
+from django.core.exceptions import PermissionDenied
+from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 
@@ -11,37 +15,38 @@ from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
 
+from django.contrib.auth.admin import UserAdmin
+
+from django.contrib.auth.models import Permission
+
+admin.site.register(Permission)
+
+UserAdmin.add_fieldsets = (
+    (None, {
+        'classes': ('wide',),
+        'fields': ('username', 'password1', 'password2', 'first_name', 'last_name')}
+     ),
+)
 
 
 class ParameterValueInline(admin.TabularInline):
+    classes = ('grp-collapse grp-closed',)
     model = ParameterValue
     extra = 0
+    ordering = ('code',)
     readonly_fields = ('key', 'code')
     max_num = 0
-    fields = ('key', 'code', 'value')
+    fields = ('key', 'value', 'code')
 
-
-class StateInline(admin.TabularInline):
-    model = State
-    extra = 1
-
-    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-
-        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-        if db_field.name == 'definition':
-            if request._obj_ is not None:
-                field.queryset = field.queryset.filter(id__in=request._obj_.applicable_states_ids())
-            else:
-                field.queryset = field.queryset.none()
-
-        return field
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 class ParameterKeyInline(admin.TabularInline):
     model = ParameterKey
     extra = 0
     classes = ('grp-collapse grp-closed',)
+
 
 class AdmissionSampleInline(admin.TabularInline):
     model = AdmissionSample
@@ -59,7 +64,7 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
         }),
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed'),
-          'fields': ('process_logic', )
+          'fields': ('process_logic',)
           })
     )
 
@@ -97,31 +102,107 @@ class ParameterAdmin(admin.ModelAdmin):
     )
 
 
+def _approve_analyse(state, request):
+    if not request.user.has_perm('lab.can_approve_analysis'):
+        raise ValidationError('-')  # PermissionDenied(
+        # _("You don't have required permissions to mark an analyse as approved"))
+    else:
+        state.analyse.approved = True
+        state.analyse.approve_time = datetime.now()
+        state.analyse.approver = request.user.profile
+        state.analyse.save()
+
+
+def _finish_analyse(state, request):
+    if not request.user.has_perm('lab.can_finish_analyse'):
+        raise PermissionDenied(
+            _("You don't have required permissions to  mark an analyse as finished"))
+    else:
+        state.analyse.finished = True
+        state.analyse.completion_time = datetime.now()
+        state.analyse.analyser = request.user.profile
+        state.analyse.save()
+
+
+class StateFormSet(BaseInlineFormSet):
+    def save_new(self, form, commit=True):
+        obj = super().save_new(form, commit=False)
+        # here you can add anything you need from the request
+        if obj.definition.finish:
+            _finish_analyse(obj, self.request)
+        if obj.definition.approve:
+            _approve_analyse(obj, self.request)
+        if commit:
+            obj.save()
+
+        return obj
+
+        # def clean(self):
+        #     super().clean()
+        #     for form in self.forms:
+        #         if not hasattr(form, 'cleaned_data'):
+        #             continue
+        #         if form.cleaned_data.get('DELETE'):
+        #             raise ValidationError('Error')
+
+
+class StateInline(admin.TabularInline):
+    model = State
+    extra = 1
+
+    formset = StateFormSet
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        formset.request = request
+        return formset
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        if db_field.name == 'definition':
+            if request._obj_ is not None:
+                field.queryset = field.queryset.filter(id__in=request._obj_.applicable_states_ids())
+            else:
+                field.queryset = field.queryset.none()
+        return field
+
+
 @admin.register(Analyse)
 class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
-    raw_id_fields = ("type",)
+    raw_id_fields = ("type", 'admission')
     date_hierarchy = 'timestamp'
     search_fields = ('admission__id', 'type__name', 'admission__patient__name',
                      'admission__patient__tcno', 'admission__patient__surname')
-    readonly_fields = ('id', 'approver')
+    readonly_fields = (
+        'id', 'approver', 'approved', 'approve_time', 'finished', 'analyser', 'completion_time')
     autocomplete_lookup_fields = {
-        'fk': ['type'],
+        'fk': ['type', 'admission'],
     }
-    fields = ('id', 'type', 'admission', ('result', 'comment'),
-              ('sample_type', 'sample_amount',),
-              ('analyser', 'finished'),
-              ('approver', 'approved'),
-              )
+    fieldsets = ((None,
+                  {'fields': ('id', 'type', 'admission', ('short_result', 'comment'),
+                              ('sample_type', 'sample_amount',),
+                              ('analyser', 'finished', 'completion_time'),
+                              ('approver', 'approved', 'approve_time'),
+                              )}),
+                 (_('Advanced'),
+                  {'classes': ('grp-collapse', 'grp-closed'),
+                   'fields': ('result', 'template')
+                   },
+                  ))
 
     list_filter = ('finished', 'timestamp', 'type')
-    list_display = ('type', 'admission',  'timestamp', 'finished')
+    list_display = ('type', 'admission', 'timestamp', 'finished', 'approved')
     inlines = [
         StateInline, ParameterValueInline
     ]
+
     def save_model(self, request, obj, form, change):
-        is_new = not bool(obj.id)
-        if is_new:
-            obj.create_empty_values()
+        # is_new = not bool(obj.id)
+        # if is_new:
+        obj.create_empty_values()
+        super().save_model(request, obj, form, change)
 
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
@@ -129,16 +210,21 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         if obj.finished:
             obj.save_result()
 
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "template":
+            kwargs["queryset"] = request._obj_.type.reporttemplate_set.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
         request._obj_ = obj
         return super().get_form(request, obj, **kwargs)
 
-    # def changelist_view(self, request, extra_context=None):
-    #     if not request.META['QUERY_STRING'] and \
-    #             not request.META.get('HTTP_REFERER', '').startswith(request.build_absolute_uri()):
-    #         return HttpResponseRedirect(request.path + "?finished__exact=0")
-    #     return super().changelist_view(request, extra_context=extra_context)
+        # def changelist_view(self, request, extra_context=None):
+        #     if not request.META['QUERY_STRING'] and \
+        #             not request.META.get('HTTP_REFERER', '').startswith(request.build_absolute_uri()):
+        #         return HttpResponseRedirect(request.path + "?finished__exact=0")
+        #     return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Patient)
@@ -147,7 +233,10 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 @admin.register(ReportTemplate)
-class PatientAdmin(admin.ModelAdmin):
+class ReportTemplateAdmin(admin.ModelAdmin):
+    filter_horizontal = ('analyse_type',)
+    save_as = True
+
     class Media:
         js = [
             '/static/tinymce/tinymce.min.js',
@@ -183,11 +272,14 @@ class AnalyseInline(admin.TabularInline):
     # show_change_link = True
     raw_id_fields = ("type",)
     readonly_fields = ('finished', 'approved')
-    fields = ('finished', 'approved', 'type',  'sample_type')
+    fields = ('finished', 'approved', 'type', 'sample_type')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
+
+    def get_extra(self, request, obj=None, **kwargs):
+        return 0 if obj else self.extra
 
 
 @admin.register(Admission)
@@ -207,6 +299,11 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     inlines = [
         AnalyseInline, AdmissionSampleInline
     ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        # just save obj reference for future processing in Inline
+        request._obj_ = obj
+        return super().get_form(request, obj, **kwargs)
 
 
 app_models = apps.get_app_config('lab').get_models()

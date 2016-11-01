@@ -19,7 +19,7 @@ def analyse_barcode(request, pk):
         'analyse': analyse,
         'id': analyse.id,
         'admission_id': analyse.admission_id,
-        'patient_name': analyse.admission.patient.full_name,
+        'patient_name': analyse.admission.patient.full_name(),
         'admission_time': analyse.admission.timestamp,
         'institution': analyse.admission.institution,
         'barcode': str(analyse.id).zfill(13),
@@ -28,28 +28,53 @@ def analyse_barcode(request, pk):
     })
 
 
+def _get_base_context(analyse):
+    data = {
+        'patient_name': analyse.admission.patient.full_name(30),
+        'report_date': analyse.approve_time,
+        'admission_date': analyse.admission.timestamp,
+        'birthdate': analyse.admission.patient.birthdate,
+        'short_result': analyse.short_result,
+        'indications': analyse.admission.indications,
+        'pregnancy_week': analyse.admission.week,
+        'admission_id': analyse.admission.id,
+        'doctor': analyse.admission.doctor,
+
+        'sample_amount': analyse.sample_amount,
+        'sample_type': analyse.sample_type,
+        'comment': analyse.comment,
+        'approved': analyse.approved,
+        'approver': analyse.approver,
+        'analyser': analyse.analyser,
+        'finished': analyse.finished,
+    }
+    if str(analyse.admission.doctor) != str(analyse.admission.institution):
+        data['institution']= analyse.admission.institution
+    return data
+
+
 def analyse_report(request, pk):
     analyse = Analyse.objects.get(pk=pk)
-    anl_tpl = analyse.type.reporttemplate_set.all()[0].template
-    with open('templates/report_base.html') as fh:
-        base_template = fh.read()
-        btpl = base_template.replace('{report_template}', anl_tpl)
-        tpl = Template(btpl)
-    fh.close()
-    cnt_dict = json.loads(analyse.result_json) if analyse.result_json else {}
-    cnt_dict['comment'] = analyse.comment
+    cnt_dict = _get_base_context(analyse)
+    if analyse.result_json:
+        result = analyse.get_result_dict()
+        cnt_dict.update(result)
+        cnt_dict['results'] = [result]
     c = Context(cnt_dict)
-
+    tpl, tpl_object = _load_analyse_template(analyse)
     return HttpResponse(tpl.render(c))
 
 
-def _load_analyse_template(analyse):
-    anl_tpl = analyse.type.reporttemplate_set.all()[0].template
+def _load_analyse_template(analyse, **kwargs):
+    if analyse.template and not kwargs:
+        anl_tpl = analyse.template
+    else:
+        anl_tpl = analyse.type.reporttemplate_set.filter(**kwargs)[0]
     fh = open('templates/report_base.html')
     base_template = fh.read()
     fh.close()
-    btpl = base_template.replace('{report_template}', anl_tpl)
-    return Template(btpl)
+    btpl = base_template.replace('{report_template}', anl_tpl.template)
+    return Template(btpl), anl_tpl
 
 
 def multiple_reports(request):
@@ -57,10 +82,16 @@ def multiple_reports(request):
     analyse_results = []
     for id in ids:
         analyse = Analyse.objects.get(pk=id)
-        analyse_results.append(json.loads(analyse.result_json) if analyse.result_json else {})
-    tpl = _load_analyse_template(analyse)
-    cnt_dict = {'results': analyse_results,
-                'comment': analyse.comment}
+        result = analyse.get_result_dict()
+        analyse_results.append(result)
+    tpl, tpl_object = _load_analyse_template(analyse, combo=True)
+    cnt_dict = _get_base_context(analyse)
+    cnt_dict.update({'results': analyse_results,
+                     'comment': analyse.comment,
+                     'short_result': analyse.short_result,
+                     'report_title': tpl_object.title
+                     })
+
     c = Context(cnt_dict)
 
     return HttpResponse(tpl.render(c))
@@ -74,7 +105,7 @@ def admission_barcode(request, pk):
         'id': admission.id,
         'admission_id': admission.id,
         'person_id': admission.patient.tcno,
-        'patient_name': admission.patient.full_name,
+        'patient_name': admission.patient.full_name(),
         'admission_time': admission.timestamp,
         'institution': admission.institution,
         'barcode': str(admission.id).zfill(13),
