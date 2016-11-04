@@ -69,8 +69,8 @@ function print_report_iframe() {
     // set top margins in millimeters
     jsPrintSetup.setOption('marginTop', 0);
     jsPrintSetup.setOption('marginBottom', 0);
-    jsPrintSetup.setOption('marginLeft', 0);
-    jsPrintSetup.setOption('marginRight', 0)
+    // jsPrintSetup.setOption('marginLeft', 0);
+    // jsPrintSetup.setOption('marginRight', 0)
     // set page header
     jsPrintSetup.setOption('headerStrLeft', '');
     jsPrintSetup.setOption('headerStrCenter', '');

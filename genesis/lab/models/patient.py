@@ -116,6 +116,8 @@ class Admission(models.Model):
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
+    def is_approved(self):
+        return all(self.analyse_set.values_list('approved', flat=True))
 
     def analyse_state(self):
         states = list(self.analyse_set.values_list('finished', flat=True))

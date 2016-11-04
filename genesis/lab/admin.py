@@ -60,7 +60,8 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     fieldsets = (
         (None, {
-            'fields': ('name', 'category', 'method', 'sample_type', 'code', 'process_time', 'price')
+            'fields': ('name', 'category', 'method', 'sample_type',
+                       'code', 'process_time', 'footnote', 'price')
         }),
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed'),
@@ -183,8 +184,8 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     fieldsets = ((None,
                   {'fields': ('id', 'type', 'admission', ('short_result', 'comment'),
                               ('sample_type', 'sample_amount',),
-                              ('analyser', 'finished', 'completion_time'),
-                              ('approver', 'approved', 'approve_time'),
+                              ('finished', 'analyser', 'completion_time'),
+                              ('approved', 'approver', 'approve_time'),
                               )}),
                  (_('Advanced'),
                   {'classes': ('grp-collapse', 'grp-closed'),
@@ -284,11 +285,12 @@ class AnalyseInline(admin.TabularInline):
 
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+    date_hierarchy = 'timestamp'
     search_fields = ('patient__name', 'patient__tcno', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
-    readonly_fields = ('id',)
+    readonly_fields = ('id', 'timestamp')
     raw_id_fields = ('patient', 'institution', 'doctor')
-    fields = ('id', ('patient', 'is_urgent'), ('institution', 'doctor'),
+    fields = (('id','timestamp'), ('patient', 'is_urgent'), ('institution', 'doctor'),
               ('week', 'upd_week', 'lmp_date'),
               ('indications', 'history'),
               )

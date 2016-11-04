@@ -114,6 +114,8 @@ class ReportTemplate(models.Model):
     title = models.CharField(_('Report title'), null=True, blank=True, max_length=30)
     combo = models.BooleanField(_('Combo'), default=False,
                                 help_text=_('Supports combined reporting of multiple analyses'))
+    generic = models.BooleanField(_('Generic'), default=False,
+                                help_text=_('Use generic reporting'))
     template = models.TextField(_('Template'))
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
@@ -370,13 +372,14 @@ PARAMETER_VALUE_TYPES = (
 class ParameterKey(models.Model):
     parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
     name = models.CharField(_('Name'), max_length=50)
+    default_value = models.TextField(_('Default value'), null=True, blank=True)
     code = models.CharField(_('Code name'), max_length=50, null=True, blank=True)
     help = models.CharField(_('Help text'), max_length=255, blank=True, null=True)
     type = models.CharField(_('Parameter type'), max_length=5,
                             choices=PARAMETER_VALUE_TYPES, default=1)
     presets = models.TextField(_('Presets'), blank=True, null=True)
     row_no = models.IntegerField(_('Row number'), default=0)
-    col_no = models.IntegerField(_('Row number'), null=True, blank=True)
+    col_no = models.IntegerField(_('Column number'), null=True, blank=True)
 
     def create_empty_value(self, analyse):
         ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
