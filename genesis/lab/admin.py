@@ -14,6 +14,7 @@ from django.contrib.admin.sites import AlreadyRegistered
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
+from com.models import *
 
 from django.contrib.auth.admin import UserAdmin
 
@@ -54,20 +55,38 @@ class AdmissionSampleInline(admin.TabularInline):
     classes = ('grp-collapse',)
 
 
+class ParameterInline(admin.TabularInline):
+    model = Parameter.analyze_type.through
+    extra = 0
+    classes = ('grp-collapse',)  # grp-closed
+
+
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
     list_filter = ('category',)
     search_fields = ('name',)
+    list_display = ('name', 'group_type', 'price')
+    filter_horizontal = ('subtypes',)
     fieldsets = (
         (None, {
             'fields': ('name', 'category', 'method', 'sample_type',
-                       'code', 'process_time', 'footnote', 'price')
+                       'code', 'process_time', 'footnote', 'price', 'alternative_price')
         }),
+        (_('Subtypes'),
+         {'classes': ('grp-collapse', 'grp-closed'),
+          'fields': ('subtypes',)
+          }),
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed'),
           'fields': ('process_logic',)
           })
     )
+    inlines = [ParameterInline, ]
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        # if obj.parameter_definition.strip():
+        #     obj.create_update_parameter_keys()
 
 
 @admin.register(StateDefinition)
@@ -259,9 +278,21 @@ class DoctorAdmin(admin.ModelAdmin):
         obj.save()
 
 
+class InstitutePricingInline(admin.TabularInline):
+    model = InstitutePricing
+    classes = ('grp-collapse',)
+
+
+class AnalysePricingInline(admin.TabularInline):
+    model = AnalysePricing
+    classes = ('grp-collapse',)
+    fields = ('analyse_type', 'price', 'discount_rate')
+
+
 @admin.register(Institution)
 class InstitutionAdmin(admin.ModelAdmin):
     search_fields = ('name', 'id', 'code')
+    inlines = [InstitutePricingInline, AnalysePricingInline]
 
 
 class AnalyseInline(admin.TabularInline):
@@ -283,6 +314,32 @@ class AnalyseInline(admin.TabularInline):
         return 0 if obj else self.extra
 
 
+class AdmissionStateInline(admin.TabularInline):
+    model = AdmissionState
+    extra = 1
+    classes = ('grp-collapse',)
+
+
+class PaymentInline(admin.TabularInline):
+    model = Payment
+    extra = 0
+    fields = ('type', 'method', 'amount', 'institution', 'patient')
+    classes = ('grp-collapse',)
+
+
+class InvoiceItemInline(admin.TabularInline):
+    model = InvoiceItem
+    extra = 0
+    classes = ('grp-collapse', 'grp-closed')
+
+
+class AdmissionPricingInline(admin.TabularInline):
+    model = AdmissionPricing
+    extra = 0
+    max_num = 0
+    classes = ('grp-collapse', )
+
+
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     date_hierarchy = 'timestamp'
@@ -290,7 +347,7 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
     readonly_fields = ('id', 'timestamp')
     raw_id_fields = ('patient', 'institution', 'doctor')
-    fields = (('id','timestamp'), ('patient', 'is_urgent'), ('institution', 'doctor'),
+    fields = (('id', 'timestamp'), ('patient', 'is_urgent'), ('doctor', 'institution'),
               ('week', 'upd_week', 'lmp_date'),
               ('indications', 'history'),
               )
@@ -299,13 +356,51 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     }
 
     inlines = [
-        AnalyseInline, AdmissionSampleInline
+        AnalyseInline, AdmissionPricingInline, PaymentInline, InvoiceItemInline,  AdmissionSampleInline, AdmissionStateInline
     ]
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
         request._obj_ = obj
         return super().get_form(request, obj, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        # if obj.parameter_definition.strip():
+        #     obj.create_update_parameter_keys()
+
+    def _create_payment_item(self):
+        pass
+
+    def _save_analyses(self, admission, analyses):
+        for analyse in analyses:
+            if analyse.type.group_type:
+                for sub_analyse in analyse.type.subtype_set.all():
+                    Analyse(type=sub_analyse,
+                            sample_type=analyse.sample_type,
+                            admission=admission).save()
+            else:
+                analyse.save()
+
+    def save_related(self, request, form, formsets, change):
+        """
+        - expand group-type analyses
+        - create payment and payment-items
+        """
+        form.save_m2m()
+        if not change:
+            adm = form.instance
+            payment = Payment(admission=adm, patient=adm.patient)
+            if adm.institution.preferred_payment_method == 20:
+                payment.institution = adm.institution
+            else:
+                payment.patient = adm.patient
+        for formset in formsets:
+            if formset.model == Analyse:
+                self._save_analyses(formset.instance, formset.save(commit=False))
+            else:
+                formset.save()
+
 
 
 app_models = apps.get_app_config('lab').get_models()

@@ -256,14 +256,14 @@
             <div id="analyser">
                 {{ analyser.prefix }} {{ analyser.user.get_full_name }}<br/>
                 {{ analyser.title }}<br>
-                {% if analyser.signature %}<img src="/{{ analyser.signature.url }}">{% endif %}
+                {% if with_sign and analyser.signature %}<img src="/{{ analyser.signature.url }}">{% endif %}
             </div>
         {% endif %}
         {% if approved %}
             <div id="approver">
                 {{ approver.prefix }} {{ approver.user.get_full_name }}<br/>
                 {{ approver.title }}<br>
-                {% if approver.signature %}<img src="/{{ approver.signature.url }}">{% endif %}
+                {% if with_sign and approver.signature %}<img src="/{{ approver.signature.url }}">{% endif %}
             </div>
         {% endif %}
     </footer>

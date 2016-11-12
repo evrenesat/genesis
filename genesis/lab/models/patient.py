@@ -28,6 +28,7 @@ class Institution(models.Model):
     address = models.CharField(_('Cellular phone'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+    email = models.EmailField(_('Email'), null=True, blank=True)
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
@@ -49,7 +50,7 @@ class Doctor(models.Model):
     institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
-
+    email = models.EmailField(_('Email'), null=True, blank=True)
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
     class Meta:
@@ -131,6 +132,40 @@ class Admission(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.patient, str(self.timestamp)[:19])
+
+
+class AdmissionStateDefinition(models.Model):
+    name = models.CharField(_('Name'), max_length=50)
+    explanation = models.TextField(_('Explanation'), null=True, blank=True)
+    hardcoded = models.BooleanField(_('Cannot be deleted'), default=False, editable=False)
+    # all_finished = models.BooleanField(_('Finished state'), default=False)
+    # all_approved = models.BooleanField(_('Approved state'), default=False)
+    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Admission State Definition')
+        verbose_name_plural = _('Admission State Definitions')
+        ordering = ('order',)
+
+    def __str__(self):
+        return self.name
+
+
+class AdmissionState(models.Model):
+    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Admission'))
+    definition = models.ForeignKey(AdmissionStateDefinition, models.PROTECT, verbose_name=_('State'))
+    comment = models.CharField(_('Comment'), max_length=50, null=True, blank=True)
+    timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+
+    class Meta:
+        verbose_name = _('Admission State')
+        verbose_name_plural = _('Admission States')
+        ordering = ('timestamp',)
+
+    def __str__(self):
+        return "%s %s" % (self.analyse, self.definition)
+
 
 
 class AdmissionSample(models.Model):

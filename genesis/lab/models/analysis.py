@@ -12,6 +12,7 @@ from ..utils import pythonize, lazy_property
 
 from .patient import Admission
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(_('Biography'), max_length=500, blank=True, null=True)
@@ -19,7 +20,8 @@ class Profile(models.Model):
     prefix = models.CharField(_('Title prefix'), max_length=30, blank=True, null=True)
     address = models.TextField(_('Address'), max_length=500, blank=True, null=True)
     phone = models.CharField(_('Phone'), max_length=30, blank=True, null=True)
-    signature = models.ImageField(_('Signature image'), null=True, blank=True, upload_to='static/signatures')
+    signature = models.ImageField(_('Signature image'), null=True, blank=True,
+                                  upload_to='static/signatures')
 
     class Meta:
         verbose_name = _('Person')
@@ -27,6 +29,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
+
 
 class MediumType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
@@ -79,6 +82,11 @@ class Category(models.Model):
 
 
 class AnalyseType(models.Model):
+    subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type')
+    group_type = models.BooleanField(_('Group'), default=False, editable=False,
+                                     help_text=_(
+                                         'This is a group type, consist of other analyse types'))
+
     category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'))
     method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'))
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
@@ -86,9 +94,12 @@ class AnalyseType(models.Model):
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     footnote = models.TextField(_('Report footnote'), blank=True, null=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
+    alternative_price = models.DecimalField(_('Alternative price'), max_digits=6, decimal_places=2,
+                                            help_text=_('Alternative price definition. '
+                                                        'Can be used for foregeign currencies etc.'))
     process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
-                                     help_text=_(
-                                         'This code will be used to calculate the analyse result according to entered data'))
+                                     help_text=_('This code will be used to calculate the analyse '
+                                                 'result according to entered data'))
     process_time = models.SmallIntegerField(_('Process Time'))
 
     def is_sample_type_compatible(self, sample_type):
@@ -110,12 +121,13 @@ class ReportTemplate(models.Model):
     analyse_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     name = models.CharField(_('Name'), max_length=20, null=True, blank=True)
     priority = models.PositiveSmallIntegerField(_('Priority'),
-                                                choices=[(n,n) for n in range(0, 50, 5)], default=5)
+                                                choices=[(n, n) for n in range(0, 50, 5)],
+                                                default=5)
     title = models.CharField(_('Report title'), null=True, blank=True, max_length=30)
     combo = models.BooleanField(_('Combo'), default=False,
                                 help_text=_('Supports combined reporting of multiple analyses'))
     generic = models.BooleanField(_('Generic'), default=False,
-                                help_text=_('Use generic reporting'))
+                                  help_text=_('Use generic reporting'))
     template = models.TextField(_('Template'))
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
@@ -129,25 +141,9 @@ class ReportTemplate(models.Model):
         return "%s" % (self.name,)
 
 
-class StateDefinition(models.Model):
-    type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
-    name = models.CharField(_('Name'), max_length=50)
-    explanation = models.TextField(_('Explanation'), null=True, blank=True)
-    finish = models.BooleanField(_('Finished state'), default=False)
-    approve = models.BooleanField(_('Approved state'), default=False)
-    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
-
-    class Meta:
-        verbose_name = _('Analyse State Definition')
-        verbose_name_plural = _('Analyse State Definitions')
-        ordering = ('order',)
-
-    def __str__(self):
-        return self.name
-
-
 class Analyse(models.Model):
-    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True, blank=True)
+    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
+                             blank=True)
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
 
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
@@ -160,15 +156,17 @@ class Analyse(models.Model):
     sample_amount = models.CharField(_('Sample Amount'), max_length=20, null=True, blank=True)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
-    template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Template'), null=True, blank=True)
+    template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Template'),
+                                 null=True, blank=True)
     finished = models.BooleanField(_('Finished'), default=False)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
     approve_time = models.DateTimeField(_('Approve time'), editable=False, null=True)
-    analyser = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Analyser'), null=True, blank=True, related_name='analyses')
+    analyser = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Analyser'), null=True,
+                                 blank=True, related_name='analyses')
     approved = models.BooleanField(_('Approved'), default=False)
-    approver = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Approver'), null=True, blank=True, related_name='approved_analyses')
-
+    approver = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Approver'), null=True,
+                                 blank=True, related_name='approved_analyses')
 
     @lazy_property
     def get_code(self):
@@ -193,6 +191,13 @@ class Analyse(models.Model):
         return result or self.result_dict
 
     def get_result_dict(self):
+        """
+        If there is a "process_logic" code defined in analyse type,
+        then calculated result returned as is.
+        Otherwise entered results parameters
+        Returns:
+            Composed analyse result dict.
+        """
         if not self.result_json:
             return {}
         calculated_result = json.loads(self.result_json)
@@ -218,7 +223,7 @@ class Analyse(models.Model):
         result_data = self.calculate_result()
         if self.result.strip() and self.result != self.result_copy:
             manual_result_data = dict([tuple(line.split('=')) for line in
-                                                  self.result.strip().split('\n')])
+                                       self.result.strip().split('\n')])
             result_data.update(manual_result_data)
         elif result_data:
             self.result = '\n'.join(['%s = %s' % (k, v) for k, v in result_data.items()])
@@ -230,7 +235,6 @@ class Analyse(models.Model):
 
     def applicable_sample_type_ids(self):
         return self.type.sample_type.values_list('id', flat=True)
-
 
     def applicable_states_ids(self):
         return self.type.statedefinition_set.values_list('id', flat=True)
@@ -254,6 +258,23 @@ class Analyse(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.type, self.admission)
+
+
+class StateDefinition(models.Model):
+    type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
+    name = models.CharField(_('Name'), max_length=50)
+    explanation = models.TextField(_('Explanation'), null=True, blank=True)
+    finish = models.BooleanField(_('Finished state'), default=False)
+    approve = models.BooleanField(_('Approved state'), default=False)
+    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Analyse State Definition')
+        verbose_name_plural = _('Analyse State Definitions')
+        ordering = ('order',)
+
+    def __str__(self):
+        return self.name
 
 
 class State(models.Model):
@@ -364,7 +385,8 @@ class Parameter(models.Model):
 
 PARAMETER_VALUE_TYPES = (
     ('str', _('String')),
-    ('num', _('Numeric')),
+    ('num', _('Integer')),
+    ('dec', _('Decimal')),
     ('bool', _('Boolean')),
 )
 
@@ -381,10 +403,22 @@ class ParameterKey(models.Model):
     row_no = models.IntegerField(_('Row number'), default=0)
     col_no = models.IntegerField(_('Column number'), null=True, blank=True)
 
+
     def create_empty_value(self, analyse):
-        ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
+        pv, new = ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
                                              code=self.code, analyse=analyse,
                                              type=self.type)
+        if new and self.default_value:
+            if self.type == 'num':
+                pv.value_int = int(self.default_value)
+            elif self.type == 'str':
+                pv.value = self.default_value
+            elif self.type == 'bool':
+                pv.value_int = 1 if self.default_value.strip() == '1' else 0
+            elif self.type == 'dec':
+                pv.value_float = float(self.default_value)
+            pv.save()
+
 
     def _jsonify_presets(self):
         if self.presets and self.presets.strip():
@@ -412,7 +446,7 @@ class ParameterValue(models.Model):
     code = models.CharField(_('Code name'), max_length=30, )
     value = models.CharField(_('Value'), max_length=30, blank=True, null=True)
     value_int = models.IntegerField(_('Int Value'), editable=False, default=0)
-    value_float = models.IntegerField(_('Float Value'), editable=False, default=.0)
+    value_float = models.FloatField(_('Float Value'), editable=False, default=.0)
 
     type = models.CharField(_('Parameter type'), max_length=5, choices=PARAMETER_VALUE_TYPES)
 
