@@ -320,26 +320,6 @@ class AdmissionStateInline(admin.TabularInline):
     classes = ('grp-collapse',)
 
 
-class PaymentInline(admin.TabularInline):
-    model = Payment
-    extra = 0
-    fields = ('type', 'method', 'amount', 'institution', 'patient')
-    classes = ('grp-collapse',)
-
-
-class InvoiceItemInline(admin.TabularInline):
-    model = InvoiceItem
-    extra = 0
-    classes = ('grp-collapse', 'grp-closed')
-
-
-class AdmissionPricingInline(admin.TabularInline):
-    model = AdmissionPricing
-    extra = 0
-    max_num = 0
-    classes = ('grp-collapse', )
-
-
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     date_hierarchy = 'timestamp'
@@ -355,9 +335,7 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         'fk': ['patient', 'institution', 'doctor'],
     }
 
-    inlines = [
-        AnalyseInline, AdmissionPricingInline, PaymentInline, InvoiceItemInline,  AdmissionSampleInline, AdmissionStateInline
-    ]
+    inlines = [AnalyseInline,  AdmissionSampleInline, AdmissionStateInline]
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline

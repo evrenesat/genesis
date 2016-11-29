@@ -1,11 +1,47 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
+from lab.admin import AdmissionAdmin
 
 
+@receiver(post_save, sender=Admission)
+def create_payment_objects(sender, instance, created, raw, **kwargs):
+    # if created and not raw:
+    if not instance.admissionpricing_set.exists() and not raw:
+        AdmissionPricing(admission=instance).save()
+
+
+class PaymentInline(admin.TabularInline):
+    model = Payment
+    extra = 0
+    fields = ('type', 'method', 'amount', 'institution', 'patient')
+    classes = ('grp-collapse',)
+
+
+class InvoiceItemInline(admin.TabularInline):
+    model = InvoiceItem
+    extra = 0
+    fields = ('name', 'amount', 'quantity', 'total')
+    readonly_fields = ('name', 'amount', 'quantity', 'total')
+    classes = ('grp-collapse', 'grp-closed')
+
+
+class AdmissionPricingInline(admin.TabularInline):
+    model = AdmissionPricing
+    extra = 0
+    max_num = 0
+    fields = ('final_amount', 'list_price', 'discount_percentage', 'discount_amount')
+    readonly_fields = ('list_price', 'discount_percentage', 'discount_amount')
+    # readonly_fields = ('list_price', 'amount', 'quantity', 'total')
+    classes = ('grp-collapse',)
+
+
+AdmissionAdmin.inlines.extend([AdmissionPricingInline, PaymentInline, InvoiceItemInline])
 
 # class PaymentItemInline(admin.TabularInline):
 #     model = PaymentItem

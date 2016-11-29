@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -89,12 +90,13 @@ class AdmissionPricing(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Admission'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     list_price = models.DecimalField(_('List price'), max_digits=8, decimal_places=2,
-                                     editable=False)
+                                     editable=False, null=True, blank=True)
     discount_percentage = models.DecimalField(_('Discount percentage'), max_digits=8, null=True,
                                               decimal_places=2, editable=False, blank=True)
     discount_amount = models.DecimalField(_('Discount amount'), max_digits=8, decimal_places=2,
                                           editable=False, null=True, blank=True)
-    final_amount = models.DecimalField(_('Final amount'), max_digits=8, decimal_places=2, null=True,
+    final_amount = models.DecimalField(_('Customer price'), max_digits=8, decimal_places=2,
+                                       null=True,
                                        blank=True)
 
     class Meta:
@@ -102,7 +104,7 @@ class AdmissionPricing(models.Model):
         verbose_name_plural = _('Admission Pricings')
 
     def __str__(self):
-        return "%s %s" % (self.patient.name, self.price)
+        return "%s %s" % (self.admission, self.final_amount)
 
     def calculate_pricing_for_analyse(self, analyse):
         """
@@ -112,7 +114,7 @@ class AdmissionPricing(models.Model):
             analyse: Analyse object
 
         Returns:
-            tuple, (discounted price, discount rate)
+            tuple, (discounted price, list price, discount rate)
         """
         institute = self.admission.institution
         analyse_price = institute.analysepricing_set.filter(analyse_type=analyse.type)
@@ -120,25 +122,36 @@ class AdmissionPricing(models.Model):
             return analyse_price[0].price, analyse_price[0].discount_rate
         use_alt_pricing = False
         institute_discount_rate = None
-        if institute.institutepricing:
+        if hasattr(institute, 'institutepricing'):
             use_alt_pricing = institute.institutepricing.use_alt_pricing
             # TODO: convert percentage to decimal
             institute_discount_rate = institute.institutepricing.discount_rate
-        price = analyse.type.alternative_price if use_alt_pricing else analyse.type.price
-        price = price * (institute_discount_rate or 1)
-        return price, institute_discount_rate
+        list_price = analyse.type.alternative_price if use_alt_pricing else analyse.type.price
+        discounted_price = list_price * (institute_discount_rate or 1)
+        return discounted_price, list_price, institute_discount_rate
 
     def process_amounts(self):
+        self.final_amount = Decimal(0)
+        self.list_price = Decimal(0)
         for analyse in self.admission.analyse_set.all():
-            analyse_price, discount_rate = self.calculate_pricing_for_analyse(analyse)
-            InvoiceItem(admission=self.admission, name=analyse.type.name, amount=analyse_price,
-                        quantity=1, total=analyse_price).save()
-            self.final_amount += analyse_price
+            discounted_price, list_price, discount_rate = self.calculate_pricing_for_analyse(
+                analyse)
+            InvoiceItem.objects.get_or_create(admission=self.admission, name=analyse.type.name,
+                                              defaults=dict(amount=discounted_price,
+                                              quantity=1, total=discounted_price))
+            self.final_amount += discounted_price
+            self.list_price += list_price
+
+    def _calculate_discount(self):
+        self.discount_amount = self.list_price - self.final_amount
+        self.discount_percentage = self.final_amount / self.list_price
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if not self.final_amount:
-            super().save(*args, **kwargs)
+            self.process_amounts()
+        self._calculate_discount()
+        super().save(*args, **kwargs)
 
 
 class Invoice(models.Model):

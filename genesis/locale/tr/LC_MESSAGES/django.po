@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-12 15:45+0000\n"
+"POT-Creation-Date: 2016-11-29 07:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,196 +18,188 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: com/apps.py:6
-#| msgid "Amount"
 msgid "Accounting"
 msgstr "Muhasebe"
 
-#: com/models.py:10
-msgid "None"
-msgstr "Yok"
-
-#: com/models.py:11
-#| msgid "Sample Amount"
-msgid "Open Account"
-msgstr "Açık Hesap"
-
-#: com/models.py:12
-msgid "Cash"
-msgstr "Nakit"
-
-#: com/models.py:13
-msgid "Credit Card"
-msgstr "Kredi Kartı"
-
-#: com/models.py:22 com/models.py:43 com/models.py:69 lab/models/patient.py:36
-#: lab/models/patient.py:106
+#: com/models.py:15 com/models.py:37 com/models.py:75 lab/models/patient.py:36
+#: lab/models/patient.py:107
 msgid "Institution"
 msgstr "Kurum"
 
-#: com/models.py:23 com/models.py:46
+#: com/models.py:16 com/models.py:40
 msgid "Discount rate"
 msgstr "İndirim oranı"
 
-#: com/models.py:24
+#: com/models.py:17
 msgid "Use alternative price"
 msgstr "Alternatif fiyatlandırmayı kullan"
 
-#: com/models.py:25
-msgid "Preferred payment method"
-msgstr "Tercih edilen ödeme biçimi"
+#: com/models.py:18
+#| msgid "Open Account"
+msgid "Open account"
+msgstr "Açık hesap"
 
-#: com/models.py:27 com/models.py:47 com/models.py:73 com/models.py:85
-#: com/models.py:111 com/models.py:129 lab/models/analysis.py:162
+#: com/models.py:19
+msgid "This institution makes mountly payments"
+msgstr "Bu kurum aylık ödemeler yapar"
+
+#: com/models.py:20 com/models.py:41 com/models.py:79 com/models.py:91
+#: com/models.py:161 com/models.py:179 lab/models/analysis.py:162
 msgid "Definition date"
 msgstr "Oluşturulma tarihi"
 
-#: com/models.py:30
-#| msgid "Institution"
+#: com/models.py:23
 msgid "Institue Pricing"
 msgstr "Kurum Fiyatlandırması"
 
-#: com/models.py:31
-#| msgid "Institutions"
+#: com/models.py:24
 msgid "Institue Pricings"
 msgstr "Kurum Fiyatlandırmaları"
 
-#: com/models.py:42
-#| msgid "Institution"
+#: com/models.py:36
 msgid "Institute pricing"
 msgstr "Kurum fiyatlandırması"
 
-#: com/models.py:44 lab/models/analysis.py:109 lab/models/analysis.py:121
+#: com/models.py:38 lab/models/analysis.py:109 lab/models/analysis.py:121
 #: lab/models/analysis.py:145 lab/models/analysis.py:264
 #: lab/models/analysis.py:320
 msgid "Analyse Type"
 msgstr "Analiz Tipi"
 
-#: com/models.py:45
+#: com/models.py:39
 msgid "Exact price"
 msgstr "Net fiyat"
 
-#: com/models.py:50
-#| msgid "Analyser"
+#: com/models.py:44
 msgid "Analyse Pricing"
 msgstr "Analiz Fiyatlandırması"
 
-#: com/models.py:51
-#| msgid "Analyse Groups"
+#: com/models.py:45
 msgid "Analyse Pricings"
 msgstr "Analiz Fiyatlandırmaları"
 
-#: com/models.py:58
+#: com/models.py:53
 msgid "Customer debt (-)"
 msgstr "Müşteri borcu (-)"
 
-#: com/models.py:59
+#: com/models.py:54
 msgid "Customer payment (+)"
 msgstr "Müşteri ödemesi (+)"
 
-#: com/models.py:65 com/models.py:84 com/models.py:104 com/models.py:122
-#: lab/models/patient.py:155
-#| msgid "Admission date"
-msgid "Admission"
-msgstr "Başvuru"
+#: com/models.py:58
+msgid "Sell"
+msgstr "Satış"
 
-#: com/models.py:67 lab/models/patient.py:93 lab/models/patient.py:105
+#: com/models.py:59
+msgid "Cash"
+msgstr "Nakit"
+
+#: com/models.py:60
+msgid "Credit Card"
+msgstr "Kredi Kartı"
+
+#: com/models.py:61
+msgid "Bank transfer"
+msgstr "EFT / Havale"
+
+#: com/models.py:71 com/models.py:90 com/models.py:154 com/models.py:172
+#: lab/models/patient.py:156
+msgid "Admission"
+msgstr "Hasta Kabul"
+
+#: com/models.py:73 lab/models/patient.py:94 lab/models/patient.py:106
 msgid "Patient"
 msgstr "Hasta"
 
-#: com/models.py:70
+#: com/models.py:76
 msgid "Record type"
 msgstr "Kayit tipi"
 
-#: com/models.py:71
-#| msgid "Analyse Method"
+#: com/models.py:77
 msgid "Payment method"
 msgstr "Ödeme yöntemi"
 
-#: com/models.py:72 com/models.py:107 com/models.py:126
-#: lab/models/analysis.py:49 lab/models/patient.py:175
+#: com/models.py:78 com/models.py:157 com/models.py:176
+#: lab/models/analysis.py:49 lab/models/patient.py:176
 msgid "Amount"
 msgstr "Miktar"
 
-#: com/models.py:76
-#| msgid "Patient Relation"
+#: com/models.py:82
 msgid "Payment Record"
 msgstr "Ödeme Kaydı"
 
-#: com/models.py:77
+#: com/models.py:83
 msgid "Payment Records"
 msgstr "Ödeme Kayıtları"
 
-#: com/models.py:86
+#: com/models.py:92
 msgid "List price"
 msgstr "Liste fiyatı"
 
-#: com/models.py:88
+#: com/models.py:94
 msgid "Discount percentage"
 msgstr "İndirim yüzdesi"
 
-#: com/models.py:90
+#: com/models.py:96
 msgid "Discount amount"
 msgstr "İndirim miktarı"
 
-#: com/models.py:92
-#| msgid "Sample Amount"
-msgid "Final amount"
-msgstr "Son fiyat"
+#: com/models.py:98
+#| msgid "Custom Views"
+msgid "Customer price"
+msgstr "Müşteri fiyatı"
 
-#: com/models.py:96
-#| msgid "Admission date"
+#: com/models.py:103
 msgid "Admission Pricing"
-msgstr "Başvuru Fiyatlandırması"
+msgstr "Hasta Kabul Fiyatlandırması"
 
-#: com/models.py:97
-#| msgid "Admission date"
+#: com/models.py:104
 msgid "Admission Pricings"
-msgstr "Başvuru Fiyatlandırmaları"
+msgstr "Hasta Kabul Fiyatlandırmaları"
 
-#: com/models.py:105 com/models.py:125 lab/models/analysis.py:35
+#: com/models.py:155 com/models.py:175 lab/models/analysis.py:35
 #: lab/models/analysis.py:47 lab/models/analysis.py:61
 #: lab/models/analysis.py:73 lab/models/analysis.py:93
 #: lab/models/analysis.py:122 lab/models/analysis.py:265
 #: lab/models/analysis.py:318 lab/models/analysis.py:396
-#: lab/models/patient.py:23 lab/models/patient.py:48 lab/models/patient.py:70
-#: lab/models/patient.py:138
+#: lab/models/patient.py:23 lab/models/patient.py:48 lab/models/patient.py:71
+#: lab/models/patient.py:139
 msgid "Name"
 msgstr "İsim"
 
-#: com/models.py:106 lab/models/analysis.py:21
+#: com/models.py:156 lab/models/analysis.py:21
 msgid "Address"
 msgstr "Adres"
 
-#: com/models.py:109
-#| msgid "Amount"
+#: com/models.py:159
 msgid "Tax amount"
 msgstr "Vergi tutarı"
 
-#: com/models.py:110 lab/models/analysis.py:96
+#: com/models.py:160 lab/models/analysis.py:96
 msgid "Price"
 msgstr "Fiyat"
 
-#: com/models.py:114 com/models.py:123
+#: com/models.py:164 com/models.py:173
 msgid "Invoice"
 msgstr "Fatura"
 
-#: com/models.py:115
+#: com/models.py:165
 msgid "Invoices"
 msgstr "Faturalar"
 
-#: com/models.py:127
+#: com/models.py:177
 msgid "Quantity"
 msgstr "Miktar"
 
-#: com/models.py:128
+#: com/models.py:178
 msgid "Line total"
 msgstr "Satır toplamı"
 
-#: com/models.py:132
+#: com/models.py:182
 msgid "Invoice Item"
 msgstr "Fatura Ögesi"
 
-#: com/models.py:133
+#: com/models.py:183
 msgid "Invoice Items"
 msgstr "Fatura Ögeleri"
 
@@ -293,7 +285,6 @@ msgid "Analyse Groups"
 msgstr "Analiz Grupları"
 
 #: lab/models/analysis.py:85
-#| msgid "Sample type"
 msgid "Sub types"
 msgstr "Alt tipler"
 
@@ -314,7 +305,7 @@ msgid "Method"
 msgstr "Yöntem"
 
 #: lab/models/analysis.py:94 lab/models/analysis.py:398
-#: lab/models/analysis.py:445
+#: lab/models/analysis.py:446
 msgid "Code name"
 msgstr "Kod adı"
 
@@ -386,8 +377,8 @@ msgstr "Rapor Şablonu"
 msgid "Report Templates"
 msgstr "Rapor Şablonları"
 
-#: lab/models/analysis.py:147 lab/models/patient.py:130
-#: lab/models/patient.py:172
+#: lab/models/analysis.py:147 lab/models/patient.py:131
+#: lab/models/patient.py:173
 msgid "Patient Admission"
 msgstr "Hasta Kabülü"
 
@@ -400,7 +391,7 @@ msgid "Result parameters"
 msgstr "Sonuç parametreleri"
 
 #: lab/models/analysis.py:152 lab/models/analysis.py:283
-#: lab/models/patient.py:157
+#: lab/models/patient.py:158
 msgid "Comment"
 msgstr "Yorum"
 
@@ -420,7 +411,7 @@ msgstr "Analiz sonucu sözlüğü"
 msgid "Sample Amount"
 msgstr "Örnek Miktarı"
 
-#: lab/models/analysis.py:157 lab/models/patient.py:176
+#: lab/models/analysis.py:157 lab/models/patient.py:177
 msgid "Sample type"
 msgstr "Örnek Türü"
 
@@ -458,7 +449,7 @@ msgid "Following sample types can be selected;"
 msgstr "Şu örnek tiplerinden biri seçilebilir"
 
 #: lab/models/analysis.py:251 lab/models/analysis.py:281
-#: lab/models/analysis.py:444
+#: lab/models/analysis.py:445
 msgid "Analyse"
 msgstr "Analiz"
 
@@ -466,7 +457,7 @@ msgstr "Analiz"
 msgid "Analysis"
 msgstr "Analizler"
 
-#: lab/models/analysis.py:266 lab/models/patient.py:139
+#: lab/models/analysis.py:266 lab/models/patient.py:140
 msgid "Explanation"
 msgstr "Açıklama"
 
@@ -478,7 +469,7 @@ msgstr "Tamamlana durumu"
 msgid "Approved state"
 msgstr "Onaylanma durumu"
 
-#: lab/models/analysis.py:269 lab/models/patient.py:143
+#: lab/models/analysis.py:269 lab/models/patient.py:144
 msgid "Order"
 msgstr "Sıra"
 
@@ -490,23 +481,23 @@ msgstr "Analiz Durum Tanımı"
 msgid "Analyse State Definitions"
 msgstr "Analiz Durum Tanımları"
 
-#: lab/models/analysis.py:282 lab/models/patient.py:156
+#: lab/models/analysis.py:282 lab/models/patient.py:157
 msgid "State"
 msgstr "Durum"
 
-#: lab/models/analysis.py:284 lab/models/patient.py:29 lab/models/patient.py:51
-#: lab/models/patient.py:52 lab/models/patient.py:74 lab/models/patient.py:75
-#: lab/models/patient.py:116 lab/models/patient.py:158
-#: lab/models/patient.py:174
+#: lab/models/analysis.py:284 lab/models/patient.py:29 lab/models/patient.py:52
+#: lab/models/patient.py:53 lab/models/patient.py:75 lab/models/patient.py:76
+#: lab/models/patient.py:117 lab/models/patient.py:159
+#: lab/models/patient.py:175
 msgid "Timestamp"
 msgstr "Zaman damgası"
 
 #: lab/models/analysis.py:285 lab/models/analysis.py:321
-#: lab/models/patient.py:30 lab/models/patient.py:159
+#: lab/models/patient.py:30 lab/models/patient.py:160
 msgid "Update date"
 msgstr "Güncellme "
 
-#: lab/models/analysis.py:288 lab/models/patient.py:127
+#: lab/models/analysis.py:288 lab/models/patient.py:128
 msgid "Analyse State"
 msgstr "Analiz Durum"
 
@@ -561,7 +552,7 @@ msgstr ""
 "key_with_preset=val1,val2,val3\n"
 
 #: lab/models/analysis.py:319 lab/models/analysis.py:400
-#: lab/models/analysis.py:450
+#: lab/models/analysis.py:451
 msgid "Parameter type"
 msgstr "Parametre tipi"
 
@@ -570,7 +561,7 @@ msgid "Parameter definition"
 msgstr "Parametre tanımı"
 
 #: lab/models/analysis.py:379 lab/models/analysis.py:395
-#: lab/models/analysis.py:442
+#: lab/models/analysis.py:443
 msgid "Parameter Definition"
 msgstr "Parametre Tanımı"
 
@@ -595,7 +586,6 @@ msgid "Boolean"
 msgstr "Mantıksal (Olumlu/Olumsuz)"
 
 #: lab/models/analysis.py:397
-#| msgid "Result Value"
 msgid "Default value"
 msgstr "Varsayılan değer"
 
@@ -612,35 +602,34 @@ msgid "Row number"
 msgstr "Satır numarası"
 
 #: lab/models/analysis.py:404
-#| msgid "Row number"
 msgid "Column number"
 msgstr "Satır numarası"
 
-#: lab/models/analysis.py:434 lab/models/analysis.py:443
+#: lab/models/analysis.py:435 lab/models/analysis.py:444
 msgid "Parameter Key"
 msgstr "Parametre Anahtarı"
 
-#: lab/models/analysis.py:435
+#: lab/models/analysis.py:436
 msgid "Parameter Keys"
 msgstr "Parametre Anahtarları"
 
-#: lab/models/analysis.py:446
+#: lab/models/analysis.py:447
 msgid "Value"
 msgstr "Değer"
 
-#: lab/models/analysis.py:447
+#: lab/models/analysis.py:448
 msgid "Int Value"
 msgstr "Sayısal Değer"
 
-#: lab/models/analysis.py:448
+#: lab/models/analysis.py:449
 msgid "Float Value"
 msgstr "Ondalık Değer"
 
-#: lab/models/analysis.py:467
+#: lab/models/analysis.py:468
 msgid "Result Value"
 msgstr "Sonuç Değeri"
 
-#: lab/models/analysis.py:468
+#: lab/models/analysis.py:469
 msgid "Result Values"
 msgstr "Sonuç Değerleri"
 
@@ -688,7 +677,7 @@ msgstr "Kurum"
 msgid "Cellular phone"
 msgstr "Cep telefonu"
 
-#: lab/models/patient.py:31 lab/models/patient.py:53
+#: lab/models/patient.py:31 lab/models/patient.py:54
 msgid "Email"
 msgstr "Eposta"
 
@@ -696,107 +685,107 @@ msgstr "Eposta"
 msgid "Institutions"
 msgstr "Kurumlar"
 
-#: lab/models/patient.py:49 lab/models/patient.py:72
+#: lab/models/patient.py:49 lab/models/patient.py:73
 msgid "Surname"
 msgstr "Soyadı"
 
-#: lab/models/patient.py:57 lab/models/patient.py:107
+#: lab/models/patient.py:51
+msgid "If left blank, an institution record will be created for this doctor"
+msgstr "Boş bırakılırsa otomatik olarak bir kurum kaydı oluşturulur."
+
+#: lab/models/patient.py:58 lab/models/patient.py:108
 msgid "Doctor"
 msgstr "Doktor"
 
-#: lab/models/patient.py:58
+#: lab/models/patient.py:59
 msgid "Doctors"
 msgstr "Doktorlar"
 
-#: lab/models/patient.py:69
+#: lab/models/patient.py:70
 msgid "TC No"
 msgstr "TC No"
 
-#: lab/models/patient.py:71
+#: lab/models/patient.py:72
 msgid "Is newborn?"
 msgstr "Yenidoğan mı?"
 
-#: lab/models/patient.py:73
+#: lab/models/patient.py:74
 msgid "Sex"
 msgstr "Cinsiyet"
 
-#: lab/models/patient.py:76
+#: lab/models/patient.py:77
 msgid "Patient Relation"
 msgstr "Hasta Yakınlığı"
 
-#: lab/models/patient.py:77
+#: lab/models/patient.py:78
 msgid "Birthdate"
 msgstr "Doğum tarihi"
 
-#: lab/models/patient.py:94
+#: lab/models/patient.py:95
 msgid "Patients"
 msgstr "Hastalar"
 
-#: lab/models/patient.py:109
+#: lab/models/patient.py:110
 msgid "Urgent"
 msgstr "Acil"
 
-#: lab/models/patient.py:110
+#: lab/models/patient.py:111
 msgid "Indications"
 msgstr "Endikasyon"
 
-#: lab/models/patient.py:111
+#: lab/models/patient.py:112
 msgid "Reproductive story / Family Tree"
 msgstr "Üreme geçmişi / Soy Ağacı"
 
-#: lab/models/patient.py:112
+#: lab/models/patient.py:113
 msgid "Pregnancy week"
 msgstr "Gebelik haftası"
 
-#: lab/models/patient.py:113
+#: lab/models/patient.py:114
 msgid "UPD"
 msgstr "USG"
 
-#: lab/models/patient.py:114
+#: lab/models/patient.py:115
 msgid "LMP"
 msgstr "SAT"
 
-#: lab/models/patient.py:115
+#: lab/models/patient.py:116
 msgid "Admission date"
-msgstr "Başvuru tarihi"
+msgstr "Hasta Kabul tarihi"
 
-#: lab/models/patient.py:131
+#: lab/models/patient.py:132
 msgid "Patient Admissions"
 msgstr "Hasta Kabülleri"
 
-#: lab/models/patient.py:140
+#: lab/models/patient.py:141
 msgid "Cannot be deleted"
 msgstr "Silinemez"
 
-#: lab/models/patient.py:146
-#| msgid "Analyse State Definition"
-msgid "Admission State Definition"
-msgstr "Başvuru Durum Tanımı"
-
 #: lab/models/patient.py:147
-#| msgid "Analyse State Definitions"
-msgid "Admission State Definitions"
-msgstr "Başvuru Durum Tanımları"
+msgid "Admission State Definition"
+msgstr "Hasta Kabul Durum Tanımı"
 
-#: lab/models/patient.py:162
-#| msgid "Admission date"
-msgid "Admission State"
-msgstr "Başvuru Durumu"
+#: lab/models/patient.py:148
+msgid "Admission State Definitions"
+msgstr "Hasta Kabul Durum Tanımları"
 
 #: lab/models/patient.py:163
-#| msgid "Admission date"
-msgid "Admission States"
-msgstr "Başvuru Durumları"
+msgid "Admission State"
+msgstr "Hasta Kabul Durumu"
 
-#: lab/models/patient.py:173
+#: lab/models/patient.py:164
+msgid "Admission States"
+msgstr "Hasta Kabul Durumları"
+
+#: lab/models/patient.py:174
 msgid "Creation Date"
 msgstr "Oluşturulma tarihi"
 
-#: lab/models/patient.py:181
+#: lab/models/patient.py:182
 msgid "Sample"
 msgstr "Örnek"
 
-#: lab/models/patient.py:182
+#: lab/models/patient.py:183
 msgid "Samples"
 msgstr "Örnekler"
 
@@ -859,6 +848,16 @@ msgstr "Benim işlemlerim"
 #: templates/admin/index.html:125
 msgid "None available"
 msgstr "Mevcut değil"
+
+#~ msgid "None"
+#~ msgstr "Yok"
+
+#~ msgid "Preferred payment method"
+#~ msgstr "Tercih edilen ödeme biçimi"
+
+#~| msgid "Sample Amount"
+#~ msgid "Final amount"
+#~ msgstr "Son fiyat"
 
 #~ msgid "Numeric"
 #~ msgstr "Sayısal"
