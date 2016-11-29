@@ -47,7 +47,8 @@ class Institution(models.Model):
 class Doctor(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     surname = models.CharField(_('Surname'), max_length=50)
-    institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True)
+    institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True,
+                                    help_text=_("If left blank, an institution record will be created for this doctor"))
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     email = models.EmailField(_('Email'), null=True, blank=True)

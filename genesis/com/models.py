@@ -6,14 +6,6 @@ from lab.models import Admission, AnalyseType, Institution
 from lab.models import Analyse
 from lab.models import Patient
 
-PAYMENT_METHODS = (
-    (10, _('None')),
-    (20, _('Open Account')),
-    (30, _('Cash')),
-    (40, _('Credit Card')),
-    # (40, _('Short-term Open Account')),
-)
-
 
 class InstitutePricing(models.Model):
     """
@@ -22,8 +14,8 @@ class InstitutePricing(models.Model):
     institution = models.OneToOneField(Institution, models.PROTECT, verbose_name=_('Institution'))
     discount_rate = models.DecimalField(_('Discount rate'), max_digits=6, decimal_places=2)
     use_alt_pricing = models.BooleanField(_('Use alternative price'), default=False)
-    preferred_payment_method = models.SmallIntegerField(_('Preferred payment method'),
-                                                        choices=PAYMENT_METHODS, default=10)
+    open_account = models.BooleanField(_('Open account'), default=False,
+                                       help_text=_('This institution makes mountly payments'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 
     class Meta:
@@ -36,6 +28,7 @@ class InstitutePricing(models.Model):
 
 class AnalysePricing(models.Model):
     """
+    per analyse pricing or percentage discounts for an institution.
 
     """
     pricing = models.ForeignKey(InstitutePricing, models.PROTECT,
@@ -49,6 +42,7 @@ class AnalysePricing(models.Model):
     class Meta:
         verbose_name = _('Analyse Pricing')
         verbose_name_plural = _('Analyse Pricings')
+        unique_together = (('institution', 'analyse_type'), ('pricing', 'analyse_type'),)
 
     def __str__(self):
         return "%s > %s" % (self.analyse_type.name, self.institution.name)
@@ -59,8 +53,19 @@ PAYMENT_TYPES = (
     (20, _('Customer payment (+)')),
 )
 
+PAYMENT_METHODS = (
+    (10, _('Sell')),
+    (30, _('Cash')),
+    (40, _('Credit Card')),
+    (50, _('Bank transfer')),
+)
+
 
 class Payment(models.Model):
+    """
+    this is a payment record for an admission.
+    there can be multiple payments for one admission (multiple credit card payments + cash)
+    """
     admission = models.ForeignKey(Admission, models.PROTECT, null=True, blank=True,
                                   verbose_name=_('Admission'))
     patient = models.ForeignKey(Patient, models.PROTECT,
@@ -98,6 +103,42 @@ class AdmissionPricing(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.patient.name, self.price)
+
+    def calculate_pricing_for_analyse(self, analyse):
+        """
+        Get analyse price and discount rate for this admission.institute
+
+        Args:
+            analyse: Analyse object
+
+        Returns:
+            tuple, (discounted price, discount rate)
+        """
+        institute = self.admission.institution
+        analyse_price = institute.analysepricing_set.filter(analyse_type=analyse.type)
+        if analyse_price:
+            return analyse_price[0].price, analyse_price[0].discount_rate
+        use_alt_pricing = False
+        institute_discount_rate = None
+        if institute.institutepricing:
+            use_alt_pricing = institute.institutepricing.use_alt_pricing
+            # TODO: convert percentage to decimal
+            institute_discount_rate = institute.institutepricing.discount_rate
+        price = analyse.type.alternative_price if use_alt_pricing else analyse.type.price
+        price = price * (institute_discount_rate or 1)
+        return price, institute_discount_rate
+
+    def process_amounts(self):
+        for analyse in self.admission.analyse_set.all():
+            analyse_price, discount_rate = self.calculate_pricing_for_analyse(analyse)
+            InvoiceItem(admission=self.admission, name=analyse.type.name, amount=analyse_price,
+                        quantity=1, total=analyse_price).save()
+            self.final_amount += analyse_price
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.final_amount:
+            super().save(*args, **kwargs)
 
 
 class Invoice(models.Model):
