@@ -1,18 +1,16 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
-from lab.admin import AdmissionAdmin
+from lab.admin import AdmissionAdmin, post_admission_save
 
 
-@receiver(post_save, sender=Admission)
-def create_payment_objects(sender, instance, created, raw, **kwargs):
-    # if created and not raw:
-    if not instance.admissionpricing_set.exists() and not raw:
+@receiver(post_admission_save, sender=Admission)
+def create_payment_objects(sender, instance, **kwargs):
+    if not instance.admissionpricing_set.exists():
         AdmissionPricing(admission=instance).save()
 
 
@@ -26,6 +24,7 @@ class PaymentInline(admin.TabularInline):
 class InvoiceItemInline(admin.TabularInline):
     model = InvoiceItem
     extra = 0
+    max_num = 0
     fields = ('name', 'amount', 'quantity', 'total')
     readonly_fields = ('name', 'amount', 'quantity', 'total')
     classes = ('grp-collapse', 'grp-closed')

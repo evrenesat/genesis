@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-
+import django.dispatch
 # Register your models here.
 
 from django.apps import apps
@@ -19,6 +19,8 @@ from com.models import *
 from django.contrib.auth.admin import UserAdmin
 
 from django.contrib.auth.models import Permission
+
+
 
 admin.site.register(Permission)
 
@@ -63,13 +65,14 @@ class ParameterInline(admin.TabularInline):
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
-    list_filter = ('category',)
+    list_filter = ('group_type', 'category',)
     search_fields = ('name',)
     list_display = ('name', 'group_type', 'price')
     filter_horizontal = ('subtypes',)
+    readonly_fields = ('group_type', )
     fieldsets = (
         (None, {
-            'fields': ('name', 'category', 'method', 'sample_type',
+            'fields': ('group_type', 'name', 'category', 'method', 'sample_type',
                        'code', 'process_time', 'footnote', 'price', 'alternative_price')
         }),
         (_('Subtypes'),
@@ -83,17 +86,22 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
     )
     inlines = [ParameterInline, ]
 
-    def save_model(self, request, obj, form, change):
-        obj.save()
+    def save_related(self, request, form, formset, change):
+        super().save_related(request, form, formset, change)
+        if form.instance.subtypes.exists() and not form.instance.group_type:
+            form.instance.group_type = True
+            form.instance.save()
+
         # if obj.parameter_definition.strip():
         #     obj.create_update_parameter_keys()
 
 
 @admin.register(StateDefinition)
-class AnalyseTypeAdmin(admin.ModelAdmin):
+class StateDefinitionAdmin(admin.ModelAdmin):
     list_filter = ('type',)
     search_fields = ('name',)
     filter_horizontal = ('type',)
+
 
 
 @admin.register(Parameter)
@@ -212,7 +220,7 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
                    },
                   ))
 
-    list_filter = ('finished', 'timestamp', 'type')
+    list_filter = ('finished', 'group_relation', 'timestamp', 'type')
     list_display = ('type', 'admission', 'timestamp', 'finished', 'approved')
     inlines = [
         StateInline, ParameterValueInline
@@ -319,6 +327,7 @@ class AdmissionStateInline(admin.TabularInline):
     extra = 1
     classes = ('grp-collapse',)
 
+post_admission_save = django.dispatch.Signal(providing_args=["instance",])
 
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
@@ -335,7 +344,7 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         'fk': ['patient', 'institution', 'doctor'],
     }
 
-    inlines = [AnalyseInline,  AdmissionSampleInline, AdmissionStateInline]
+    inlines = [AnalyseInline, AdmissionSampleInline, AdmissionStateInline]
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
@@ -353,12 +362,14 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
             if analyse.type.group_type:
-                for sub_analyse in analyse.type.subtype_set.all():
-                    Analyse(type=sub_analyse,
+                analyse.group_relation = 20  # this is a group
+                for sub_analyse_type in analyse.type.subtypes.all():
+                    Analyse(type=sub_analyse_type,
                             sample_type=analyse.sample_type,
+                            group_relation=30,  # this is a member of a group
                             admission=admission).save()
-            else:
-                analyse.save()
+            analyse.save()
+        post_admission_save.send(sender=Admission, instance=admission)
 
     def save_related(self, request, form, formsets, change):
         """
@@ -368,17 +379,16 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         form.save_m2m()
         if not change:
             adm = form.instance
-            payment = Payment(admission=adm, patient=adm.patient)
-            if adm.institution.preferred_payment_method == 20:
-                payment.institution = adm.institution
-            else:
-                payment.patient = adm.patient
+            # payment = Payment(admission=adm, patient=adm.patient)
+            # if adm.institution.preferred_payment_method == 20:
+            #     payment.institution = adm.institution
+            # else:
+            #     payment.patient = adm.patient
         for formset in formsets:
             if formset.model == Analyse:
                 self._save_analyses(formset.instance, formset.save(commit=False))
             else:
                 formset.save()
-
 
 
 app_models = apps.get_app_config('lab').get_models()

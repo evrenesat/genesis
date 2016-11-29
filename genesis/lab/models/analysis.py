@@ -141,6 +141,13 @@ class ReportTemplate(models.Model):
         return "%s" % (self.name,)
 
 
+ANALYSE_GROUP_RELATION = (
+    (10, _('None')),
+    (20, _('Group')),
+    (30, _('Member')),
+)
+
+
 class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
                              blank=True)
@@ -148,7 +155,8 @@ class Analyse(models.Model):
 
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result parameters'), blank=True, null=True,
-                              help_text="Can be used to override entered/calculated result parameters<br>Format:<br> key=val<br />key2=val2")
+                              help_text=_("Can be used to override entered/calculated result "
+                                          "parameters<br>Format:<br> key=val<br />key2=val2"))
     comment = models.TextField(_('Comment'), blank=True, null=True)
     short_result = models.TextField(_('Result'), blank=True, null=True,
                                     help_text=_('Normal Karyotype, Trisomy 21'))
@@ -158,6 +166,8 @@ class Analyse(models.Model):
                                     null=True, blank=True)
     template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Template'),
                                  null=True, blank=True)
+    group_relation = models.SmallIntegerField(_('Group relation'), default=10,
+                                              choices=ANALYSE_GROUP_RELATION)
     finished = models.BooleanField(_('Finished'), default=False)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
@@ -403,11 +413,10 @@ class ParameterKey(models.Model):
     row_no = models.IntegerField(_('Row number'), default=0)
     col_no = models.IntegerField(_('Column number'), null=True, blank=True)
 
-
     def create_empty_value(self, analyse):
         pv, new = ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
-                                             code=self.code, analyse=analyse,
-                                             type=self.type)
+                                                       code=self.code, analyse=analyse,
+                                                       type=self.type)
         if new and self.default_value:
             if self.type == 'num':
                 pv.value_int = int(self.default_value)
@@ -418,7 +427,6 @@ class ParameterKey(models.Model):
             elif self.type == 'dec':
                 pv.value_float = float(self.default_value)
             pv.save()
-
 
     def _jsonify_presets(self):
         if self.presets and self.presets.strip():

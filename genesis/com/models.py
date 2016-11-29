@@ -106,7 +106,14 @@ class AdmissionPricing(models.Model):
     def __str__(self):
         return "%s %s" % (self.admission, self.final_amount)
 
-    def calculate_pricing_for_analyse(self, analyse):
+    def charge_customer(self):
+        payment, is_new = Payment.objects.get_or_create(admisison=self.admission,
+                                                        patient=self.admission.patient,
+                                                        payment_method=10, type=10,
+                                                        institution=self.admission.institution,
+                                                        defaults=dict(amount=self.final_amount))
+
+    def calculate_pricing_for(self, analyse):
         """
         Get analyse price and discount rate for this admission.institute
 
@@ -134,17 +141,21 @@ class AdmissionPricing(models.Model):
         self.final_amount = Decimal(0)
         self.list_price = Decimal(0)
         for analyse in self.admission.analyse_set.all():
-            discounted_price, list_price, discount_rate = self.calculate_pricing_for_analyse(
-                analyse)
-            InvoiceItem.objects.get_or_create(admission=self.admission, name=analyse.type.name,
-                                              defaults=dict(amount=discounted_price,
-                                              quantity=1, total=discounted_price))
-            self.final_amount += discounted_price
-            self.list_price += list_price
+            if analyse.group_relation != 30:  # if this is not a group member (sub-analysis)
+                discounted_price, list_price, discount_rate = self.calculate_pricing_for(analyse)
+                InvoiceItem.objects.get_or_create(admission=self.admission, name=analyse.type.name,
+                                                  defaults=dict(amount=discounted_price,
+                                                                quantity=1, total=discounted_price))
+                self.final_amount += discounted_price
+                self.list_price += list_price
+            if analyse.group_relation == 20: # if this is a group, delete it
+                analyse.delete()
 
     def _calculate_discount(self):
         self.discount_amount = self.list_price - self.final_amount
-        self.discount_percentage = self.final_amount / self.list_price
+        if self.final_amount and self.discount_amount:
+            self.discount_percentage = Decimal(float(str(self.final_amount)) /
+                                               float(str(self.list_price)))
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

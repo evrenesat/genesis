@@ -291,3 +291,16 @@ body.lab-analyse.grp-change-form textarea#id_result{
 }
 
 
+footer li input[name="_continue"]{
+    font-size: 1.3em;
+    color: #fff !important;
+    opacity: 1 !important;
+}
+
+footer li input[name="_continue"]:hover{
+    color:#000 !important;
+}
+
+footer li input[name="_addanother"], footer li input[name="_save"]{
+    display: none;
+}

@@ -113,7 +113,7 @@ function patch_edit_views() {
         if (object_id) {
             add_footer_button({url: '/lab/admission_barcode/' + object_id + '/', name: 'Barkod Yazdır'});
             add_footer_button({
-                url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
+                url: '/admin/lab/analyse/?group_relation__in=10,30&admission__id__exact=' + object_id,
                 name: 'Analizleri Listele',
                 target: '_self'
             });
@@ -173,6 +173,11 @@ function patch_everywhere() {
 
     // align True/False check marks to center
     grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
+
+    // change text of _save
+    grp.jQuery('input[name="_continue"]').val(grp.jQuery('input[name="_save"]').val());
+    // hide empty (looking) <li> elements of hided "_save" and "_addanother" buttons.
+    grp.jQuery('input[name="_save"], input[name="_addanother"]').parent().hide()
 }
 grp.jQuery('document').ready(function () {
     grp.jQuery('#_ifrm').attr('src', '');
