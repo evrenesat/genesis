@@ -10,7 +10,7 @@ from lab.admin import AdmissionAdmin, post_admission_save
 
 @receiver(post_admission_save, sender=Admission)
 def create_payment_objects(sender, instance, **kwargs):
-    if not instance.admissionpricing_set.exists():
+    if not hasattr(instance, 'admissionpricing'):
         AdmissionPricing(admission=instance).save()
 
 

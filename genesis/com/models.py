@@ -87,7 +87,7 @@ class Payment(models.Model):
 
 
 class AdmissionPricing(models.Model):
-    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Admission'))
+    admission = models.OneToOneField(Admission, models.PROTECT, verbose_name=_('Admission'))
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     list_price = models.DecimalField(_('List price'), max_digits=8, decimal_places=2,
                                      editable=False, null=True, blank=True)
@@ -164,11 +164,12 @@ class AdmissionPricing(models.Model):
         self._calculate_discount()
         super().save(*args, **kwargs)
 
-
+DEFAULT_INVOICE_UNIT = 'Adet'
 class Invoice(models.Model):
     admission = models.ManyToManyField(Admission, verbose_name=_('Admission'), editable=False)
     name = models.CharField(_('Name'), null=True, blank=True, max_length=250)
     address = models.CharField(_('Address'), null=True, blank=True, max_length=250)
+    unit = models.CharField(_('Unit'), default=DEFAULT_INVOICE_UNIT, max_length=30)
     amount = models.DecimalField(_('Amount'), max_digits=8, decimal_places=2, editable=False,
                                  null=True, blank=True)
     tax = models.IntegerField(_('Tax amount'), null=True, blank=True)
@@ -180,7 +181,7 @@ class Invoice(models.Model):
         verbose_name_plural = _('Invoices')
 
     def __str__(self):
-        return "%s - %s | %s" % (self.admission, self.admission.institution.name, self.price)
+        return "%s - %s" % (self.name, self.total)
 
 
 class InvoiceItem(models.Model):

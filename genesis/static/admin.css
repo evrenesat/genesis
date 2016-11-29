@@ -304,3 +304,7 @@ footer li input[name="_continue"]:hover{
 footer li input[name="_addanother"], footer li input[name="_save"]{
     display: none;
 }
+
+div#admissionpricing-group a.grp-add-handler{
+    display: none !important;
+}

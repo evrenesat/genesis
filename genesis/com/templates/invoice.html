@@ -1,0 +1,72 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Genesis Invoice</title>
+    <style media="screen">
+        body {
+            background-color: #4f5b66;
+        }
+
+        div#container {
+            background-color: #fff;
+            width: 1000px !important;
+            min-height: 1300px;
+        }
+
+        footer > div {
+            padding-top: 2em;
+        }
+
+        header, main, footer, div#title {
+            margin-left: auto;
+            margin-right: auto;
+            width: 900px !important;
+
+        }
+
+    </style>
+    <style>
+
+        header{
+            margin-top:200px;
+            margin-left:30px;
+        }
+        main{
+            margin-top:40px;
+            margin-left:70px;
+        }
+    </style>
+    {#    <link href="{% static "report.css" %}" rel="stylesheet" type="text/css" media="screen"/>#}
+</head>
+<div id="container">
+    <body style="font-family: sans-serif">
+    <header>
+        <div style="width:300px;height:150px;">
+            {{ invoice.name }}<br>
+            {{ invoice.address }}
+        </div>
+    </header>
+    <main>
+        <table>
+            {% for item in items %}
+                <tr>
+                    <td class="name">{{ item.name }}</td>
+                    <td class="quantity">{{ item.quantity }}</td>
+                    <td class="unit">{{ item.unit }}</td>
+                    <td class="amount">{{ item.amount }}</td>
+                    <td class="total">{{ item.total }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </main>
+    <footer>
+
+    </footer>
+
+</div>
+<script>window.parent.print_invoice_iframe();</script>
+</body>
+</html>
+

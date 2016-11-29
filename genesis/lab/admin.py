@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# import dbsettings
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.forms import BaseInlineFormSet
@@ -19,8 +20,13 @@ from com.models import *
 from django.contrib.auth.admin import UserAdmin
 
 from django.contrib.auth.models import Permission
+#
+# class AppConfig(dbsettings.Group):
+#     barcode_printer = dbsettings.StringValue('Barcode printer')
+#     report_printer = dbsettings.StringValue('Report printer')
+#     invoice_printer = dbsettings.StringValue('Invoice printer')
 
-
+# app_settings = AppConfig()
 
 admin.site.register(Permission)
 
