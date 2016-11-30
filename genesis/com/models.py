@@ -83,7 +83,7 @@ class Payment(models.Model):
         verbose_name_plural = _('Payment Records')
 
     def __str__(self):
-        return "%s %s" % (self.patient.name, self.price)
+        return "%s %s" % (self.patient.name, self.amount)
 
 
 class AdmissionPricing(models.Model):
@@ -107,9 +107,9 @@ class AdmissionPricing(models.Model):
         return "%s %s" % (self.admission, self.final_amount)
 
     def charge_customer(self):
-        payment, is_new = Payment.objects.get_or_create(admisison=self.admission,
+        payment, is_new = Payment.objects.get_or_create(admission=self.admission,
                                                         patient=self.admission.patient,
-                                                        payment_method=10, type=10,
+                                                        method=10, type=10,
                                                         institution=self.admission.institution,
                                                         defaults=dict(amount=self.final_amount))
 
@@ -137,7 +137,7 @@ class AdmissionPricing(models.Model):
         discounted_price = list_price * (institute_discount_rate or 1)
         return discounted_price, list_price, institute_discount_rate
 
-    def process_amounts(self):
+    def process_amounts_and_create_invoiceitems(self):
         self.final_amount = Decimal(0)
         self.list_price = Decimal(0)
         for analyse in self.admission.analyse_set.all():
@@ -148,7 +148,7 @@ class AdmissionPricing(models.Model):
                                                                 quantity=1, total=discounted_price))
                 self.final_amount += discounted_price
                 self.list_price += list_price
-            if analyse.group_relation == 20: # if this is a group, delete it
+            if analyse.group_relation == 20:  # if this is a group, delete it
                 analyse.delete()
 
     def _calculate_discount(self):
@@ -160,20 +160,25 @@ class AdmissionPricing(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if not self.final_amount:
-            self.process_amounts()
+            self.process_amounts_and_create_invoiceitems()
+            self.charge_customer()
         self._calculate_discount()
         super().save(*args, **kwargs)
 
+
 DEFAULT_INVOICE_UNIT = 'Adet'
+
+
 class Invoice(models.Model):
     admission = models.ManyToManyField(Admission, verbose_name=_('Admission'), editable=False)
     name = models.CharField(_('Name'), null=True, blank=True, max_length=250)
     address = models.CharField(_('Address'), null=True, blank=True, max_length=250)
-    unit = models.CharField(_('Unit'), default=DEFAULT_INVOICE_UNIT, max_length=30)
-    amount = models.DecimalField(_('Amount'), max_digits=8, decimal_places=2, editable=False,
+
+    amount = models.DecimalField(_('Total'), max_digits=8, decimal_places=2, editable=False,
                                  null=True, blank=True)
-    tax = models.IntegerField(_('Tax amount'), null=True, blank=True)
-    total = models.DecimalField(_('Price'), max_digits=8, decimal_places=2)
+    tax = models.DecimalField(_('Tax amount'), null=True, blank=True, max_digits=8,
+                              decimal_places=2)
+    total = models.DecimalField(_('Grand Total'), max_digits=8, decimal_places=2)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 
     class Meta:
@@ -189,9 +194,10 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, models.SET_NULL, verbose_name=_('Invoice'),
                                 null=True, blank=True)
     name = models.TextField(_('Name'))
-    amount = models.IntegerField(_('Amount'))
+    amount = models.DecimalField(_('Amount'), max_digits=6, decimal_places=2)
     quantity = models.IntegerField(_('Quantity'), default=1)
-    total = models.IntegerField(_('Line total'))
+    unit = models.CharField(_('Unit'), default=DEFAULT_INVOICE_UNIT, max_length=30)
+    total = models.DecimalField(_('Line total'), max_digits=6, decimal_places=2)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 
     class Meta:

@@ -11,7 +11,7 @@
 
         div#container {
             background-color: #fff;
-            width: 1000px !important;
+            width: 1200px !important;
             min-height: 1300px;
         }
 
@@ -28,45 +28,143 @@
 
     </style>
     <style>
+        body {
+            font-family: sans-serif;
+        }
 
-        header{
-            margin-top:200px;
-            margin-left:30px;
+        div#total_text {
+            top: 900px;
+            left: 160px;
         }
-        main{
-            margin-top:40px;
-            margin-left:70px;
+
+        div#total_box {
+            top: 880px;
+            left: 890px;
         }
+
+        #total_box th {
+            padding-right: 20px;
+            text-align: left;
+        }
+
+        #total_box td {
+            padding-left: 10px;
+            text-align: left;
+        }
+
+        div#container {
+            display: inline-block;
+            height: 1200px;
+        }
+
+        #container > * {
+            position: absolute;
+        {#            border: 1px solid #ccc;#}
+        }
+
+        div#namebox {
+            display: block;
+            top: 230px;
+            left: 160px;
+            width: 300px;
+            height: 130px;
+
+        }
+
+        div#datebox {
+            top: 275px;
+            left: 1090px;
+
+        }
+
+        table#items td {
+            padding: 0;
+        {#            border:1px solid #ccc;#}
+        }
+
+        table#items {
+        {#            border: 1px solid #ccc;#} padding: 0;
+            top: 400px;
+            left: 160px;
+        }
+
+        td.name {
+            width: 530px;
+        }
+
+        td.quantity {
+            width: 180px;
+            text-align: center;
+        }
+
+        td.unit {
+            width: 90px;
+        }
+
+        td.total {
+            width: 200px;
+        }
+
+        td.amount {
+            width: 220px;
+        }
+
     </style>
     {#    <link href="{% static "report.css" %}" rel="stylesheet" type="text/css" media="screen"/>#}
 </head>
+<body>
 <div id="container">
-    <body style="font-family: sans-serif">
-    <header>
-        <div style="width:300px;height:150px;">
-            {{ invoice.name }}<br>
-            {{ invoice.address }}
-        </div>
-    </header>
-    <main>
+
+    <div id="namebox">
+        {{ invoice.name }}
+        <br>
+        <br>
+        {{ invoice.address }}
+    </div>
+    <div id="datebox">
+        {{ invoice.timestamp|date:"d.m.Y"}}
+    </div>
+    <table id="items">
+        {% for item in items %}
+            <tr>
+                <td class="name">{{ item.name }}</td>
+                <td class="quantity">{{ item.quantity }}</td>
+                <td class="unit">{{ item.unit }}</td>
+                <td class="amount">{{ item.amount }}</td>
+                <td class="total">{{ item.total }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div id="total_text">
+        Yalnız {{ text_total_int }} lira, {{ text_total_decimal }} kuruş.
+        <br><br><br><br><br><br>.
+    </div>
+    <div id="total_box">
         <table>
-            {% for item in items %}
-                <tr>
-                    <td class="name">{{ item.name }}</td>
-                    <td class="quantity">{{ item.quantity }}</td>
-                    <td class="unit">{{ item.unit }}</td>
-                    <td class="amount">{{ item.amount }}</td>
-                    <td class="total">{{ item.total }}</td>
-                </tr>
-            {% endfor %}
+            <tr>
+                <th>Ara Toplam</th>
+                <td>{{ invoice.amount }}</td>
+            </tr>
+            <tr>
+                <th>KDV %8</th>
+                <td>{{ invoice.tax }}</td>
+            </tr>
+            <tr>
+                <th>Genel Toplam</th>
+                <td>{{ invoice.total }}</td>
+            </tr>
         </table>
-    </main>
-    <footer>
-
-    </footer>
-
+    </div>
 </div>
-<script>window.parent.print_invoice_iframe();</script>
+
+<script>
+    {% if error %}
+        window.parent.popup_error("{{ error }}");
+    {% else %}
+        window.parent.print_invoice_iframe();
+    {% endif %}
+</script>
+
 </body>
 </html>
 

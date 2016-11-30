@@ -25,7 +25,7 @@ class Institution(models.Model):
     type = models.SmallIntegerField(_('Institution type'), choices=INSTITUTION_TYPE)
     phone = models.CharField(_('Phone'), max_length=30, null=True, blank=True)
     cellular = models.CharField(_('Cellular phone'), max_length=30, null=True, blank=True)
-    address = models.CharField(_('Cellular phone'), max_length=100, null=True, blank=True)
+    address = models.CharField(_('Address'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     email = models.EmailField(_('Email'), null=True, blank=True)
@@ -76,6 +76,7 @@ class Patient(models.Model):
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
     relation = models.SmallIntegerField(_('Patient Relation'), choices=RELATION)
     birthdate = models.DateField(_('Birthdate'))
+    address = models.CharField(_('Address'), max_length=100, null=True, blank=True)
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 

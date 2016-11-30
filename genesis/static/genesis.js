@@ -89,6 +89,9 @@ function print_invoice_iframe() {
     jsPrintSetup.printWindow(window.frames[0]);
     // next commands
 }
+function popup_error(msg){
+    alert(msg);
+}
 function print_report_iframe() {
     // this method will be called from iframe
     // ie: window.parent.print_barcode_iframe()
