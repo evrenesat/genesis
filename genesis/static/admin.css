@@ -301,10 +301,14 @@ footer li input[name="_continue"]:hover{
     color:#000 !important;
 }
 
-footer li input[name="_addanother"], footer li input[name="_save"]{
-    display: none;
-}
+/*body:not(.grp-popup) footer li input[name="_addanother"], body:not(.grp-popup) footer li input[name="_save"]{*/
+    /*display: none;*/
+/*}*/
 
 div#admissionpricing-group a.grp-add-handler{
     display: none !important;
+}
+
+textarea#id_process_logic{
+    width:700px !important;
 }

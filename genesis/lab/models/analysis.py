@@ -8,6 +8,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # Create your models here.
+
+
 from ..utils import pythonize, lazy_property
 
 from .patient import Admission
@@ -82,7 +84,8 @@ class Category(models.Model):
 
 
 class AnalyseType(models.Model):
-    subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type')
+    subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type',
+                                      null=True, blank=True)
     group_type = models.BooleanField(_('Group'), default=False, editable=False,
                                      help_text=_(
                                          'This is a group type, consist of other analyse types'))
@@ -92,7 +95,8 @@ class AnalyseType(models.Model):
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
     name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
-    footnote = models.TextField(_('Report footnote'), blank=True, null=True)
+    footnote = models.TextField(_('Report footnote'), blank=True, null=True,
+                                help_text=_('This will be shown under the report'))
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
     alternative_price = models.DecimalField(_('Alternative price'), max_digits=6, decimal_places=2,
                                             help_text=_('Alternative price definition. '
@@ -157,7 +161,8 @@ class Analyse(models.Model):
     result = models.TextField(_('Result parameters'), blank=True, null=True,
                               help_text=_("Can be used to override entered/calculated result "
                                           "parameters<br>Format:<br> key=val<br />key2=val2"))
-    comment = models.TextField(_('Comment'), blank=True, null=True)
+    comment = models.TextField(_('Interpretation'), blank=True, null=True,
+                               help_text=_('Interpretation of analyse results'))
     short_result = models.TextField(_('Result'), blank=True, null=True,
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
@@ -197,7 +202,14 @@ class Analyse(models.Model):
         """executes result process logic with result"""
         result = {}
         if self.type.process_logic:
-            exec(self.type.process_logic, {'data': self.result_dict})
+            context = self.result_dict.copy()
+            context['result'] = ''
+            context['comment'] = ''
+            exec(self.type.process_logic, context)
+            if context['result']:
+                self.short_result = context['result']
+            if context['comment']:
+                self.comment = context['comment']
         return result or self.result_dict
 
     def get_result_dict(self):
@@ -211,11 +223,12 @@ class Analyse(models.Model):
         if not self.result_json:
             return {}
         calculated_result = json.loads(self.result_json)
-        if self.type.process_logic:
-            calculated_result['title'] = self.type.name
-            calculated_result['analyse_id'] = self.id
-            return calculated_result
+        # if self.type.process_logic:
+        #     calculated_result['title'] = self.type.name
+        #     calculated_result['analyse_id'] = self.id
+            # return calculated_result
         results = defaultdict(dict)
+        # results.update(calculated_result)
         titles = {}
         for par_val in self.parametervalue_set.all():
             titles[par_val.code] = par_val.key.name
@@ -326,7 +339,8 @@ key_with_preset=val1,val2,val3
 
 class Parameter(models.Model):
     name = models.CharField(_('Name'), max_length=50)
-    type = models.CharField(_('Parameter type'), max_length=12, choices=PARAMETER_TYPES)
+    type = models.CharField(_('Parameter type'), max_length=12, default='keyval_s',
+                            choices=PARAMETER_TYPES)
     analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     parameter_definition = models.TextField(_('Parameter definition'), null=True, blank=True,

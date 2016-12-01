@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <title>Gentan Analyse Report</title>
     <style media="screen">
-        body {
-            background-color: #4f5b66;
-        }
+{#        body {#}
+{#            background-color: #4f5b66;#}
+{#        }#}
 
         div#container {
             background-color: #fff;
-            width: 1000px !important;
-            min-height: 1300px;
+{#            width: 1000px !important;#}
+{#            min-height: 1300px;#}
         }
 
         footer > div {
@@ -140,6 +140,10 @@
         .pad-up1 {
             margin-top: 1em;
         }
+        #footnote{
+            padding-top: 1em;
+            display: inline-block;
+        }
     </style>
     {#    <link href="{% static "report.css" %}" rel="stylesheet" type="text/css" media="screen"/>#}
 </head>
@@ -203,13 +207,13 @@
                 </div>{% endif %}
         </div>
         <div class="big_data boxed_data">
-            {% if short_result %}
+            {% if short_result|safe %}
                 <div><span>Sonuç</span>
                     <div>{{ short_result }}</div>
                 </div>{% endif %}
             {% if comment %}
                 <div><span>Yorum</span>
-                    <div>{{ comment }}</div>
+                    <div>{{ comment|safe }}</div>
                 </div>{% endif %}
         </div>
         {% if generic %}
@@ -243,11 +247,10 @@
         {% endif %}
         {report_template}
         {% if note %}
-            <div class="big_data boxed_data">
-            <div><span>Not</span>
-                <div>{{ note }}</div>
+            <div id="footnote">
+
+                {{ note|safe }}
             </div>
-        </div>
         {% endif %}
         {#{{ results }}#}
     </main>

@@ -16,7 +16,12 @@ function add_footer_button(params) {
 }
 
 function is_editing(name) {
-    return grp.jQuery('body').attr('class').indexOf(name) > -1;
+    let klses = grp.jQuery('body').attr('class').split(' ');
+    for(let kls of klses){
+        if(kls.indexOf('-')>0 && kls.split('-')[1] == name){
+            return true;
+        }
+    }
 }
 function is_listing(name) {
     return Boolean(grp.jQuery('a[href*="/admin/lab/' + name + '/add/"].grp-add-link').length && grp.jQuery('body.grp-change-list').length)
@@ -142,6 +147,13 @@ function patch_edit_views() {
                 url: '/lab/analyse_report/' + object_id + '/',
                 name: 'Rapor Yazdır'
             });
+            add_footer_button({
+                onclick: function () {
+                    $.featherlight({iframe: '/lab/analyse_report/' + object_id + '/',
+                        iframeWidth: 900, iframeHeight: 600});
+                },
+                name: 'Rapor Görüntüle'
+            });
         }
     }
     if (is_editing('admission')) {
@@ -194,6 +206,9 @@ function patch_edit_views() {
 
     }
 
+    if (is_editing('analysetype')) {
+        tiny_tinymce('id_footnote');
+    }
     if (is_editing('reporttemplate')) {
         add_footer_button({
             onclick: function () {
@@ -247,7 +262,7 @@ function patch_everywhere() {
     // change text of _save
     grp.jQuery('input[name="_continue"]').val(grp.jQuery('input[name="_save"]').val());
     // hide empty (looking) <li> elements of hided "_save" and "_addanother" buttons.
-    grp.jQuery('input[name="_save"], input[name="_addanother"]').parent().hide()
+    grp.jQuery('body:not(.grp-popup) input[name="_save"], body:not(.grp-popup) input[name="_addanother"]').parent().hide()
 }
 grp.jQuery('document').ready(function () {
     grp.jQuery('#_ifrm').attr('src', '');

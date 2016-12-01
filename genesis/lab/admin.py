@@ -12,6 +12,7 @@ import django.dispatch
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
+from django_ace import AceWidget
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
@@ -39,7 +40,7 @@ UserAdmin.add_fieldsets = (
 
 
 class ParameterValueInline(admin.TabularInline):
-    classes = ('grp-collapse grp-closed',)
+    classes = ('grp-collapse',)
     model = ParameterValue
     extra = 0
     ordering = ('code',)
@@ -68,9 +69,17 @@ class ParameterInline(admin.TabularInline):
     extra = 0
     classes = ('grp-collapse',)  # grp-closed
 
+class AnalyseTypeForm(forms.ModelForm):
+  class Meta:
+    model = AnalyseType
+    widgets = {
+      'process_logic': AceWidget(mode='python', theme='twilight', width="700px", height="400px"),
+    }
+    fields = '__all__'
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
+    form = AnalyseTypeForm
     list_filter = ('group_type', 'category',)
     search_fields = ('name',)
     list_display = ('name', 'group_type', 'price')
@@ -86,11 +95,16 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
           'fields': ('subtypes',)
           }),
         (_('Advanced'),
-         {'classes': ('grp-collapse', 'grp-closed'),
+         {'classes': ('grp-collapse', ),
           'fields': ('process_logic',)
           })
     )
     inlines = [ParameterInline, ]
+    class Media:
+        js = [
+            '/static/tinymce/tinymce.min.js',
+            '/static/tinymce/setup.js',
+        ]
 
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
@@ -241,7 +255,7 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
         obj = form.instance
-        if obj.finished:
+        if obj.finished and not obj.result:
             obj.save_result()
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -393,8 +407,7 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         for formset in formsets:
             if formset.model == Analyse:
                 self._save_analyses(formset.instance, formset.save(commit=False))
-            else:
-                formset.save()
+            formset.save()
 
 
 app_models = apps.get_app_config('lab').get_models()
