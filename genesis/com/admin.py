@@ -42,6 +42,27 @@ class AdmissionPricingInline(admin.TabularInline):
 
 AdmissionAdmin.inlines.extend([AdmissionPricingInline, PaymentInline, InvoiceItemInline])
 
+
+
+class InvoiceItemFullInline(admin.TabularInline):
+    model = InvoiceItem
+    # extra = 0
+    # max_num = 0
+    fields = ('name', 'amount', 'quantity', 'total')
+    # readonly_fields = ('name', 'amount', 'quantity', 'total')
+    # classes = ('grp-collapse', 'grp-closed')
+
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    date_hierarchy = 'timestamp'
+    # list_filter = ('group_type', 'category',)
+    search_fields = ('name','patient__name', 'patient__surname', 'institution__name')
+    list_display = ('name', 'amount', 'total', 'timestamp')
+    inlines = [InvoiceItemFullInline, ]
+    fields = ('id', 'name', 'address', 'amount', 'tax', 'total')
+    readonly_fields = ('id', )
+
 # class PaymentItemInline(admin.TabularInline):
 #     model = PaymentItem
 #     extra = 0

@@ -16,7 +16,7 @@ function add_footer_button(params) {
 }
 
 function is_editing(name) {
-    return grp.jQuery('body').hasClass('lab-' + name);
+    return grp.jQuery('body').attr('class').indexOf(name) > -1;
 }
 function is_listing(name) {
     return Boolean(grp.jQuery('a[href*="/admin/lab/' + name + '/add/"].grp-add-link').length && grp.jQuery('body.grp-change-list').length)
@@ -89,7 +89,7 @@ function print_invoice_iframe() {
     jsPrintSetup.printWindow(window.frames[0]);
     // next commands
 }
-function popup_error(msg){
+function popup_error(msg) {
     alert(msg);
 }
 function print_report_iframe() {
@@ -138,16 +138,36 @@ function patch_edit_views() {
         add_footer_button({url: '/lab/analyse_barcode/' + object_id + '/', name: 'Barkod Yazdır'});
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         if (is_finished) {
-            add_footer_button({url: '/lab/analyse_report/' + object_id + '/', name: 'Rapor Yazdır'});
+            add_footer_button({
+                url: '/lab/analyse_report/' + object_id + '/',
+                name: 'Rapor Yazdır'
+            });
         }
     }
     if (is_editing('admission')) {
-        setTimeout(function() { // allow grapelli to do it's magic
+        setTimeout(function () { // allow grapelli to do it's magic
             grp.jQuery('#id_patient-autocomplete').parent().attr('style', 'max-width:440px !important');
         }, 0);
         if (object_id) {
-            add_footer_button({url: '/lab/admission_barcode/' + object_id + '/', name: 'Barkod Yazdır'});
-            add_footer_button({url: '/com/print_invoice/' + object_id + '/', name: 'Fatura Bas'});
+            add_footer_button({
+                url: '/lab/admission_barcode/' + object_id + '/',
+                name: 'Barkod Yazdır'
+            });
+
+            grp.jQuery.getJSON('/com/invoice_id_of_admission/'+ object_id + '/', function(data, status, xhr){
+                if(data['id']){
+                    add_footer_button({url: '/com/print_invoice/' + object_id + '/', name: 'Faturayı TEKRAR Bas: #' + data['id']});
+                }else{
+                    grp.jQuery.getJSON('/com/next_invoice_id/', function(data, status, xhr) {
+                        add_footer_button({
+                            url: '/com/print_invoice/' + object_id + '/',
+                            name: 'Fatura Bas: #' + data['id']
+                        });
+                    });
+                }
+            });
+
+
             add_footer_button({
                 url: '/admin/lab/analyse/?group_relation__in=10,30&admission__id__exact=' + object_id,
                 name: 'Analizleri Listele',
@@ -160,6 +180,20 @@ function patch_edit_views() {
         }
 
     }
+    if (is_editing('invoice')) {
+        debugger;
+        if (object_id) {
+            add_footer_button({
+                url: '/com/print_invoice_by_id/' + object_id + '/',
+                name: 'Fatura Yazdır'
+            });
+        } else {
+            // TODO: request and show next invoice ID
+
+        }
+
+    }
+
     if (is_editing('reporttemplate')) {
         add_footer_button({
             onclick: function () {

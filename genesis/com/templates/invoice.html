@@ -47,8 +47,11 @@
             text-align: left;
         }
 
+        #total_box td:before {
+            content: ": ";
+        }
         #total_box td {
-            padding-left: 10px;
+            padding-left: 40px;
             text-align: left;
         }
 
@@ -93,12 +96,12 @@
         }
 
         td.quantity {
-            width: 180px;
+            width: 220px;
             text-align: center;
         }
 
         td.unit {
-            width: 90px;
+            width: 120px;
         }
 
         td.total {
@@ -151,7 +154,7 @@
             </tr>
             <tr>
                 <th>Genel Toplam</th>
-                <td>{{ invoice.total }}</td>
+                <td>{{ invoice.total }} TL</td>
             </tr>
         </table>
     </div>
@@ -159,9 +162,10 @@
 
 <script>
     {% if error %}
-        window.parent.popup_error("{{ error }}");
+        parent.popup_error("{{ error }}");
     {% else %}
-        window.parent.print_invoice_iframe();
+        parent.print_invoice_iframe();
+        parent.location.href=parent.location.href;
     {% endif %}
 </script>
 

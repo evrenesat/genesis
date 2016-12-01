@@ -172,14 +172,15 @@ DEFAULT_INVOICE_UNIT = 'Adet'
 class Invoice(models.Model):
     admission = models.ManyToManyField(Admission, verbose_name=_('Admission'), editable=False)
     name = models.CharField(_('Name'), null=True, blank=True, max_length=250)
-    address = models.CharField(_('Address'), null=True, blank=True, max_length=250)
+    address = models.TextField(_('Address'), null=True, blank=True, max_length=250)
 
-    amount = models.DecimalField(_('Total'), max_digits=8, decimal_places=2, editable=False,
+    amount = models.DecimalField(_('Total'), max_digits=8, decimal_places=2,
                                  null=True, blank=True)
     tax = models.DecimalField(_('Tax amount'), null=True, blank=True, max_digits=8,
                               decimal_places=2)
-    total = models.DecimalField(_('Grand Total'), max_digits=8, decimal_places=2)
-    timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
+    total = models.DecimalField(_('Grand Total'), max_digits=8, decimal_places=2,
+                                null=True, blank=True)
+    timestamp = models.DateTimeField(_('Definition date'), auto_now_add=True)
 
     class Meta:
         verbose_name = _('Invoice')
@@ -193,7 +194,7 @@ class InvoiceItem(models.Model):
     admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Admission'))
     invoice = models.ForeignKey(Invoice, models.SET_NULL, verbose_name=_('Invoice'),
                                 null=True, blank=True)
-    name = models.TextField(_('Name'))
+    name = models.CharField(_('Name'), max_length=255)
     amount = models.DecimalField(_('Amount'), max_digits=6, decimal_places=2)
     quantity = models.IntegerField(_('Quantity'), default=1)
     unit = models.CharField(_('Unit'), default=DEFAULT_INVOICE_UNIT, max_length=30)
