@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
@@ -12,6 +13,8 @@ from lab.admin import AdmissionAdmin, post_admission_save
 def create_payment_objects(sender, instance, **kwargs):
     if not hasattr(instance, 'admissionpricing'):
         AdmissionPricing(admission=instance).save()
+    instance.analyse_set.filter(group_relation='GRP').delete()
+
 
 
 class PaymentInline(admin.TabularInline):
@@ -34,7 +37,7 @@ class AdmissionPricingInline(admin.TabularInline):
     model = AdmissionPricing
     extra = 0
     max_num = 0
-    fields = ('final_amount', 'list_price', 'discount_percentage', 'discount_amount')
+    fields = ('tax_included', 'final_amount', 'list_price', 'discount_percentage', 'discount_amount')
     readonly_fields = ('list_price', 'discount_percentage', 'discount_amount')
     # readonly_fields = ('list_price', 'amount', 'quantity', 'total')
     classes = ('grp-collapse',)
@@ -63,32 +66,6 @@ class InvoiceAdmin(admin.ModelAdmin):
     fields = ('id', 'name', 'address', 'amount', 'tax', 'total')
     readonly_fields = ('id', )
 
-# class PaymentItemInline(admin.TabularInline):
-#     model = PaymentItem
-#     extra = 0
-#     classes = ('grp-collapse', )
-#
-#
-# @admin.register(Payment)
-# class PaymentAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
-#     date_hierarchy = 'timestamp'
-#     # search_fields = ('patient__name', 'patient__tcno', 'patient__surname')
-#     # list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
-#     # readonly_fields = ('id', 'timestamp')
-#     # raw_id_fields = ('patient', 'institution', 'doctor')
-#     # fields = (('id', 'timestamp'), ('patient', 'is_urgent'), ('doctor', 'institution'),
-#     #           ('week', 'upd_week', 'lmp_date'),
-#     #           ('indications', 'history'),
-#     #           )
-#     # autocomplete_lookup_fields = {
-#     #     'fk': ['patient', 'institution', 'doctor'],
-#     # }
-#
-#     inlines = [
-#      PaymentItemInline
-#     ]
-#
-#
 
 
 

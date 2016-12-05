@@ -1,8 +1,13 @@
 from datetime import datetime
 
 # import dbsettings
+from functools import partial
+from random import randint
+from uuid import uuid4
+
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
+from django.dispatch import receiver
 from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
@@ -21,6 +26,7 @@ from com.models import *
 from django.contrib.auth.admin import UserAdmin
 
 from django.contrib.auth.models import Permission
+
 #
 # class AppConfig(dbsettings.Group):
 #     barcode_printer = dbsettings.StringValue('Barcode printer')
@@ -37,6 +43,96 @@ UserAdmin.add_fieldsets = (
         'fields': ('username', 'password1', 'password2', 'first_name', 'last_name')}
      ),
 )
+
+
+def finish_selected_value(modeladmin, request, queryset):
+    for value_item in queryset:
+        value_item.analyse.mark_finished(request, True)
+
+
+finish_selected_value.short_description = _("Mark selected analyses as Finished")
+
+
+def approve_selected_value(modeladmin, request, queryset):
+    for value_item in queryset:
+        value_item.analyse.mark_approved(request, True)
+
+
+approve_selected_value.short_description = _("Mark selected analyses as Approved")
+
+
+def finish_selected(modeladmin, request, queryset):
+    for analyse in queryset:
+        analyse.mark_finished(request, True)
+
+
+finish_selected.short_description = _("Mark selected analyses as Finished")
+
+
+def approve_selected(modeladmin, request, queryset):
+    for analyse in queryset:
+        analyse.mark_approved(request, True)
+
+
+approve_selected.short_description = _("Mark selected analyses as Approved")
+
+
+@admin.register(ParameterValue)
+class ParameterValueAdmin(admin.ModelAdmin):
+    list_editable = ('value',)
+    actions = [finish_selected_value, approve_selected_value]
+    list_display = ('code', 'patient_name', 'analyse_name', 'key', 'value', 'analyse_state', 'keyid')
+    search_fields = ('analyse__group_relation', 'analyse__type__name', 'analyse__admission__id')
+
+
+
+    def get_search_results(self, request, queryset, search_term):
+        # integer search_term means we want to list values of a certain admission
+        try:
+            search_term_as_int = int(search_term)
+            return ParameterValue.objects.filter(analyse__admission=search_term_as_int), False
+        except ValueError:
+            return super().get_search_results(request, queryset, search_term)
+
+    def message_user(self, *args, **kwargs):
+        super().message_user(*args, **kwargs)
+        # this is a pure hack!
+        # we are harnessing the fact that message_user will be called
+        # for once after all objects are saved
+        if hasattr(self, 'updated_analysis'):
+            for analyse in self.updated_analysis[0].admission.analyse_set.all():
+                analyse.save_result()
+
+    def log_change(self, request, object, message):
+        # by overriding log_change we can catch the changed objects
+        # and accumulate their analyse ids
+        if request.method == "POST" and '_save' in request.POST:
+            if not hasattr(self, 'updated_analyses'):
+                self.updated_analysis = []
+            self.updated_analysis.append(object.analyse)
+            super().log_change(request, object, message)
+
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['formfield_callback'] = partial(self.formfield_for_dbfield, request=request, obj=obj)
+        return super().get_form(request, obj, **kwargs)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        kwargs['formfield_callback'] = partial(self.formfield_for_dbfield, request=request, obj=obj)
+        return super().get_formset(request, obj, **kwargs)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        p_value = kwargs.pop('obj', None)
+        if p_value and db_field.name == "value" and p_value.key.presets:
+            db_field.choices = p_value.key.preset_choices()
+        return super().formfield_for_dbfield(db_field, **kwargs)
+
+    # def formfield_for_choice_field(self, db_field, request=None, **kwargs):
+        # if db_field.name == "value":
+        #     kwargs['choices'] = (
+        #         ('accepted', 'Accepted'),
+        #         ('denied', 'Denied'),
+        #     )
+        # return super().formfield_for_choice_field(db_field, request, **kwargs)
 
 
 class ParameterValueInline(admin.TabularInline):
@@ -69,13 +165,16 @@ class ParameterInline(admin.TabularInline):
     extra = 0
     classes = ('grp-collapse',)  # grp-closed
 
+
 class AnalyseTypeForm(forms.ModelForm):
-  class Meta:
-    model = AnalyseType
-    widgets = {
-      'process_logic': AceWidget(mode='python', theme='twilight', width="700px", height="400px"),
-    }
-    fields = '__all__'
+    class Meta:
+        model = AnalyseType
+        widgets = {
+            'process_logic': AceWidget(mode='python', theme='twilight', width="700px",
+                                       height="400px"),
+        }
+        fields = '__all__'
+
 
 @admin.register(AnalyseType)
 class AnalyseTypeAdmin(admin.ModelAdmin):
@@ -84,22 +183,23 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_display = ('name', 'group_type', 'price')
     filter_horizontal = ('subtypes',)
-    readonly_fields = ('group_type', )
+    readonly_fields = ('group_type',)
     fieldsets = (
         (None, {
             'fields': ('group_type', 'name', 'category', 'method', 'sample_type',
                        'code', 'process_time', 'footnote', 'price', 'alternative_price')
         }),
         (_('Subtypes'),
-         {'classes': ('grp-collapse', 'grp-closed'),
+         {'classes': ('grp-collapse',),
           'fields': ('subtypes',)
           }),
         (_('Advanced'),
-         {'classes': ('grp-collapse', ),
+         {'classes': ('grp-collapse', 'grp-closed'),
           'fields': ('process_logic',)
           })
     )
     inlines = [ParameterInline, ]
+
     class Media:
         js = [
             '/static/tinymce/tinymce.min.js',
@@ -112,8 +212,8 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
             form.instance.group_type = True
             form.instance.save()
 
-        # if obj.parameter_definition.strip():
-        #     obj.create_update_parameter_keys()
+            # if obj.parameter_definition.strip():
+            #     obj.create_update_parameter_keys()
 
 
 @admin.register(StateDefinition)
@@ -121,7 +221,6 @@ class StateDefinitionAdmin(admin.ModelAdmin):
     list_filter = ('type',)
     search_fields = ('name',)
     filter_horizontal = ('type',)
-
 
 
 @admin.register(Parameter)
@@ -150,36 +249,14 @@ class ParameterAdmin(admin.ModelAdmin):
     )
 
 
-def _approve_analyse(state, request):
-    if not request.user.has_perm('lab.can_approve_analysis'):
-        raise ValidationError('-')  # PermissionDenied(
-        # _("You don't have required permissions to mark an analyse as approved"))
-    else:
-        state.analyse.approved = True
-        state.analyse.approve_time = datetime.now()
-        state.analyse.approver = request.user.profile
-        state.analyse.save()
-
-
-def _finish_analyse(state, request):
-    if not request.user.has_perm('lab.can_finish_analyse'):
-        raise PermissionDenied(
-            _("You don't have required permissions to  mark an analyse as finished"))
-    else:
-        state.analyse.finished = True
-        state.analyse.completion_time = datetime.now()
-        state.analyse.analyser = request.user.profile
-        state.analyse.save()
-
-
 class StateFormSet(BaseInlineFormSet):
     def save_new(self, form, commit=True):
         obj = super().save_new(form, commit=False)
         # here you can add anything you need from the request
         if obj.definition.finish:
-            _finish_analyse(obj, self.request)
+            obj.analyse.mark_finished(self.request)
         if obj.definition.approve:
-            _approve_analyse(obj, self.request)
+            obj.analyse.mark_approved(self.request)
         if commit:
             obj.save()
 
@@ -192,6 +269,10 @@ class StateFormSet(BaseInlineFormSet):
         #             continue
         #         if form.cleaned_data.get('DELETE'):
         #             raise ValidationError('Error')
+
+
+class AnalyseAdminForm(forms.ModelForm):
+    group_relation = forms.CharField(widget=forms.HiddenInput)
 
 
 class StateInline(admin.TabularInline):
@@ -219,7 +300,9 @@ class StateInline(admin.TabularInline):
 
 @admin.register(Analyse)
 class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+    form = AnalyseAdminForm
     raw_id_fields = ("type", 'admission')
+    actions = [finish_selected, approve_selected]
     date_hierarchy = 'timestamp'
     search_fields = ('admission__id', 'type__name', 'admission__patient__name',
                      'admission__patient__tcno', 'admission__patient__surname')
@@ -236,7 +319,7 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
                               )}),
                  (_('Advanced'),
                   {'classes': ('grp-collapse', 'grp-closed'),
-                   'fields': ('result', 'template')
+                   'fields': ('result', 'template', 'group_relation')
                    },
                   ))
 
@@ -255,7 +338,7 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
         obj = form.instance
-        if obj.finished and not obj.result:
+        if not obj.result:  # obj.finished and
             obj.save_result()
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -347,7 +430,9 @@ class AdmissionStateInline(admin.TabularInline):
     extra = 1
     classes = ('grp-collapse',)
 
-post_admission_save = django.dispatch.Signal(providing_args=["instance",])
+
+post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
+
 
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
@@ -364,7 +449,7 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         'fk': ['patient', 'institution', 'doctor'],
     }
 
-    inlines = [AnalyseInline, AdmissionSampleInline, AdmissionStateInline]
+    inlines = [AnalyseInline,  AdmissionStateInline]  # AdmissionSampleInline,
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
@@ -382,11 +467,12 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
             if analyse.type.group_type:
-                analyse.group_relation = 20  # this is a group
+                analyse.group_relation = 'GRP'  # this is a group
+                rand_group_code = uuid4().hex
                 for sub_analyse_type in analyse.type.subtypes.all():
                     Analyse(type=sub_analyse_type,
                             sample_type=analyse.sample_type,
-                            group_relation=30,  # this is a member of a group
+                            group_relation=rand_group_code,
                             admission=admission).save()
             analyse.save()
         post_admission_save.send(sender=Admission, instance=admission)
@@ -416,3 +502,10 @@ for model in app_models:
         admin.site.register(model)
     except AlreadyRegistered:
         pass
+
+
+@receiver(post_admission_save, sender=Admission)
+def create_payment_objects(sender, instance, **kwargs):
+    # instance.analyse_set.filter(group_relation='GRP').delete()
+    for analyse in instance.analyse_set.exclude(group_relation='GRP'):
+        analyse.create_empty_values()

@@ -17,8 +17,8 @@ function add_footer_button(params) {
 
 function is_editing(name) {
     let klses = grp.jQuery('body').attr('class').split(' ');
-    for(let kls of klses){
-        if(kls.indexOf('-')>0 && kls.split('-')[1] == name){
+    for (let kls of klses) {
+        if (kls.indexOf('-') > 0 && kls.split('-')[1] == name) {
             return true;
         }
     }
@@ -133,24 +133,62 @@ function print_report_iframe() {
 var object_id = get_editing_id();
 
 function patch_edit_views() {
+
+    // change text of _save
+    grp.jQuery('input[name="_continue"]').val(grp.jQuery('input[name="_save"]').val());
+    // hide empty (looking) <li> elements of hided "_save" and "_addanother" buttons.
+    grp.jQuery('body:not(.grp-popup) input[name="_save"], body:not(.grp-popup) input[name="_addanother"]').parent().hide()
+
+
     // get rid of those empty cells
     grp.jQuery('div.c-1').map(function () {
         self = grp.jQuery(this);
-        if (self.html() == "&nbsp;")self.hide();
+        if (self.html() == "&nbsp;") self.hide();
     })
 
     if (is_editing('analyse') && object_id) {
         add_footer_button({url: '/lab/analyse_barcode/' + object_id + '/', name: 'Barkod Yazdır'});
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
+        var group_membership = $('input#id_group_relation').val();
+
+        if (group_membership) {
+            add_footer_button({
+                url: '/admin/lab/parametervalue/?q=' + group_membership,
+                name: 'Analiz Panelini Goruntule',
+                target: '_self'
+            });
+
+            add_footer_button({
+                url: '/lab/report_for_panel/' + group_membership + '/',
+                name: 'Panel Rapor Yazdır',
+            });
+
+            add_footer_button({
+                onclick: function () {
+                    $.featherlight({
+                        iframe: '/lab/report_for_panel/' + group_membership + '/',
+                        iframeWidth: 900, iframeHeight: 600
+                    });
+                },
+                name: 'Panel Rapor Görüntüle',
+            });
+
+
+        }
+
         if (is_finished) {
+
             add_footer_button({
                 url: '/lab/analyse_report/' + object_id + '/',
                 name: 'Rapor Yazdır'
             });
+
             add_footer_button({
                 onclick: function () {
-                    $.featherlight({iframe: '/lab/analyse_report/' + object_id + '/',
-                        iframeWidth: 900, iframeHeight: 600});
+                    $.featherlight({
+                        iframe: '/lab/analyse_report/' + object_id + '/#noprint',
+                        iframeWidth: 900, iframeHeight: 600
+                    });
                 },
                 name: 'Rapor Görüntüle'
             });
@@ -166,11 +204,14 @@ function patch_edit_views() {
                 name: 'Barkod Yazdır'
             });
 
-            grp.jQuery.getJSON('/com/invoice_id_of_admission/'+ object_id + '/', function(data, status, xhr){
-                if(data['id']){
-                    add_footer_button({url: '/com/print_invoice/' + object_id + '/', name: 'Faturayı TEKRAR Bas: #' + data['id']});
-                }else{
-                    grp.jQuery.getJSON('/com/next_invoice_id/', function(data, status, xhr) {
+            grp.jQuery.getJSON('/com/invoice_id_of_admission/' + object_id + '/', function (data, status, xhr) {
+                if (data['id']) {
+                    add_footer_button({
+                        url: '/com/print_invoice/' + object_id + '/',
+                        name: 'Faturayı TEKRAR Bas: #' + data['id']
+                    });
+                } else {
+                    grp.jQuery.getJSON('/com/next_invoice_id/', function (data, status, xhr) {
                         add_footer_button({
                             url: '/com/print_invoice/' + object_id + '/',
                             name: 'Fatura Bas: #' + data['id']
@@ -179,9 +220,32 @@ function patch_edit_views() {
                 }
             });
 
+            add_footer_button({
+                onclick: function () {
+                    $.featherlight({
+                        iframe: '/admin/lab/parametervalue/?q=' + object_id,
+                        iframeWidth: 900, iframeHeight: 600
+                    });
+                },
+                name: 'Sonuç Gir'
+            });
 
             add_footer_button({
-                url: '/admin/lab/analyse/?group_relation__in=10,30&admission__id__exact=' + object_id,
+                onclick: function () {
+                    $.featherlight({
+                        iframe: '/com/print_invoice/' + object_id + '/#noprint',
+                        iframeWidth: 1000, iframeHeight: 600,
+                        afterClose: function () {
+                            window.location.reload()
+                        }
+                    });
+                },
+                name: 'Faturayı Görüntüle'
+            });
+
+
+            add_footer_button({
+                url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
                 name: 'Analizleri Listele',
                 target: '_self'
             });
@@ -221,6 +285,35 @@ function patch_edit_views() {
 }
 
 
+function create_selectbox(optionList, toElem) {
+    var combo = $("<select></select>");
+
+    $.each(optionList, function (i, el) {
+        combo.append("<option>" + el + "</option>");
+    });
+    $(combo).change(function(){
+        console.log("Change", toElem);
+        toElem.val($(this).val());
+    })
+
+    return combo;
+}
+
+function modify_parameter_list_edit(){
+    $('table#result_list tr.grp-row').each(function(){
+
+        let tr = $(this);
+        let keyData = JSON.parse(tr.find('input.keydata').val());
+        if (Object.keys(keyData).length) {
+            let txt_field = tr.find('input.vTextField');
+            console.log(txt_field.val());
+            txt_field.hide();
+            txt_field.after(create_selectbox(keyData, txt_field));
+        }
+    })
+}
+
+
 function handle_dashboard() {
 
 
@@ -248,6 +341,10 @@ function patch_list_views() {
 
 
     }
+    if (is_listing('parametervalue')) {
+        modify_parameter_list_edit()
+
+    }
 }
 
 function patch_everywhere() {
@@ -259,15 +356,18 @@ function patch_everywhere() {
     // align True/False check marks to center
     grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
 
-    // change text of _save
-    grp.jQuery('input[name="_continue"]').val(grp.jQuery('input[name="_save"]').val());
-    // hide empty (looking) <li> elements of hided "_save" and "_addanother" buttons.
-    grp.jQuery('body:not(.grp-popup) input[name="_save"], body:not(.grp-popup) input[name="_addanother"]').parent().hide()
+
 }
 grp.jQuery('document').ready(function () {
     grp.jQuery('#_ifrm').attr('src', '');
-    patch_list_views();
-    patch_edit_views();
+
+
+    if ($('body.grp-change-list').length) {
+        patch_list_views();
+    }
+    if ($('body.grp-change-form').length) {
+        patch_edit_views();
+    }
     handle_dashboard();
 
     patch_everywhere();

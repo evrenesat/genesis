@@ -1,10 +1,12 @@
 import json
 from collections import defaultdict
+from datetime import datetime
 
 from django import forms
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 # Create your models here.
@@ -90,17 +92,20 @@ class AnalyseType(models.Model):
                                      help_text=_(
                                          'This is a group type, consist of other analyse types'))
 
-    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'))
-    method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'))
+    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'), null=True,
+                                 blank=True)
+    method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'), null=True,
+                               blank=True)
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
     name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     footnote = models.TextField(_('Report footnote'), blank=True, null=True,
                                 help_text=_('This will be shown under the report'))
-    price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2)
+    price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2, default=0)
     alternative_price = models.DecimalField(_('Alternative price'), max_digits=6, decimal_places=2,
                                             help_text=_('Alternative price definition. '
-                                                        'Can be used for foregeign currencies etc.'))
+                                                        'Can be used for foregeign currencies etc.')
+                                            , default=0)
     process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
                                      help_text=_('This code will be used to calculate the analyse '
                                                  'result according to entered data'))
@@ -145,17 +150,10 @@ class ReportTemplate(models.Model):
         return "%s" % (self.name,)
 
 
-ANALYSE_GROUP_RELATION = (
-    (10, _('None')),
-    (20, _('Group')),
-    (30, _('Member')),
-)
-
-
 class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
                              blank=True)
-    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Patient Admission'))
+    admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Patient Admission'))
 
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result parameters'), blank=True, null=True,
@@ -169,10 +167,11 @@ class Analyse(models.Model):
     sample_amount = models.CharField(_('Sample Amount'), max_length=20, null=True, blank=True)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
-    template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Template'),
-                                 null=True, blank=True)
-    group_relation = models.SmallIntegerField(_('Group relation'), default=10,
-                                              choices=ANALYSE_GROUP_RELATION)
+    template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Report template'),
+                                 null=True, blank=True, help_text=_(
+            'Instead of default one, use this template to create the analyse report.'))
+    group_relation = models.CharField(null=True, blank=True, max_length=50)
+
     finished = models.BooleanField(_('Finished'), default=False)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
@@ -182,6 +181,34 @@ class Analyse(models.Model):
     approved = models.BooleanField(_('Approved'), default=False)
     approver = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Approver'), null=True,
                                  blank=True, related_name='approved_analyses')
+
+    def _set_state_for(self, approve=False, finish=False):
+        state = self.type.statedefinition_set.get(finish=finish, approve=approve)
+        self.state_set.create(definition=state)
+
+    def mark_approved(self, request, set_state=False):
+        if not request.user.has_perm('lab.can_approve_analysis'):
+            raise ValidationError('-')  # PermissionDenied(
+            # _("You don't have required permissions to mark an analyse as approved"))
+        else:
+            self.approved = True
+            self.approve_time = datetime.now()
+            self.approver = request.user.profile
+            self.save()
+        if set_state:
+            self._set_state_for(approve=True)
+
+    def mark_finished(self, request, set_state=False):
+        if not request.user.has_perm('lab.can_finish_analyse'):
+            raise PermissionDenied(
+                _("You don't have required permissions to  mark an analyse as finished"))
+        else:
+            self.finished = True
+            self.completion_time = datetime.now()
+            self.analyser = request.user.profile
+            self.save()
+        if set_state:
+            self._set_state_for(finish=True)
 
     @lazy_property
     def get_code(self):
@@ -226,13 +253,15 @@ class Analyse(models.Model):
         # if self.type.process_logic:
         #     calculated_result['title'] = self.type.name
         #     calculated_result['analyse_id'] = self.id
-            # return calculated_result
+        # return calculated_result
         results = defaultdict(dict)
         # results.update(calculated_result)
         titles = {}
         for par_val in self.parametervalue_set.all():
             titles[par_val.code] = par_val.key.name
         for k, v in calculated_result.items():
+            if k.startswith('_'):
+                continue
             results[k]['value'] = v
             results[k]['title'] = titles[k]
             results[k]['code'] = k
@@ -244,7 +273,7 @@ class Analyse(models.Model):
         """saves serialized calculation result to self.result_json
         allows manual result data entry through self.result to override calculation result"""
         result_data = self.calculate_result()
-        if self.result.strip() and self.result != self.result_copy:
+        if self.result and self.result.strip() and self.result != self.result_copy:
             manual_result_data = dict([tuple(line.split('=')) for line in
                                        self.result.strip().split('\n')])
             result_data.update(manual_result_data)
@@ -301,8 +330,8 @@ class StateDefinition(models.Model):
 
 
 class State(models.Model):
-    analyse = models.ForeignKey(Analyse, models.PROTECT, verbose_name=_('Analyse'))
-    definition = models.ForeignKey(StateDefinition, models.PROTECT, verbose_name=_('State'))
+    analyse = models.ForeignKey(Analyse, models.CASCADE, verbose_name=_('Analyse'))
+    definition = models.ForeignKey(StateDefinition, models.CASCADE, verbose_name=_('State'))
     comment = models.CharField(_('Comment'), max_length=50, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
@@ -334,6 +363,7 @@ Key/Values:<br />
 key<br />
 key2<br />
 key_with_preset=val1,val2,val3
+<br><br>Note: Parameters that their code name starts with underscore "_" will be excluded from reports.
 """)
 
 
@@ -351,15 +381,16 @@ class Parameter(models.Model):
         param_type, data_type = self.type.split('_')
         if param_type != 'matrix':
             data_type = 1
-        ParameterKey.objects.update_or_create({'code': code,
-                                               'row_no': row_no,
-                                               'col_no': col_no,
-                                               'presets': preset,
-                                               'type': data_type,
-                                               },
-                                              parameter=self,
-                                              name=key_name
-                                              )
+        # FIXME: update requires a  double save
+        obj, created = ParameterKey.objects.update_or_create({'code': code,
+                                                              'row_no': row_no,
+                                                              'col_no': col_no,
+                                                              'presets': preset,
+                                                              'type': data_type,
+                                                              },
+                                                             parameter=self,
+                                                             name=key_name
+                                                             )
 
     def _create_matrix_params(self, rows, cols):
         for row_no, row in enumerate(map(str.strip, rows.split(','))):
@@ -419,13 +450,18 @@ class ParameterKey(models.Model):
     parameter = models.ForeignKey(Parameter, verbose_name=_('Parameter Definition'))
     name = models.CharField(_('Name'), max_length=50)
     default_value = models.TextField(_('Default value'), null=True, blank=True)
-    code = models.CharField(_('Code name'), max_length=50, null=True, blank=True)
+    code = models.CharField(_('Code name'), max_length=50, null=True, blank=True,
+                            help_text=_(
+                                'Parameters that their code name starts with underscore "_" will be excluded from reports.'))
     help = models.CharField(_('Help text'), max_length=255, blank=True, null=True)
     type = models.CharField(_('Parameter type'), max_length=5,
                             choices=PARAMETER_VALUE_TYPES, default=1)
     presets = models.TextField(_('Presets'), blank=True, null=True)
     row_no = models.IntegerField(_('Row number'), default=0)
     col_no = models.IntegerField(_('Column number'), null=True, blank=True)
+
+    def preset_choices(self):
+        return [(v, v) for v in json.loads(self.presets)] if self.presets else None
 
     def create_empty_value(self, analyse):
         pv, new = ParameterValue.objects.get_or_create(parameter=self.parameter, key=self,
@@ -471,6 +507,36 @@ class ParameterValue(models.Model):
     value_float = models.FloatField(_('Float Value'), editable=False, default=.0)
 
     type = models.CharField(_('Parameter type'), max_length=5, choices=PARAMETER_VALUE_TYPES)
+
+    def keyid(self):
+        preset = '{}'
+        if self.key.presets:
+            preset = self.key.presets
+        else:
+            preset = json.dumps(
+                list(self.key.parametervalue_set.distinct().values_list('value', flat=True)))
+        return "<input class=keydata type=hidden value='%s'>" % preset
+
+    keyid.allow_tags = True
+
+    def analyse_name(self):
+        return self.analyse.type.name
+
+    analyse_name.short_description = _('Analyse name')
+    analyse_name.admin_order_field = 'analyse__type__name'
+
+    def analyse_state(self):
+        state = self.analyse.state_set.all()
+        return state[0].definition.name if state else '-'
+
+    analyse_state.short_description = _('Analyse state')
+    analyse_state.admin_order_field = 'analyse__finished'
+
+    def patient_name(self):
+        return self.analyse.admission.patient.full_name()
+
+    patient_name.short_description = _('Patient name')
+    patient_name.admin_order_field = 'analyse__patient__name'
 
     @property
     def val(self):

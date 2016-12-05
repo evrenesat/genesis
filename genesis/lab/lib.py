@@ -47,15 +47,21 @@ def render_report(pk, signed=False):
 
 def render_combo_report(ids, signed=False):
     analyse_results = []
+    comment = ''
+    short_result  = ''
     for id in ids:
         analyse = Analyse.objects.get(pk=id)
         result = analyse.get_result_dict()
         analyse_results.append(result)
+        if analyse.comment:
+            comment = analyse.comment
+        if analyse.short_result:
+            short_result = analyse.short_result
     tpl, tpl_object = load_analyse_template(analyse, combo=True)
     cnt_dict = get_base_context(analyse)
     cnt_dict.update({'results': analyse_results,
-                     'comment': analyse.comment,
-                     'short_result': analyse.short_result,
+                     'comment': comment,
+                     'short_result': short_result,
                      'multi': True,
                      'with_sign': signed,
                      })

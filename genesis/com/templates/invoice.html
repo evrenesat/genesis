@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <title>Genesis Invoice</title>
     <style media="screen">
-        body {
-            background-color: #4f5b66;
-        }
+{#        body {#}
+{#            background-color: #4f5b66;#}
+{#        }#}
 
         div#container {
             background-color: #fff;
-            width: 1200px !important;
-            min-height: 1300px;
+{#            width: 1200px !important;#}
+{#            min-height: 1300px;#}
         }
 
         footer > div {
@@ -22,7 +22,7 @@
         header, main, footer, div#title {
             margin-left: auto;
             margin-right: auto;
-            width: 900px !important;
+{#            width: 900px !important;#}
 
         }
 
@@ -38,10 +38,17 @@
         }
 
         div#total_box {
+        {% if invoice.discount %}
+            top: 750px;
+        {% else %}
             top: 880px;
+        {% endif %}
             left: 890px;
         }
 
+        #total_box table {
+            width:280px;
+        }
         #total_box th {
             padding-right: 20px;
             text-align: left;
@@ -50,6 +57,7 @@
         #total_box td:before {
             content: ": ";
         }
+
         #total_box td {
             padding-left: 40px;
             text-align: left;
@@ -125,7 +133,7 @@
         {{ invoice.address }}
     </div>
     <div id="datebox">
-        {{ invoice.timestamp|date:"d.m.Y"}}
+        {{ invoice.timestamp|date:"d.m.Y" }}
     </div>
     <table id="items">
         {% for item in items %}
@@ -148,6 +156,16 @@
                 <th>Ara Toplam</th>
                 <td>{{ invoice.amount }}</td>
             </tr>
+            {% if invoice.discount %}
+                <tr>
+                    <th>İndirim</th>
+                    <td>{{ invoice.discount }}</td>
+                </tr>
+                <tr>
+                    <th>Toplam</th>
+                    <td>{{ invoice.subtotal }}</td>
+                </tr>
+            {% endif %}
             <tr>
                 <th>KDV %8</th>
                 <td>{{ invoice.tax }}</td>
@@ -161,11 +179,16 @@
 </div>
 
 <script>
+
     {% if error %}
-        parent.popup_error("{{ error }}");
+        if (window != parent) {
+            parent.popup_error("{{ error }}");
+        } else {
+            alert("{{ error }}");
+        }
     {% else %}
         parent.print_invoice_iframe();
-        parent.location.href=parent.location.href;
+        parent.location.href = parent.location.href;
     {% endif %}
 </script>
 

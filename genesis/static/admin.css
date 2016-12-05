@@ -312,3 +312,10 @@ div#admissionpricing-group a.grp-add-handler{
 textarea#id_process_logic{
     width:700px !important;
 }
+
+img[alt="False"]{
+    opacity: .5;
+}
+th.column-keyid, td.field-keyid{
+    display:none;
+}

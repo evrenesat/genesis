@@ -1,5 +1,7 @@
 import json
 from datetime import datetime
+
+from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -9,7 +11,7 @@ from django.template import Context
 from django.views.decorators.cache import cache_control
 
 from lab.lib import load_analyse_template, render_report, get_base_context, render_combo_report
-from lab.models import Admission
+from lab.models import Admission, ParameterKey
 from lab.models import Analyse
 
 
@@ -73,8 +75,23 @@ def analyse_report(request, pk):
 
 
 @login_required
+def choices_for_parameter(request, pk):
+    pk = ParameterKey.objects.get(parametervalue=pk)
+    return JsonResponse({
+        'presets': json.loads(pk.presets),
+        'has_preset': True if pk.presets else False
+    })
+
+
+@login_required
 def multiple_reports(request):
     ids = request.GET.get('ids').split(',')
+    content = render_combo_report(ids)
+    return HttpResponse(content)
+
+@login_required
+def multiple_reports_for_panel(request, group_code):
+    ids = Analyse.objects.filter(group_relation=group_code).values_list('id', flat=True)
     content = render_combo_report(ids)
     return HttpResponse(content)
 

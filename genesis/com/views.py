@@ -17,13 +17,21 @@ TAX_RATE = Decimal(8)
 
 
 def add_tax_to(admission, invoice):
-    payment = Payment.objects.get(admission=admission, method=10, type=10)
-    taxed_amount = (admission.admissionpricing.final_amount * (100 + TAX_RATE)) / 100
-    payment.amount = -taxed_amount
-    payment.save()
-    invoice.amount = admission.admissionpricing.final_amount
-    invoice.tax = taxed_amount - admission.admissionpricing.final_amount
-    invoice.total = taxed_amount
+
+    pricing = admission.admissionpricing
+    invoice.amount = pricing.list_price
+    if pricing.tax_included:
+        invoice.total = pricing.final_amount
+        invoice.subtotal = pricing.final_amount * Decimal(100) / Decimal(100) + TAX_RATE
+    else:
+        # if pricing.final_amount != pricing.list_price:  # pre-tax discount applied
+        invoice.subtotal = pricing.final_amount
+        invoice.total = (invoice.subtotal * (100 + TAX_RATE)) / 100
+        payment = Payment.objects.get(admission=admission, method=10, type=10)
+        payment.amount = -invoice.total
+        payment.save()
+    invoice.tax = invoice.total - invoice.subtotal
+    invoice.discount = invoice.subtotal - invoice.amount
     invoice.save()
 
 
@@ -80,6 +88,8 @@ def next_invoice_id(request):
 
 
 def print_invoice(invoice, request, error=None):
+    if error:
+        return render(request, 'invoice.html', {'error': error})
     integ, decim = str(invoice.total).split('.')
     text_total_int = num2text(int(integ))
     text_total_decimal = num2text(int(decim))

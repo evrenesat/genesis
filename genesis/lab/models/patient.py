@@ -154,7 +154,7 @@ class AdmissionStateDefinition(models.Model):
 
 
 class AdmissionState(models.Model):
-    admission = models.ForeignKey(Admission, models.PROTECT, verbose_name=_('Admission'))
+    admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Admission'))
     definition = models.ForeignKey(AdmissionStateDefinition, models.PROTECT, verbose_name=_('State'))
     comment = models.CharField(_('Comment'), max_length=50, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
@@ -166,7 +166,7 @@ class AdmissionState(models.Model):
         ordering = ('timestamp',)
 
     def __str__(self):
-        return "%s %s" % (self.analyse, self.definition)
+        return "%s: %s" % (self.admission, self.definition.name)
 
 
 
