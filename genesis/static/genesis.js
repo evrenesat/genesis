@@ -151,13 +151,20 @@ function patch_edit_views() {
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
 
-        modify_parameter_list_edit('div#parametervalue_set-group div.form-row');
+        modify_parameter_list_edit('div#parametervalue_set-group div.form-row.has_original');
 
         if (group_membership) {
+
+
+
             add_footer_button({
-                url: '/admin/lab/parametervalue/?q=' + group_membership,
-                name: 'Analiz Panelini Goruntule',
-                target: '_self'
+                onclick: function () {
+                    $.featherlight({
+                        iframe: '/admin/lab/parametervalue/?q=' + group_membership + '#pop_up=1',
+                        iframeWidth: 1000, iframeHeight: 600
+                    });
+                },
+                name: 'Tüm Paneli Görüntüle'
             });
 
             add_footer_button({
@@ -225,7 +232,7 @@ function patch_edit_views() {
             add_footer_button({
                 onclick: function () {
                     $.featherlight({
-                        iframe: '/admin/lab/parametervalue/?q=' + object_id,
+                        iframe: '/admin/lab/parametervalue/?q=' + object_id + '#pop_up=1',
                         iframeWidth: 1000, iframeHeight: 600
                     });
                 },
@@ -368,6 +375,10 @@ function patch_everywhere() {
     // align True/False check marks to center
     grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
 
+    if(window.location.hash.indexOf('pop_up=1') > -1){
+        $('#grp-navigation, #grp-context-navigation, #grp-content-title, div.grp-module:first').hide();
+        $('#grp-content').css('top', '20px');
+    }
 
 }
 grp.jQuery('document').ready(function () {

@@ -345,6 +345,9 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         if not obj.result:  # obj.finished and
             obj.save_result()
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(group_relation='GRP')
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "template":
             kwargs["queryset"] = request._obj_.type.reporttemplate_set.all()
@@ -427,6 +430,9 @@ class AnalyseInline(admin.TabularInline):
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0 if obj else self.extra
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(group_relation='GRP')
 
 
 class AdmissionStateInline(admin.TabularInline):

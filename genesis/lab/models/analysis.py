@@ -183,8 +183,11 @@ class Analyse(models.Model):
                                  blank=True, related_name='approved_analyses')
 
     def _set_state_for(self, approve=False, finish=False):
-        state = self.type.statedefinition_set.get(finish=finish, approve=approve)
-        self.state_set.create(definition=state)
+        state_set = self.state_set.all()
+        if not state_set or (state_set[0].definition.finish != finish
+                             or state_set[0].definition.approve != approve):
+            state = self.type.statedefinition_set.get(finish=finish, approve=approve)
+            self.state_set.create(definition=state)
 
     def mark_approved(self, request, set_state=False):
         if not request.user.has_perm('lab.can_approve_analysis'):
