@@ -151,6 +151,8 @@ function patch_edit_views() {
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
 
+        modify_parameter_list_edit('div#parametervalue_set-group div.form-row');
+
         if (group_membership) {
             add_footer_button({
                 url: '/admin/lab/parametervalue/?q=' + group_membership,
@@ -299,18 +301,21 @@ function create_selectbox(optionList, toElem) {
     return combo;
 }
 
-function modify_parameter_list_edit(){
-    $('table#result_list tr.grp-row').each(function(){
+function modify_parameter_list_edit(selector){
+    $(selector).each(function(){
 
         let tr = $(this);
+        window.tr = tr;
+        console.log(tr);
+        console.log(tr.find('input.keydata').val());
         let keyData = JSON.parse(tr.find('input.keydata').val());
         if (Object.keys(keyData).length) {
             let txt_field = tr.find('input.vTextField');
-            console.log(txt_field.val());
+
             txt_field.hide();
             var combo = create_selectbox(keyData, txt_field);
             txt_field.after(combo);
-            let manual_button = $('<input class="manualb" type="button" value=" <|> ">');
+            let manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
             manual_button.click(function(){
                 combo.toggle();
                 txt_field.toggle();
@@ -349,7 +354,7 @@ function patch_list_views() {
 
     }
     if (is_listing('parametervalue')) {
-        modify_parameter_list_edit()
+        modify_parameter_list_edit('table#result_list tr.grp-row')
 
     }
 }

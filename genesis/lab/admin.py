@@ -140,12 +140,16 @@ class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
     extra = 0
     ordering = ('code',)
-    readonly_fields = ('key', 'code')
+    readonly_fields = ('key', 'code', 'keydata')
     max_num = 0
-    fields = ('key', 'value', 'code')
+    fields = ('key', 'value', 'code', 'keydata')
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    def keydata(self, obj):
+        return obj.keyid()
+    keydata.allow_tags = True
 
 
 class ParameterKeyInline(admin.TabularInline):
