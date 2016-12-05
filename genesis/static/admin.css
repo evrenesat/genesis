@@ -319,3 +319,13 @@ img[alt="False"]{
 th.column-keyid, td.field-keyid{
     display:none;
 }
+td input.manualb{
+    float:right;
+}
+td.field-value input.vTextField, td.field-value select.comboin{
+    width:120px !important;
+}
+
+td.field-value input.vTextField {
+    background-color: #fcf8e3;
+}

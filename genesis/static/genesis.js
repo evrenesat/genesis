@@ -224,7 +224,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/admin/lab/parametervalue/?q=' + object_id,
-                        iframeWidth: 900, iframeHeight: 600
+                        iframeWidth: 1000, iframeHeight: 600
                     });
                 },
                 name: 'Sonuç Gir'
@@ -286,7 +286,7 @@ function patch_edit_views() {
 
 
 function create_selectbox(optionList, toElem) {
-    var combo = $("<select></select>");
+    var combo = $("<select class='comboin'></select>");
 
     $.each(optionList, function (i, el) {
         combo.append("<option>" + el + "</option>");
@@ -308,7 +308,14 @@ function modify_parameter_list_edit(){
             let txt_field = tr.find('input.vTextField');
             console.log(txt_field.val());
             txt_field.hide();
-            txt_field.after(create_selectbox(keyData, txt_field));
+            var combo = create_selectbox(keyData, txt_field);
+            txt_field.after(combo);
+            let manual_button = $('<input class="manualb" type="button" value=" <|> ">');
+            manual_button.click(function(){
+                combo.toggle();
+                txt_field.toggle();
+            })
+            txt_field.after(manual_button);
         }
     })
 }
