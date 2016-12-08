@@ -277,7 +277,13 @@ function patch_edit_views() {
 
 
             add_footer_button({
-                url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
+                // url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
+                onclick: function () {
+                                    $.featherlight({
+                                        iframe: '/admin/lab/analyse/?admission__id__exact=' + object_id + '#pop_up=1',
+                                        iframeWidth: 1100, iframeHeight: 600
+                                    });
+                                },
                 name: 'Analizleri Listele',
                 target: '_self'
             });

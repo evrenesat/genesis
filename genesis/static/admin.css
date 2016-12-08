@@ -336,3 +336,7 @@ div.grp-tr div.grp-td.value{
 div.grp-tr {
     table-layout: fixed;
 }
+
+div.grp-td.keydata, div.grp-th.keydata{
+    display:none !important;
+}

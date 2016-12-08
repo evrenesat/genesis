@@ -15,6 +15,8 @@ RELATION = ((1, _('Self')),
 INSTITUTION_TYPE = ((10, _('Government Hospital')),
                     (20, _('Private Hospital')),
                     (30, _('Clinic')),
+                    (40, _('Lab')),
+                    (50, _('Supplier')),
                     (99, _('Internal')),
                     )
 
@@ -25,10 +27,12 @@ class Institution(models.Model):
     type = models.SmallIntegerField(_('Institution type'), choices=INSTITUTION_TYPE)
     phone = models.CharField(_('Phone'), max_length=30, null=True, blank=True)
     cellular = models.CharField(_('Cellular phone'), max_length=30, null=True, blank=True)
-    address = models.CharField(_('Address'), max_length=100, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     email = models.EmailField(_('Email'), null=True, blank=True)
+    address = models.CharField(_('Address'), max_length=100, null=True, blank=True)
+    tax_no = models.CharField(_('Tax no'), max_length=11, null=True, blank=True)
+    tax_office = models.CharField(_('Tax office'), max_length=40, null=True, blank=True)
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
@@ -43,6 +47,20 @@ class Institution(models.Model):
     def autocomplete_search_fields():
         return ("id__iexact", "name__icontains", "code__startswith")
 
+class ExternalLab(models.Model):
+    name = models.CharField(_('Name'), max_length=30, unique=True)
+    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
+    institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('External Lab')
+        verbose_name_plural = _('External Labs')
+
+    def __str__(self):
+        return self.name
+
+    def get_code(self):
+        return self.code or self.name[:3].upper()
 
 class Doctor(models.Model):
     name = models.CharField(_('Name'), max_length=50)

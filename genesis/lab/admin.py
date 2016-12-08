@@ -77,11 +77,17 @@ approve_selected.short_description = _("Mark selected analyses as Approved")
 
 
 @admin.register(ParameterValue)
-class ParameterValueAdmin(admin.ModelAdmin):
+class AdminParameterValue(admin.ModelAdmin):
     list_editable = ('value',)
     actions = [finish_selected_value, approve_selected_value]
     list_display = ('code', 'patient_name', 'analyse_name', 'key', 'value', 'analyse_state', 'keyid')
     search_fields = ('analyse__group_relation', 'analyse__type__name', 'analyse__admission__id')
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 
@@ -139,9 +145,9 @@ class ParameterValueInline(admin.TabularInline):
     model = ParameterValue
     extra = 0
     ordering = ('code',)
-    readonly_fields = ('key', 'code', 'keydata')
+    readonly_fields = ('key',  'keydata')
     max_num = 0
-    fields = ('key', 'value', 'code', 'keydata')
+    fields = ('key', 'value', 'keydata')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -344,11 +350,31 @@ class AdminAnalyse(admin.ModelAdmin):
                    },
                   ))
 
-    list_filter = ('finished', 'group_relation', 'timestamp', 'type')
+    list_filter = ('finished', 'timestamp', 'type')
     list_display = ('type', 'admission', 'timestamp', 'finished', 'approved')
     inlines = [
         StateInline, ParameterValueInline
     ]
+
+    def get_search_results(self, request, queryset, search_term):
+        # integer search_term means we want to list values of a certain record
+        try:
+            search_term_as_int = int(search_term)
+            return Analyse.objects.filter(pk=search_term_as_int), False
+        except ValueError:
+            if len(search_term) == 32 and ' ' not in search_term:
+                # checking if the search term is a hash or not,
+                # a weak solution but should work for most cases
+                return Analyse.objects.filter(group_relation=search_term), False
+            return super().get_search_results(request, queryset, search_term)
+
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
 
     def doctor_institution(self, obj):
         adm  = obj.admission
@@ -356,8 +382,11 @@ class AdminAnalyse(admin.ModelAdmin):
     doctor_institution.short_description = _("Institution / Doctor")
 
     def patient(self, obj):
-        return '%s - %s' % (obj.admission.patient.full_name(30), obj.admission.timestamp)
+        return '<a href="/admin/lab/admission/%s/">%s - %s</a>' % (obj.admission.id,
+                                                                   obj.admission.patient.full_name(30),
+                                                                   obj.admission.timestamp)
     patient.short_description = _("Patient info")
+    patient.allow_tags = True
 
     def analyse_type(self, obj):
         external = ' | %s:%s' % (_('Ext.Lab'), obj.external_lab) if obj.external else ''

@@ -14,7 +14,7 @@ from django.core.cache import cache
 
 from ..utils import pythonize, lazy_property
 
-from .patient import Admission
+from .patient import Admission, ExternalLab
 
 
 class Profile(models.Model):
@@ -91,19 +91,7 @@ class Category(models.Model):
         return self.code or self.name[:3].upper()
 
 
-class ExternalLab(models.Model):
-    name = models.CharField(_('Name'), max_length=30, unique=True)
-    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
 
-    class Meta:
-        verbose_name = _('External Lab')
-        verbose_name_plural = _('External Labs')
-
-    def __str__(self):
-        return self.name
-
-    def get_code(self):
-        return self.code or self.name[:3].upper()
 
 
 class AnalyseType(models.Model):
@@ -124,7 +112,8 @@ class AnalyseType(models.Model):
                                 help_text=_('This will be shown under the report'))
     external = models.BooleanField(_('Goes to external lab'), default=False,
                                    help_text=_('Analysed by an external lab'))
-    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True)
+    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True,
+                                     verbose_name=_('External lab'))
     external_price = models.DecimalField(_('External lab price'), max_digits=6, decimal_places=2,
                                          default=0)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2, default=0)
@@ -207,7 +196,7 @@ class Analyse(models.Model):
 
     external = models.BooleanField(_('Goes to external lab'), default=False,
                                    help_text=_('Analysed by an external lab'))
-    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True)
+    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True, verbose_name=_('External lab'))
 
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
     approve_time = models.DateTimeField(_('Approve time'), editable=False, null=True)

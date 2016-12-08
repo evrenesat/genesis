@@ -53,6 +53,7 @@ class AnalysePricing(models.Model):
 
 
 PAYMENT_TYPES = (
+    (5, _('Expense (-)')),
     (10, _('Customer debt (-)')),
     (20, _('Customer payment (+)')),
 )
@@ -165,7 +166,7 @@ class AdmissionPricing(models.Model):
         self.final_amount = Decimal(0)
         self.list_price = Decimal(0)
         for analyse in self.admission.analyse_set.all():
-            if analyse.group_relation == '' or analyse.group_relation == 'GRP':
+            if not analyse.group_relation  or analyse.group_relation == 'GRP':
                 # this is not a group member (sub-analysis) so we should count it in our price calc.
                 discounted_price, list_price, discount_rate = self.calculate_pricing_for(analyse)
                 InvoiceItem.objects.get_or_create(admission=self.admission, name=analyse.type.name,
