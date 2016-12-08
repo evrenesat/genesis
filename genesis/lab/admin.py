@@ -49,7 +49,7 @@ def finish_selected_value(modeladmin, request, queryset):
         value_item.analyse.mark_finished(request, True)
 
 
-finish_selected_value.short_description = _("Mark selected analyses as Finished")
+finish_selected_value.short_description = _("Mark as Finished")
 
 
 def approve_selected_value(modeladmin, request, queryset):
@@ -57,7 +57,7 @@ def approve_selected_value(modeladmin, request, queryset):
         value_item.analyse.mark_approved(request, True)
 
 
-approve_selected_value.short_description = _("Mark selected analyses as Approved")
+approve_selected_value.short_description = _("Mark as Approved")
 
 
 def finish_selected(modeladmin, request, queryset):
@@ -65,7 +65,7 @@ def finish_selected(modeladmin, request, queryset):
         analyse.mark_finished(request, True)
 
 
-finish_selected.short_description = _("Mark selected analyses as Finished")
+finish_selected.short_description = _("Mark as Finished")
 
 
 def accept_selected(modeladmin, request, queryset):
@@ -73,7 +73,7 @@ def accept_selected(modeladmin, request, queryset):
         analyse.mark_accepted(request, True)
 
 
-finish_selected.short_description = _("Mark selected analyses as Finished")
+finish_selected.short_description = _("Mark as Finished")
 
 
 def approve_selected(modeladmin, request, queryset):
@@ -81,7 +81,7 @@ def approve_selected(modeladmin, request, queryset):
         analyse.mark_approved(request, True)
 
 
-approve_selected.short_description = _("Mark selected analyses as Approved")
+approve_selected.short_description = _("Mark as Approved")
 
 
 @admin.register(ParameterValue)

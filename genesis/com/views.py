@@ -50,7 +50,8 @@ def prepare_invoice_for(admission):
                               address=admission.patient.address)
             add_tax_to(admission, invoice)
             invoice.admission.add(admission)
-            for item in admission.invoiceitem_set.all():
+        for item in admission.invoiceitem_set.all():
+            if not item.invoice:
                 item.invoice = invoice
                 item.save()
     return invoice, error

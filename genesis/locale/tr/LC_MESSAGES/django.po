@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-08 04:07+0000\n"
+"POT-Creation-Date: 2016-12-08 04:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,12 +119,12 @@ msgid "Patient"
 msgstr "Hasta"
 
 #: com/models.py:80
-msgid "Record type"
-msgstr "Kayit tipi"
-
-#: com/models.py:81
 msgid "Payment method"
 msgstr "Ödeme yöntemi"
+
+#: com/models.py:81
+msgid "Record type"
+msgstr "Kayit tipi"
 
 #: com/models.py:82 com/models.py:228 lab/models/analysis.py:53
 #: lab/models/patient.py:198
@@ -241,12 +241,14 @@ msgid "Customer address is missing"
 msgstr "Müşteri adresi eksik"
 
 #: lab/admin.py:52 lab/admin.py:68 lab/admin.py:76
-msgid "Mark selected analyses as Finished"
-msgstr "Seçilen analizleri Tamamlandı olarak işaretle"
+#| msgid "Finished"
+msgid "Mark as Finished"
+msgstr "Tamamlandı yap"
 
 #: lab/admin.py:60 lab/admin.py:84
-msgid "Mark selected analyses as Approved"
-msgstr "Seçilen analizleri Onaylandı olarak işaretle"
+#| msgid "Approved"
+msgid "Mark as Approved"
+msgstr "Onaylandı yap"
 
 #: lab/admin.py:212
 msgid "Subtypes"
@@ -576,7 +578,6 @@ msgid "Approved state"
 msgstr "Onaylanma durumu"
 
 #: lab/models/analysis.py:361
-#| msgid "Approved state"
 msgid "Accepted state"
 msgstr "Kabul edilme durumu"
 
@@ -989,29 +990,17 @@ msgstr "Belgeler"
 msgid "Home"
 msgstr "Ana Ekran"
 
-#: templates/admin/index.html:98
+#: templates/admin/index.html:100
 msgid "Add"
 msgstr "Ekle"
 
-#: templates/admin/index.html:108
+#: templates/admin/index.html:110
 msgid "You don´t have permission to edit anything."
 msgstr "Yetkiniz yok"
 
-#: templates/admin/index.html:113
+#: templates/admin/index.html:115
 msgid "Custom Views"
 msgstr "Özel Görünümler"
-
-#: templates/admin/index.html:126
-msgid "Recent actions"
-msgstr "Son işlemler"
-
-#: templates/admin/index.html:128
-msgid "My actions"
-msgstr "Benim işlemlerim"
-
-#: templates/admin/index.html:131
-msgid "None available"
-msgstr "Mevcut değil"
 
 #: templates/admin/lab/analyse/change_list.html:168
 #: templates/admin/lab/parametervalue/change_list.html:168
@@ -1038,6 +1027,21 @@ msgstr ""
 #: templates/admin/lab/parametervalue/change_list.html:258
 msgid "Save"
 msgstr ""
+
+#~ msgid "Mark selected analyses as Finished"
+#~ msgstr "Seçilen analizleri Tamamlandı olarak işaretle"
+
+#~ msgid "Mark selected analyses as Approved"
+#~ msgstr "Seçilen analizleri Onaylandı olarak işaretle"
+
+#~ msgid "Recent actions"
+#~ msgstr "Son işlemler"
+
+#~ msgid "My actions"
+#~ msgstr "Benim işlemlerim"
+
+#~ msgid "None available"
+#~ msgstr "Mevcut değil"
 
 #~ msgid "None"
 #~ msgstr "Yok"

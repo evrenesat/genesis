@@ -320,7 +320,7 @@ th.column-keyid, td.field-keyid{
     display:none;
 }
 input.manualb{
-    float:right !important;
+    /*float:right !important;*/
 }
 td.field-value input.vTextField, td.field-value select.comboin, div#parametervalue_set-group div.form-row input.vTextField, div#parametervalue_set-group div.form-row select.comboin{
     width:120px !important;

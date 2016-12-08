@@ -6,7 +6,7 @@ import smtplib
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
-
+import os
 from lab.models import Admission
 
 FROM_MAIL = 'kotumektup@gmail.com'
@@ -48,7 +48,7 @@ def send_mail(subject, body, to, files=None, file_paths=None):
     # s = smtplib.SMTP('localhost')
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login(FROM_MAIL, "2kj4g23jkh423g4jkh32")
+    server.login(FROM_MAIL, os.getenv('MAIL_KEY'))
     server.send_message(msg)
     server.quit()
 

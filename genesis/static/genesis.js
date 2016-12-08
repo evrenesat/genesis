@@ -174,8 +174,8 @@ function patch_edit_views() {
 
         modify_parameter_list_edit('div#parametervalue_set-group div.form-row.has_original');
 
-        swap_add_another_status_row();
-        setTimeout(lock_unlock_analyse_states, 0);
+        lock_unlock_analyse_states();
+        setTimeout(swap_add_another_status_row, 0);
 
         if (group_membership) {
 
@@ -184,7 +184,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/admin/lab/parametervalue/?q=' + group_membership + '#pop_up=1',
-                        iframeWidth: 1000, iframeHeight: 600
+                        iframeWidth: 1100, iframeHeight: 600
                     });
                 },
                 name: 'Tüm Paneli Görüntüle'
@@ -199,7 +199,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/lab/report_for_panel/' + group_membership + '/',
-                        iframeWidth: 900, iframeHeight: 600
+                        iframeWidth: 1100, iframeHeight: 600
                     });
                 },
                 name: 'Panel Rapor Görüntüle',
@@ -219,7 +219,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/lab/analyse_report/' + object_id + '/#noprint',
-                        iframeWidth: 900, iframeHeight: 600
+                        iframeWidth: 1100, iframeHeight: 600
                     });
                 },
                 name: 'Rapor Görüntüle'
@@ -256,7 +256,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/admin/lab/parametervalue/?q=' + object_id + '#pop_up=1',
-                        iframeWidth: 1000, iframeHeight: 600
+                        iframeWidth: 1100, iframeHeight: 600
                     });
                 },
                 name: 'Sonuç Gir'
@@ -266,7 +266,7 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/com/print_invoice/' + object_id + '/#noprint',
-                        iframeWidth: 1000, iframeHeight: 600,
+                        iframeWidth: 1100, iframeHeight: 600,
                         afterClose: function () {
                             window.location.reload()
                         }
@@ -359,7 +359,7 @@ function modify_parameter_list_edit(selector) {
                 combo.toggle();
                 txt_field.toggle();
             })
-            txt_field.after(manual_button);
+            combo.after(manual_button);
         }
     })
 }
@@ -373,6 +373,10 @@ function handle_dashboard() {
     })
 
 
+}
+
+function check_all_records() {
+    $('input.action-select').attr('checked', true);
 }
 
 function get_selected_record_ids() {
@@ -393,16 +397,16 @@ function patch_list_views() {
             onclick: function () {
                 grp.jQuery('#_ifrm').attr('src',
                     '/lab/multiple_reports/?ids=' + get_selected_record_ids());
-            }, name: 'Seçili Analizler İçin Rapor Yazdır'
+            }, name: 'Seçilenler için Rapor Yazdır'
         });
 
         add_footer_button({
             onclick: function () {
                 $.featherlight({
                     iframe: '/lab/multiple_reports/?ids=' + get_selected_record_ids() + '#noprint',
-                    iframeWidth: 1000, iframeHeight: 600,
+                    iframeWidth: 1100, iframeHeight: 600,
                 });
-            }, name: 'Seçili Analizler İçin Rapor Göster'
+            }, name: 'Seçilenler için Rapor Göster'
         });
 
 
@@ -411,6 +415,11 @@ function patch_list_views() {
         modify_parameter_list_edit('table#result_list tr.grp-row')
 
     }
+    add_footer_button({
+        onclick: function () {
+            check_all_records();
+        }, name: ' ✓ '
+    });
 }
 
 function patch_everywhere() {
