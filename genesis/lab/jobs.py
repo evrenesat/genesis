@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 from lab.models import Admission
 
-FROM_MAIL = 'kotumektup@gmail.com'
+FROM_MAIL = os.getenv('MAIL_LOGIN')
 
 try:
     from weasyprint import HTML
