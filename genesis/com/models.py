@@ -77,8 +77,8 @@ class Payment(models.Model):
                                 verbose_name=_('Patient'), null=True, blank=True)
     institution = models.ForeignKey(Institution, models.PROTECT,
                                     verbose_name=_('Institution'), null=True, blank=True)
-    type = models.SmallIntegerField(_('Record type'), choices=PAYMENT_METHODS)
-    method = models.SmallIntegerField(_('Payment method'), choices=PAYMENT_TYPES, default=10)
+    type = models.SmallIntegerField(_('Payment method'), choices=PAYMENT_METHODS)
+    method = models.SmallIntegerField(_('Record type'), choices=PAYMENT_TYPES, default=10)
     amount = models.DecimalField(_('Amount'), max_digits=8, decimal_places=2, null=True, blank=True)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 

@@ -203,15 +203,27 @@ class Analyse(models.Model):
     analyser = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Analyser'), null=True,
                                  blank=True, related_name='analyses')
     approved = models.BooleanField(_('Approved'), default=False)
+    accepted = models.BooleanField(_('Accepted'), default=False)
     approver = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Approver'), null=True,
                                  blank=True, related_name='approved_analyses')
 
-    def _set_state_for(self, approve=False, finish=False):
+    def _set_state_for(self, approve=False, finish=False, accept=False):
         state_set = self.state_set.all()
         if not state_set or (state_set[0].definition.finish != finish
-                             or state_set[0].definition.approve != approve):
-            state = self.type.statedefinition_set.get(finish=finish, approve=approve)
+                             or state_set[0].definition.approve != approve
+                             or state_set[0].definition.accept != accept):
+            state = self.type.statedefinition_set.get(finish=finish, approve=approve, accept=accept)
             self.state_set.create(definition=state)
+
+    def mark_accepted(self, request, set_state=False):
+        if not request.user.has_perm('lab.can_finish_analysis'):
+            raise ValidationError('-')  # PermissionDenied(
+            # _("You don't have required permissions to mark an analyse as approved"))
+        else:
+            self.accepted = True
+            self.save()
+        if set_state:
+            self._set_state_for(accept=True)
 
     def mark_approved(self, request, set_state=False):
         if not request.user.has_perm('lab.can_approve_analysis'):
@@ -346,6 +358,7 @@ class StateDefinition(models.Model):
     explanation = models.TextField(_('Explanation'), null=True, blank=True)
     finish = models.BooleanField(_('Finished state'), default=False)
     approve = models.BooleanField(_('Approved state'), default=False)
+    accept = models.BooleanField(_('Accepted state'), default=False)
     order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
 
     class Meta:

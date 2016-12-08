@@ -175,7 +175,7 @@ function patch_edit_views() {
         modify_parameter_list_edit('div#parametervalue_set-group div.form-row.has_original');
 
         swap_add_another_status_row();
-        setTimeout(lock_unlock_analyse_states,0);
+        setTimeout(lock_unlock_analyse_states, 0);
 
         if (group_membership) {
 
@@ -279,11 +279,11 @@ function patch_edit_views() {
             add_footer_button({
                 // url: '/admin/lab/analyse/?admission__id__exact=' + object_id,
                 onclick: function () {
-                                    $.featherlight({
-                                        iframe: '/admin/lab/analyse/?admission__id__exact=' + object_id + '#pop_up=1',
-                                        iframeWidth: 1100, iframeHeight: 600
-                                    });
-                                },
+                    $.featherlight({
+                        iframe: '/admin/lab/analyse/?admission__id__exact=' + object_id + '#pop_up=1',
+                        iframeWidth: 1100, iframeHeight: 600
+                    });
+                },
                 name: 'Analizleri Listele',
                 target: '_self'
             });
@@ -375,24 +375,34 @@ function handle_dashboard() {
 
 }
 
-function print_multi_report() {
-    analyzes = grp.jQuery('input.action-select:checked').map(function () {
+function get_selected_record_ids() {
+    return grp.jQuery('input.action-select:checked').map(function () {
         return this.value;
     }).get().join(',')
-    grp.jQuery('#_ifrm').attr('src', '/lab/multiple_reports/?ids=' + analyzes)
 }
+
 
 function patch_list_views() {
 
-    if(_actions_icnt=="1" && location.search.indexOf('q=')>-1){
+    if (_actions_icnt == "1" && location.search.indexOf('q=') > -1) {
         location.pathname = location.pathname + $('.action-select').val() + '/'
     }
 
     if (is_listing('analyse')) {
         add_footer_button({
             onclick: function () {
-                print_multi_report()
+                grp.jQuery('#_ifrm').attr('src',
+                    '/lab/multiple_reports/?ids=' + get_selected_record_ids());
             }, name: 'Seçili Analizler İçin Rapor Yazdır'
+        });
+
+        add_footer_button({
+            onclick: function () {
+                $.featherlight({
+                    iframe: '/lab/multiple_reports/?ids=' + get_selected_record_ids() + '#noprint',
+                    iframeWidth: 1000, iframeHeight: 600,
+                });
+            }, name: 'Seçili Analizler İçin Rapor Göster'
         });
 
 

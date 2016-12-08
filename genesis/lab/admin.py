@@ -68,6 +68,14 @@ def finish_selected(modeladmin, request, queryset):
 finish_selected.short_description = _("Mark selected analyses as Finished")
 
 
+def accept_selected(modeladmin, request, queryset):
+    for analyse in queryset:
+        analyse.mark_accepted(request, True)
+
+
+finish_selected.short_description = _("Mark selected analyses as Finished")
+
+
 def approve_selected(modeladmin, request, queryset):
     for analyse in queryset:
         analyse.mark_approved(request, True)
@@ -267,6 +275,8 @@ class StateFormSet(BaseInlineFormSet):
         # here you can add anything you need from the request
         if obj.definition.finish:
             obj.analyse.mark_finished(self.request)
+        if obj.definition.accept:
+            obj.analyse.mark_accepted(self.request)
         if obj.definition.approve:
             obj.analyse.mark_approved(self.request)
         if commit:

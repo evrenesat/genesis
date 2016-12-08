@@ -36,7 +36,9 @@
                     <form action="/admin/lab/admission/" method="get">
                         <div class="container-1">
                             <span class="icon"><img src="/static/icons/magnifier_dna.svg"></span>
-                            <input type="search" id="search" name="q" placeholder="Protokol No, Hasta Adı ya da TC No ile ara" autofocus/>
+                            <input type="search" id="search" name="q"
+                                   placeholder="Protokol No, Hasta Adı ya da TC No ile ara"
+                                   autofocus/>
                         </div>
                     </form>
                 </div>
@@ -73,8 +75,8 @@
                     </div>
                     <div class="small-icon">
                         <a href="/admin/lab/analysetype/">
-                        <img src="/static/icons/tubes.svg">
-                        <span>Analiz<br>Tipleri</span>
+                            <img src="/static/icons/tubes.svg">
+                            <span>Analiz<br>Tipleri</span>
                         </a>
                     </div>
                 </div>
@@ -123,28 +125,41 @@
         </div>
         <div class="g-d-6 g-d-l" style="float:right !important;">
             <div class="grp-module" id="grp-recent-actions-module">
-                <h2>{% trans 'Recent actions' %}</h2>
+
                 <div class="grp-module">
-                    <h3>{% trans 'My actions' %}</h3>
-                    {% get_admin_log 10 as admin_log for_user user %}
-                    {% if not admin_log %}
-                        <div class="grp-row"><p>{% trans 'None available' %}</p></div>
-                    {% else %}
-                        <ul class="grp-listing-small">
-                            {% for entry in admin_log %}
-                                <li class="grp-row{% if entry.is_addition %} grp-add-link{% endif %}{% if entry.is_change %} grp-change-link{% endif %}{% if entry.is_deletion %} grp-delete-link{% endif %}">
-                                    {% if entry.is_deletion %}
-                                        <span>{{ entry.object_repr }}</span>
-                                    {% else %}
-                                        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
-                                    {% endif %}
-                                    <span class="grp-font-color-quiet">{% filter capfirst %}
-                                        {% trans entry.content_type.name %}{% endfilter %}</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
+                    <h2>Yeni Gelenler</h2>
+                    <ul class="grp-listing-small">
+                        <li style="zoom:0.8" class="grp-row grp-add-link">
+
+                            -
+                            <span class="grp-font-color-quiet"> * </span>
+                        </li>
+                    </ul>
                 </div>
+
+                <div class="grp-module">
+                    <h2>Onay Bekleyenler</h2>
+                    <ul class="grp-listing-small">
+                        <li style="zoom:0.8" class="grp-row grp-add-link">
+
+                            -
+                            <span class="grp-font-color-quiet"> * </span>
+                        </li>
+                    </ul>
+                </div>
+
+
+                <div class="grp-module">
+                    <h2>Onaylanmışlar</h2>
+                    <ul class="grp-listing-small">
+                        <li style="zoom:0.8" class="grp-row grp-add-link">
+
+                            -
+                            <span class="grp-font-color-quiet"> * </span>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
         </div>
     </div>
