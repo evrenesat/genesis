@@ -340,3 +340,6 @@ div.grp-tr {
 div.grp-td.keydata, div.grp-th.keydata{
     display:none !important;
 }
+li.grp-row.grp-add-link{
+    cursor: pointer;
+}

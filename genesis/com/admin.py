@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
-from lab.admin import AdmissionAdmin, post_admission_save
+from lab.admin import AdminAdmission, post_admission_save
 
 
 @receiver(post_admission_save, sender=Admission)
@@ -43,7 +43,7 @@ class AdmissionPricingInline(admin.TabularInline):
     classes = ('grp-collapse',)
 
 
-AdmissionAdmin.inlines.extend([AdmissionPricingInline, PaymentInline, InvoiceItemInline])
+AdminAdmission.inlines.extend([AdmissionPricingInline, PaymentInline, InvoiceItemInline])
 
 
 

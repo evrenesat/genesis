@@ -143,9 +143,17 @@ class Admission(models.Model):
     def is_approved(self):
         return all(self.analyse_set.values_list('approved', flat=True))
 
-    def analyse_state(self):
-        states = list(self.analyse_set.values_list('finished', flat=True))
-        return "{}/{}".format(states.count(True), len(states))
+    def analyse_state(self, raw=False):
+        total, approved, finished = 0,0,0
+        for fin,app in self.analyse_set.values_list('finished', 'approved'):
+            total +=1
+            if app:
+                approved+=1
+            if fin:
+                finished +=1
+        if raw:
+            return total, finished, approved
+        return "{}/{}/{}".format(total, finished, approved)
 
     analyse_state.short_description = _('Analyse State')
 

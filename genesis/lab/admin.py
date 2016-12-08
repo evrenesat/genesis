@@ -514,7 +514,7 @@ post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
 
 
 @admin.register(Admission)
-class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     search_fields = ('id', 'patient__name', 'patient__tcno', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')

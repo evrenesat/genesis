@@ -9,6 +9,9 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^get_admissions/$', views.get_admissions),
+    url(r'^get_analyses/$', views.get_analyses),
+    url(r'^get_admissions_by_analyses/$', views.get_admissions_by_analyses),
     url(r'^choices_for_parameter/(?P<pk>\d+)/$', views.choices_for_parameter),
     url(r'^analyse_check$', views.analyse_check),
     url(r'^analyse_barcode/(?P<pk>\d+)/$', views.analyse_barcode),

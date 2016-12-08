@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from django.core import serializers
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.decorators import login_required
@@ -15,7 +16,6 @@ from lab.models import Admission, ParameterKey
 from lab.models import Analyse
 
 
-
 @cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
 def analyse_check(request):
     patient_id = int(request.GET.get('pid'))
@@ -50,6 +50,7 @@ def analyse_check(request):
     else:
         result = _('Your analyses are still in progress.')
     return HttpResponse(content=result)
+
 
 @login_required
 def analyse_barcode(request, pk):
@@ -73,7 +74,6 @@ def analyse_report(request, pk):
     return HttpResponse(content)
 
 
-
 @login_required
 def choices_for_parameter(request, pk):
     pk = ParameterKey.objects.get(parametervalue=pk)
@@ -84,16 +84,52 @@ def choices_for_parameter(request, pk):
 
 
 @login_required
+def get_admissions(request):
+    queryset = Admission.objects.filter(**request.GET.copy())
+    return HttpResponse(serializers.serialize('json', queryset[:10]),
+                        content_type='application/json')
+
+
+@login_required
+def get_analyses(request):
+    queryset = Analyse.objects.filter(**request.GET.copy())
+    return HttpResponse(serializers.serialize('json', queryset[:10]),
+                        content_type='application/json')
+
+
+@login_required
+def get_admissions_by_analyses(request):
+    admissions = set()
+    query = dict(
+        (k, (v == 'True' if v in ('False', 'True') else v)) for k, v in request.GET.items())
+    for adm_id in Analyse.objects.filter(**query).values_list('admission_id', flat=True):
+        admissions.add(adm_id)
+        if len(admissions) == 10:
+            break
+
+    data = {'admissions': []}
+    for adm in Admission.objects.filter(id__in=list(admissions)):
+        data['admissions'].append({
+            'title': adm.patient.full_name(),
+            'state': adm.analyse_state(),
+            'id': adm.id,
+        })
+    return JsonResponse(data)
+
+
+@login_required
 def multiple_reports(request):
     ids = request.GET.get('ids').split(',')
     content = render_combo_report(ids)
     return HttpResponse(content)
+
 
 @login_required
 def multiple_reports_for_panel(request, group_code):
     ids = Analyse.objects.filter(group_relation=group_code).values_list('id', flat=True)
     content = render_combo_report(ids)
     return HttpResponse(content)
+
 
 @login_required
 def admission_barcode(request, pk):

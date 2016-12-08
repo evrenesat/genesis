@@ -365,6 +365,25 @@ function modify_parameter_list_edit(selector) {
 }
 
 
+function dashbox(box_id, data, url){
+    let _data = data || {};
+    let _url = url || '/lab/get_admissions_by_analyses/';
+    var box = $('#'+box_id);
+    $.get(_url, _data, function(result){
+        // result = JSON.parse(result);
+        for(let itm of result.admissions){
+            box.append($('<li class="grp-row grp-add-link"></li>').html(itm.title + ' | ' +itm.state).click(
+                function(){
+                    $.featherlight({
+                        iframe: '/admin/lab/admission/' + itm.id + '/#pop_up=1',
+                        iframeWidth: 1140, iframeHeight: 600
+                    });
+                }
+            ));
+        }
+    });
+}
+
 function handle_dashboard() {
 
 
@@ -372,6 +391,10 @@ function handle_dashboard() {
         grp.jQuery("div.hide_it").toggleClass('show_it');
     })
 
+
+    dashbox('new_admissions', {accepted:'False'})
+    dashbox('finished_admissions', {finished:'True', approved:'False'})
+    dashbox('approved_admissions', {approved:'True'})
 
 }
 
