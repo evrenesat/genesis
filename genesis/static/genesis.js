@@ -130,8 +130,29 @@ function print_report_iframe() {
     jsPrintSetup.printWindow(window.frames[0]);
     // next commands
 }
-var object_id = get_editing_id();
 
+function lock_unlock_analyse_states() {
+    $('#state_set-group select').each(function () {
+        var selbox = $(this);
+        let id = selbox.attr('id').replace('definition', '') + 'id';
+        if (id.indexOf('_prefix') == -1 && $('#' + id).val()) {
+            selbox.attr("disabled", true);
+            selbox.after($('<input type=hidden>').val(selbox.val()).attr('name', selbox.attr('name')));
+            selbox.closest('.definition').dblclick(function () {
+                alert("Çok gerekmedikçe mevcut bir durum kaydını değiştirmek yerine yeni bir kayıt eklemeyi tercih ediniz.");
+                selbox.attr("disabled", false);
+                selbox.siblings('input').remove();
+            })
+        }
+    });
+}
+function swap_add_another_status_row() {
+    let add_new = $('#state_set-group div.grp-dynamic-form.grp-module.grp-tbody').not('.has_original');
+    let th = add_new.siblings('.grp-thead');
+    th.after(add_new.detach()[0]);
+}
+
+var object_id = get_editing_id();
 function patch_edit_views() {
 
     // change text of _save
@@ -153,8 +174,10 @@ function patch_edit_views() {
 
         modify_parameter_list_edit('div#parametervalue_set-group div.form-row.has_original');
 
-        if (group_membership) {
+        swap_add_another_status_row();
+        setTimeout(lock_unlock_analyse_states,0);
 
+        if (group_membership) {
 
 
             add_footer_button({
@@ -300,7 +323,7 @@ function create_selectbox(optionList, toElem) {
     $.each(optionList, function (i, el) {
         combo.append("<option>" + el + "</option>");
     });
-    $(combo).change(function(){
+    $(combo).change(function () {
         console.log("Change", toElem);
         toElem.val($(this).val());
     })
@@ -308,22 +331,25 @@ function create_selectbox(optionList, toElem) {
     return combo;
 }
 
-function modify_parameter_list_edit(selector){
-    $(selector).each(function(){
+function modify_parameter_list_edit(selector) {
+    $(selector).each(function () {
 
         let tr = $(this);
         window.tr = tr;
         console.log(tr);
         console.log(tr.find('input.keydata').val());
         let keyData = JSON.parse(tr.find('input.keydata').val());
-        if (Object.keys(keyData).length) {
+        if (keyData.presets.length) {
             let txt_field = tr.find('input.vTextField');
-
             txt_field.hide();
-            var combo = create_selectbox(keyData, txt_field);
+            var combo = create_selectbox(keyData.presets, txt_field);
+            combo.val(txt_field.val());
             txt_field.after(combo);
             let manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
-            manual_button.click(function(){
+            manual_button.click(function () {
+                if (!keyData.auto_preset && txt_field.css('display') == 'none') {
+                    alert("Öntanımlı değerler dışında bir değer girmek üzeresiniz!")
+                }
                 combo.toggle();
                 txt_field.toggle();
             })
@@ -351,6 +377,11 @@ function print_multi_report() {
 }
 
 function patch_list_views() {
+
+    if(_actions_icnt=="1" && location.search.indexOf('q=')>-1){
+        location.pathname = location.pathname + $('.action-select').val() + '/'
+    }
+
     if (is_listing('analyse')) {
         add_footer_button({
             onclick: function () {
@@ -375,7 +406,7 @@ function patch_everywhere() {
     // align True/False check marks to center
     grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
 
-    if(window.location.hash.indexOf('pop_up=1') > -1){
+    if (window.location.hash.indexOf('pop_up=1') > -1) {
         $('#grp-navigation, #grp-context-navigation, #grp-content-title, div.grp-module:first').hide();
         $('#grp-content').css('top', '20px');
     }

@@ -51,9 +51,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'lab',
     'com',
+    'django.contrib.humanize',
     'django_ace',
     # 'dbtemplates',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        # 'LOCATION': 's_unique-snowflake',
+    },
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    # }
+
+}
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,6 +176,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
+USE_THOUSAND_SEPARATOR = True
 
 LANGUAGE_CODE = 'tr'
 # LANGUAGE_CODE = 'en-EN'

@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,25 +154,25 @@
         <table>
             <tr>
                 <th>Ara Toplam</th>
-                <td>{{ invoice.amount }}</td>
+                <td>{{ invoice.amount|floatformat:"2"|intcomma  }}</td>
             </tr>
             {% if invoice.discount %}
                 <tr>
                     <th>İndirim</th>
-                    <td>{{ invoice.discount }}</td>
+                    <td>{{ invoice.discount|floatformat:"2"|intcomma  }}</td>
                 </tr>
                 <tr>
                     <th>Toplam</th>
-                    <td>{{ invoice.subtotal }}</td>
+                    <td>{{ invoice.subtotal|floatformat:"2"|intcomma  }}</td>
                 </tr>
             {% endif %}
             <tr>
                 <th>KDV %8</th>
-                <td>{{ invoice.tax }}</td>
+                <td>{{ invoice.tax|floatformat:"2"|intcomma }}</td>
             </tr>
             <tr>
                 <th>Genel Toplam</th>
-                <td>{{ invoice.total }} TL</td>
+                <td>{{ invoice.total|floatformat:"2"|intcomma  }} TL</td>
             </tr>
         </table>
     </div>

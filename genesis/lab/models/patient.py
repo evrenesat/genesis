@@ -54,6 +54,9 @@ class Doctor(models.Model):
     email = models.EmailField(_('Email'), null=True, blank=True)
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
+    def full_name(self):
+        return '%s %s' % (self.name, self.surname or '')
+
     class Meta:
         verbose_name = _('Doctor')
         verbose_name_plural = _('Doctors')

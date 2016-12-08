@@ -2,7 +2,6 @@ from datetime import datetime
 
 # import dbsettings
 from functools import partial
-from random import randint
 from uuid import uuid4
 
 from django.contrib import admin
@@ -43,7 +42,7 @@ UserAdmin.add_fieldsets = (
         'fields': ('username', 'password1', 'password2', 'first_name', 'last_name')}
      ),
 )
-
+# admin.ModelAdmin.change_list_template = "admin/change_list_filter_sidebar.html"
 
 def finish_selected_value(modeladmin, request, queryset):
     for value_item in queryset:
@@ -180,18 +179,21 @@ class AnalyseTypeForm(forms.ModelForm):
         fields = '__all__'
 
 
+
 @admin.register(AnalyseType)
-class AnalyseTypeAdmin(admin.ModelAdmin):
+class AdminAnalyseType(admin.ModelAdmin):
     form = AnalyseTypeForm
     list_filter = ('group_type', 'category',)
     search_fields = ('name',)
-    list_display = ('name', 'group_type', 'price')
+    list_display = ('name', 'code', 'group_type', 'category', 'method', 'price', 'external')
+    list_editable = ('category', 'method', 'price', 'code')
     filter_horizontal = ('subtypes',)
     readonly_fields = ('group_type',)
     fieldsets = (
         (None, {
             'fields': ('group_type', 'name', 'category', 'method', 'sample_type',
-                       'code', 'process_time', 'footnote', 'price', 'alternative_price')
+                       'code', 'process_time', 'footnote', 'price','external_price', 'external',
+                       'external_lab', 'alternative_price')
         }),
         (_('Subtypes'),
          {'classes': ('grp-collapse',),
@@ -221,14 +223,14 @@ class AnalyseTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(StateDefinition)
-class StateDefinitionAdmin(admin.ModelAdmin):
+class AdminStateDefinition(admin.ModelAdmin):
     list_filter = ('type',)
     search_fields = ('name',)
     filter_horizontal = ('type',)
 
 
 @admin.register(Parameter)
-class ParameterAdmin(admin.ModelAdmin):
+class AdminParameter(admin.ModelAdmin):
     # list_filter = (,)
     # search_fields = (,)
 
@@ -276,14 +278,22 @@ class StateFormSet(BaseInlineFormSet):
 
 
 class AnalyseAdminForm(forms.ModelForm):
-    group_relation = forms.CharField(widget=forms.HiddenInput)
+    class Meta:
+        model = Analyse
+        widgets = {
+            'group_relation': forms.HiddenInput()
+        }
+        fields = '__all__'
 
 
 class StateInline(admin.TabularInline):
     model = State
     extra = 1
-
+    can_delete = False
     formset = StateFormSet
+    fields = ('definition', 'comment', 'timestamp', 'updated_at')
+    readonly_fields = ('timestamp', 'updated_at')
+    ordering = ("-timestamp",)
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
@@ -303,27 +313,34 @@ class StateInline(admin.TabularInline):
 
 
 @admin.register(Analyse)
-class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+class AdminAnalyse(admin.ModelAdmin):
     form = AnalyseAdminForm
     raw_id_fields = ("type", 'admission')
     actions = [finish_selected, approve_selected]
     date_hierarchy = 'timestamp'
     search_fields = ('admission__id', 'type__name', 'admission__patient__name',
                      'admission__patient__tcno', 'admission__patient__surname')
-    readonly_fields = (
-        'id', 'approver', 'approved', 'approve_time', 'finished', 'analyser', 'completion_time')
+    readonly_fields = ('id', 'approver', 'approved', 'approve_time', 'finished', 'analyser',
+        'completion_time', 'doctor_institution', 'patient', 'analyse_type')
     autocomplete_lookup_fields = {
         'fk': ['type', 'admission'],
     }
-    fieldsets = ((None,
-                  {'fields': ('id', 'type', 'admission', ('short_result', 'comment'),
+    fieldsets = (
+        (_('Admission'),
+         {'classes': ('grp-collapse',),
+          'fields': (('analyse_type','doctor_institution', 'patient'), )
+          },
+         ),
+        ("State Inline", {"classes": ("placeholder state_set-group",), "fields": ()}),
+        (None,
+                  {'fields': (('short_result', 'comment'),
                               ('sample_type', 'sample_amount',),
                               ('finished', 'analyser', 'completion_time'),
                               ('approved', 'approver', 'approve_time'),
                               )}),
                  (_('Advanced'),
                   {'classes': ('grp-collapse', 'grp-closed'),
-                   'fields': ('result', 'template', 'group_relation')
+                   'fields': ('result', 'template', 'group_relation','admission', 'type', 'external', 'external_lab')
                    },
                   ))
 
@@ -333,6 +350,21 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         StateInline, ParameterValueInline
     ]
 
+    def doctor_institution(self, obj):
+        adm  = obj.admission
+        return '%s / %s' % (adm.institution.name, adm.doctor.full_name() if adm.doctor else '')
+    doctor_institution.short_description = _("Institution / Doctor")
+
+    def patient(self, obj):
+        return '%s - %s' % (obj.admission.patient.full_name(30), obj.admission.timestamp)
+    patient.short_description = _("Patient info")
+
+    def analyse_type(self, obj):
+        external = ' | %s:%s' % (_('Ext.Lab'), obj.external_lab) if obj.external else ''
+        return '<span style="font-size:16px">#%s</span> / %s %s' % (obj.id, obj.type.name, external)
+    analyse_type.short_description = _("Analyse")
+    analyse_type.allow_tags = True
+
     def save_model(self, request, obj, form, change):
         # is_new = not bool(obj.id)
         # if is_new:
@@ -341,9 +373,7 @@ class AnalyseAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
 
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
-        obj = form.instance
-        if not obj.result:  # obj.finished and
-            obj.save_result()
+        form.instance.save_result()
 
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(group_relation='GRP')
@@ -447,7 +477,7 @@ post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
 @admin.register(Admission)
 class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     date_hierarchy = 'timestamp'
-    search_fields = ('patient__name', 'patient__tcno', 'patient__surname')
+    search_fields = ('id', 'patient__name', 'patient__tcno', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
     readonly_fields = ('id', 'timestamp')
     raw_id_fields = ('patient', 'institution', 'doctor')
@@ -474,6 +504,16 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     def _create_payment_item(self):
         pass
 
+    def get_search_results(self, request, queryset, search_term):
+        # integer search_term means we want to list values of a certain admission
+        try:
+            search_term_as_int = int(search_term)
+            if len(search_term.strip()) < 7:
+                return Admission.objects.filter(pk=search_term_as_int), False
+        except ValueError:
+            return super().get_search_results(request, queryset, search_term)
+
+
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
             if analyse.type.group_type:
@@ -483,7 +523,12 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
                     Analyse(type=sub_analyse_type,
                             sample_type=analyse.sample_type,
                             group_relation=rand_group_code,
+                            external=sub_analyse_type.external,
+                            external_lab=sub_analyse_type.external_lab,
                             admission=admission).save()
+            if analyse.type.external:
+                analyse.external = analyse.type.external
+                analyse.external_lab = analyse.type.external_lab
             analyse.save()
         post_admission_save.send(sender=Admission, instance=admission)
 
@@ -506,6 +551,15 @@ class AdmissionAdmin(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
             formset.save()
 
 
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code',)
+
+@admin.register(Method)
+class MethodAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code',)
+
 app_models = apps.get_app_config('lab').get_models()
 for model in app_models:
     try:
@@ -519,3 +573,5 @@ def create_payment_objects(sender, instance, **kwargs):
     # instance.analyse_set.filter(group_relation='GRP').delete()
     for analyse in instance.analyse_set.exclude(group_relation='GRP'):
         analyse.create_empty_values()
+
+

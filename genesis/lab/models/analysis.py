@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-
+from django.core.cache import cache
 # Create your models here.
 
 
@@ -60,6 +60,9 @@ class SampleType(models.Model):
     def __str__(self):
         return self.name
 
+    def get_code(self):
+        return self.code or self.name[:3].upper()
+
 
 class Method(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
@@ -84,6 +87,24 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_code(self):
+        return self.code or self.name[:3].upper()
+
+
+class ExternalLab(models.Model):
+    name = models.CharField(_('Name'), max_length=30, unique=True)
+    code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('External Lab')
+        verbose_name_plural = _('External Labs')
+
+    def __str__(self):
+        return self.name
+
+    def get_code(self):
+        return self.code or self.name[:3].upper()
+
 
 class AnalyseType(models.Model):
     subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type',
@@ -94,13 +115,18 @@ class AnalyseType(models.Model):
 
     category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'), null=True,
                                  blank=True)
-    method = models.ForeignKey(Method, models.PROTECT, verbose_name=_('Method'), null=True,
+    method = models.ForeignKey(Method, models.SET_NULL, verbose_name=_('Method'), null=True,
                                blank=True)
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
     name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     footnote = models.TextField(_('Report footnote'), blank=True, null=True,
                                 help_text=_('This will be shown under the report'))
+    external = models.BooleanField(_('Goes to external lab'), default=False,
+                                   help_text=_('Analysed by an external lab'))
+    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True)
+    external_price = models.DecimalField(_('External lab price'), max_digits=6, decimal_places=2,
+                                         default=0)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2, default=0)
     alternative_price = models.DecimalField(_('Alternative price'), max_digits=6, decimal_places=2,
                                             help_text=_('Alternative price definition. '
@@ -119,7 +145,11 @@ class AnalyseType(models.Model):
         verbose_name_plural = _('Analyse Types')
 
     def __str__(self):
-        return self.name
+        return "%s | %s %s" % (self.name,
+                               self.category.get_code() if self.category else '',
+                               ('%s:%s' % (_('Ext.Lab'),
+                                           self.external_lab.get_code()
+                                           ) if self.external else ''))
 
     @staticmethod
     def autocomplete_search_fields():
@@ -174,6 +204,11 @@ class Analyse(models.Model):
 
     finished = models.BooleanField(_('Finished'), default=False)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
+
+    external = models.BooleanField(_('Goes to external lab'), default=False,
+                                   help_text=_('Analysed by an external lab'))
+    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True)
+
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
     approve_time = models.DateTimeField(_('Approve time'), editable=False, null=True)
     analyser = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Analyser'), null=True,
@@ -230,9 +265,9 @@ class Analyse(models.Model):
 
     def calculate_result(self):
         """executes result process logic with result"""
-        result = {}
+        context = self.result_dict.copy()
+        context['result_set'] = self.result_dict.copy()
         if self.type.process_logic:
-            context = self.result_dict.copy()
             context['result'] = ''
             context['comment'] = ''
             exec(self.type.process_logic, context)
@@ -240,7 +275,7 @@ class Analyse(models.Model):
                 self.short_result = context['result']
             if context['comment']:
                 self.comment = context['comment']
-        return result or self.result_dict
+        return context['result_set']
 
     def get_result_dict(self):
         """
@@ -263,6 +298,7 @@ class Analyse(models.Model):
         for par_val in self.parametervalue_set.all():
             titles[par_val.code] = par_val.key.name
         for k, v in calculated_result.items():
+            k = k.strip()
             if k.startswith('_'):
                 continue
             results[k]['value'] = v
@@ -385,14 +421,14 @@ class Parameter(models.Model):
         if param_type != 'matrix':
             data_type = 1
         # FIXME: update requires a  double save
-        obj, created = ParameterKey.objects.update_or_create({'code': code,
+        obj, created = ParameterKey.objects.update_or_create({'code': code.strip(),
                                                               'row_no': row_no,
                                                               'col_no': col_no,
                                                               'presets': preset,
                                                               'type': data_type,
                                                               },
                                                              parameter=self,
-                                                             name=key_name
+                                                             name=key_name.strip()
                                                              )
 
     def _create_matrix_params(self, rows, cols):
@@ -512,13 +548,19 @@ class ParameterValue(models.Model):
     type = models.CharField(_('Parameter type'), max_length=5, choices=PARAMETER_VALUE_TYPES)
 
     def keyid(self):
-        preset = '{}'
-        if self.key.presets:
-            preset = self.key.presets
-        else:
-            preset = json.dumps(
-                list(self.key.parametervalue_set.distinct().values_list('value', flat=True)))
-        return "<input class=keydata type=hidden value='%s'>" % preset
+        ckey = "PKEYDATA:%s" % self.key_id
+        data = cache.get(ckey, None)
+        if data is None:
+            data = {'auto_preset': False, 'presets': []}
+            if self.key.presets:
+                data['presets'] = json.loads(self.key.presets)
+            else:
+                data['auto_preset'] = True
+                data['presets'] = list(
+                    filter(None, self.key.parametervalue_set.distinct().values_list('value',
+                                                                                    flat=True)))
+            cache.set(ckey, data, 30)
+        return "<input class=keydata type=hidden value='%s'>" % json.dumps(data)
 
     keyid.allow_tags = True
 

@@ -22,7 +22,7 @@ def add_tax_to(admission, invoice):
     invoice.amount = pricing.list_price
     if pricing.tax_included:
         invoice.total = pricing.final_amount
-        invoice.subtotal = pricing.final_amount * Decimal(100) / Decimal(100) + TAX_RATE
+        invoice.subtotal = (pricing.final_amount * Decimal(100)) / (Decimal(100) + TAX_RATE)
     else:
         # if pricing.final_amount != pricing.list_price:  # pre-tax discount applied
         invoice.subtotal = pricing.final_amount
@@ -44,6 +44,7 @@ def prepare_invoice_for(admission):
         invoice_set = list(admission.invoice_set.all())
         if invoice_set:
             invoice = invoice_set[0]
+            add_tax_to(admission, invoice)
         else:
             invoice = Invoice(name=admission.patient.full_name(50),
                               address=admission.patient.address)
