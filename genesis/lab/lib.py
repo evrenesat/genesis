@@ -37,12 +37,12 @@ def render_report(pk, signed=False):
     cnt_dict = get_base_context(analyse)
     if analyse.result_json:
         result = analyse.get_result_dict()
-        cnt_dict.update(result)
+        cnt_dict.update(result['KV'])
         cnt_dict['results'] = [result]
     cnt_dict.update({'multi': False,
                      'with_sign': signed})
     tpl, tpl_object = load_analyse_template(analyse)
-    cnt_dict['generic'] = True
+    cnt_dict['generic'] = tpl_object.generic
     return tpl.render(Context(cnt_dict))
 
 def render_combo_report(ids, signed=False):

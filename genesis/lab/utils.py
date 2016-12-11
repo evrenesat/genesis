@@ -3,7 +3,7 @@
 """
 import re
 
-tr_to_ascii_trans = str.maketrans('ĞÜŞİÖÇğüşöç', 'GUSIOCgusoc')
+tr_to_ascii_trans = str.maketrans('ĞÜŞİÖÇğüşöçı', 'GUSIOCgusoci')
 
 
 def pythonize(s):

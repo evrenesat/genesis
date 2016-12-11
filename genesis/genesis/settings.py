@@ -209,3 +209,5 @@ except ImportError:
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static_serve/")
+
+DEFAULT_CACHE_EXPIRE_TIME = 30

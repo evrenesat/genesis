@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 # Create your models here.
-
+from static.cache import AnalyseStateCache
 
 from ..utils import pythonize, lazy_property
 
@@ -91,9 +91,6 @@ class Category(models.Model):
         return self.code or self.name[:3].upper()
 
 
-
-
-
 class AnalyseType(models.Model):
     subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type',
                                       null=True, blank=True)
@@ -101,7 +98,7 @@ class AnalyseType(models.Model):
                                      help_text=_(
                                          'This is a group type, consist of other analyse types'))
 
-    category = models.ForeignKey(Category, models.PROTECT, verbose_name=_('Category'), null=True,
+    category = models.ForeignKey(Category, models.SET_NULL, verbose_name=_('Category'), null=True,
                                  blank=True)
     method = models.ForeignKey(Method, models.SET_NULL, verbose_name=_('Method'), null=True,
                                blank=True)
@@ -196,7 +193,8 @@ class Analyse(models.Model):
 
     external = models.BooleanField(_('Goes to external lab'), default=False,
                                    help_text=_('Analysed by an external lab'))
-    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True, verbose_name=_('External lab'))
+    external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True,
+                                     verbose_name=_('External lab'))
 
     completion_time = models.DateTimeField(_('Completion time'), editable=False, null=True)
     approve_time = models.DateTimeField(_('Approve time'), editable=False, null=True)
@@ -298,8 +296,10 @@ class Analyse(models.Model):
         titles = {}
         for par_val in self.parametervalue_set.all():
             titles[par_val.code] = par_val.key.name
+        KV = {}
         for k, v in calculated_result.items():
             k = k.strip()
+            KV[k] = v
             if k.startswith('_'):
                 continue
             results[k]['value'] = v
@@ -307,6 +307,7 @@ class Analyse(models.Model):
             results[k]['code'] = k
         results['title'] = self.type.name
         results['analyse_id'] = self.id
+        results['KV'] = KV
         return dict(results)
 
     def save_result(self):
@@ -361,6 +362,19 @@ class StateDefinition(models.Model):
     accept = models.BooleanField(_('Accepted state'), default=False)
     order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
 
+
+    @classmethod
+    def comment_autocomplete_data(cls, definition_id):
+        cache = AnalyseStateCache(definition_id)
+        data = cache.get(None)
+        if data is None:
+            state_def = cls.objects.get(pk=definition_id)
+            data = {'auto_preset': True,
+                    'presets': list(filter(None, state_def.state_set.distinct().values_list(
+                        'comment', flat=True)))}
+            cache.set(data)
+        return data
+
     class Meta:
         verbose_name = _('Analyse State Definition')
         verbose_name_plural = _('Analyse State Definitions')
@@ -373,14 +387,16 @@ class StateDefinition(models.Model):
 class State(models.Model):
     analyse = models.ForeignKey(Analyse, models.CASCADE, verbose_name=_('Analyse'))
     definition = models.ForeignKey(StateDefinition, models.CASCADE, verbose_name=_('State'))
-    comment = models.CharField(_('Comment'), max_length=50, null=True, blank=True)
+    comment = models.CharField(_('Notes'), max_length=250, null=True, blank=True)
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
+    personnel = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Personnel'), blank=True)
 
     class Meta:
         verbose_name = _('Analyse State')
         verbose_name_plural = _('Analyse States')
         ordering = ('timestamp',)
+
 
     def __str__(self):
         return "%s %s" % (self.analyse, self.definition)

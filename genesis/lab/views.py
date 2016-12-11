@@ -12,7 +12,7 @@ from django.template import Context
 from django.views.decorators.cache import cache_control
 
 from lab.lib import load_analyse_template, render_report, get_base_context, render_combo_report
-from lab.models import Admission, ParameterKey
+from lab.models import Admission, ParameterKey, StateDefinition
 from lab.models import Analyse
 
 
@@ -115,6 +115,10 @@ def get_admissions_by_analyses(request):
             'id': adm.id,
         })
     return JsonResponse(data)
+
+@login_required
+def analyse_state_comments_for_statetype(request, pk):
+    return JsonResponse(StateDefinition.comment_autocomplete_data(pk))
 
 
 @login_required

@@ -132,6 +132,8 @@ function print_report_iframe() {
 }
 
 function lock_unlock_analyse_states() {
+    // prevent changing of existing analyse  states
+    // ( double click on container div allows editin albeiting warning)
     $('#state_set-group select').each(function () {
         var selbox = $(this);
         let id = selbox.attr('id').replace('definition', '') + 'id';
@@ -146,13 +148,66 @@ function lock_unlock_analyse_states() {
         }
     });
 }
+
+function get_pk(obj, $obj) {
+    // returns pk of object from id of widgets formatted like this: id="id_state_set-1-definition"
+    obj = obj || $obj[0]
+    try {
+        return obj.id.match(/-(\d*)-/)[1]
+    } catch (e) {
+        return -1;
+    }
+}
+
+function create_selectbox_for_analyse_state() {
+    var selbox = $(this);
+    pk = get_pk(this);
+    remove_selectbox();
+    if (selbox.val()) {
+        $.get('/lab/analyse_state_comments_for_statetype/' + selbox.val(), function (data, st, xhr) {
+            window._last_selbox_id = pk;
+            create_autocomplete_widget(data, $('#id_state_set-' + pk + '-comment'));
+        });
+    }
+}
+
+function remove_selectbox(txt_field) {
+    if (window._last_selbox_id) {
+        txt_field = $('#id_state_set-' + window._last_selbox_id + '-comment');
+        txt_field.show();
+        txt_field.siblings('select,input').remove();
+        window._last_selbox_id = null;
+    }
+}
+
+
+function create_autocomplete_widget(data, txt_field) {
+    if (data.presets.length) {
+        txt_field.hide();
+        let combo = create_selectbox(data.presets, txt_field);
+        combo.val(txt_field.val());
+        txt_field.after(combo);
+        let manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
+        manual_button.click(function () {
+            if (!data.auto_preset && txt_field.css('display') == 'none') {
+                alert("Öntanımlı değerler dışında bir değer girmek üzeresiniz!")
+            }
+            combo.toggle();
+            txt_field.toggle();
+        })
+        combo.after(manual_button);
+    }
+}
+
 function swap_add_another_status_row() {
+    // move top the analyse change_form add new state line
     let add_new = $('#state_set-group div.grp-dynamic-form.grp-module.grp-tbody').not('.has_original');
     let th = add_new.siblings('.grp-thead');
     th.after(add_new.detach()[0]);
 }
 
 var object_id = get_editing_id();
+
 function patch_edit_views() {
 
     // change text of _save
@@ -168,7 +223,10 @@ function patch_edit_views() {
     })
 
     if (is_editing('analyse') && object_id) {
-        add_footer_button({url: '/lab/analyse_barcode/' + object_id + '/', name: 'Barkod Yazdır'});
+        add_footer_button({
+            url: '/lab/analyse_barcode/' + object_id + '/',
+            name: 'Barkod Yazdır'
+        });
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
 
@@ -176,6 +234,9 @@ function patch_edit_views() {
 
         lock_unlock_analyse_states();
         setTimeout(swap_add_another_status_row, 0);
+
+        $("select[id$=-definition]:not([id*=prefix])").change(create_selectbox_for_analyse_state);
+
 
         if (group_membership) {
 
@@ -365,15 +426,15 @@ function modify_parameter_list_edit(selector) {
 }
 
 
-function dashbox(box_id, data, url){
+function dashbox(box_id, data, url) {
     let _data = data || {};
     let _url = url || '/lab/get_admissions_by_analyses/';
-    var box = $('#'+box_id);
-    $.get(_url, _data, function(result){
+    var box = $('#' + box_id);
+    $.get(_url, _data, function (result) {
         // result = JSON.parse(result);
-        for(let itm of result.admissions){
-            box.append($('<li class="grp-row grp-add-link"></li>').html(itm.title + ' | ' +itm.state).click(
-                function(){
+        for (let itm of result.admissions) {
+            box.append($('<li class="grp-row grp-add-link"></li>').html(itm.title + ' | ' + itm.state).click(
+                function () {
                     $.featherlight({
                         iframe: '/admin/lab/admission/' + itm.id + '/#pop_up=1',
                         iframeWidth: 1140, iframeHeight: 600
@@ -392,9 +453,9 @@ function handle_dashboard() {
     })
 
 
-    dashbox('new_admissions', {accepted:'False'})
-    dashbox('finished_admissions', {finished:'True', approved:'False'})
-    dashbox('approved_admissions', {approved:'True'})
+    dashbox('new_admissions', {accepted: 'False'})
+    dashbox('finished_admissions', {finished: 'True', approved: 'False'})
+    dashbox('approved_admissions', {approved: 'True'})
 
 }
 
@@ -460,6 +521,7 @@ function patch_everywhere() {
     }
 
 }
+
 grp.jQuery('document').ready(function () {
     grp.jQuery('#_ifrm').attr('src', '');
 

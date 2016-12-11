@@ -343,3 +343,17 @@ div.grp-td.keydata, div.grp-th.keydata{
 li.grp-row.grp-add-link{
     cursor: pointer;
 }
+
+div#grp-navigation a{
+    color:#fff !important;
+}
+div#grp-navigation{
+    background-image: linear-gradient(#bd3c3c,rgb(101, 43, 43)) !important;
+
+}
+div#state_set-group textarea{
+    width: 310px !important;
+}
+div#state_set-group select.comboin{
+    width:270px;
+}

@@ -42,6 +42,8 @@ UserAdmin.add_fieldsets = (
         'fields': ('username', 'password1', 'password2', 'first_name', 'last_name')}
      ),
 )
+
+
 # admin.ModelAdmin.change_list_template = "admin/change_list_filter_sidebar.html"
 
 def finish_selected_value(modeladmin, request, queryset):
@@ -88,7 +90,8 @@ approve_selected.short_description = _("Mark as Approved")
 class AdminParameterValue(admin.ModelAdmin):
     list_editable = ('value',)
     actions = [finish_selected_value, approve_selected_value]
-    list_display = ('code', 'patient_name', 'analyse_name', 'key', 'value', 'analyse_state', 'keyid')
+    list_display = (
+        'code', 'patient_name', 'analyse_name', 'key', 'value', 'analyse_state', 'keyid')
     search_fields = ('analyse__group_relation', 'analyse__type__name', 'analyse__admission__id')
 
     def get_actions(self, request):
@@ -96,8 +99,6 @@ class AdminParameterValue(admin.ModelAdmin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
-
-
 
     def get_search_results(self, request, queryset, search_term):
         # integer search_term means we want to list values of a certain admission
@@ -139,7 +140,7 @@ class AdminParameterValue(admin.ModelAdmin):
             db_field.choices = p_value.key.preset_choices()
         return super().formfield_for_dbfield(db_field, **kwargs)
 
-    # def formfield_for_choice_field(self, db_field, request=None, **kwargs):
+        # def formfield_for_choice_field(self, db_field, request=None, **kwargs):
         # if db_field.name == "value":
         #     kwargs['choices'] = (
         #         ('accepted', 'Accepted'),
@@ -149,11 +150,11 @@ class AdminParameterValue(admin.ModelAdmin):
 
 
 class ParameterValueInline(admin.TabularInline):
-    classes = ('grp-collapse',)
+    classes = ('grp-collapse grp-closed',)
     model = ParameterValue
     extra = 0
     ordering = ('code',)
-    readonly_fields = ('key',  'keydata')
+    readonly_fields = ('key', 'keydata')
     max_num = 0
     fields = ('key', 'value', 'keydata')
 
@@ -162,6 +163,7 @@ class ParameterValueInline(admin.TabularInline):
 
     def keydata(self, obj):
         return obj.keyid()
+
     keydata.allow_tags = True
 
 
@@ -193,7 +195,6 @@ class AnalyseTypeForm(forms.ModelForm):
         fields = '__all__'
 
 
-
 @admin.register(AnalyseType)
 class AdminAnalyseType(admin.ModelAdmin):
     form = AnalyseTypeForm
@@ -206,7 +207,7 @@ class AdminAnalyseType(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('group_type', 'name', 'category', 'method', 'sample_type',
-                       'code', 'process_time', 'footnote', 'price','external_price', 'external',
+                       'code', 'process_time', 'footnote', 'price', 'external_price', 'external',
                        'external_lab', 'alternative_price')
         }),
         (_('Subtypes'),
@@ -271,7 +272,11 @@ class AdminParameter(admin.ModelAdmin):
 
 class StateFormSet(BaseInlineFormSet):
     def save_new(self, form, commit=True):
+
         obj = super().save_new(form, commit=False)
+        if not obj.personnel_id:
+            obj.personnel = self.request.user.profile
+        # if obj.personnel != form._request.user.profile:
         # here you can add anything you need from the request
         if obj.definition.finish:
             obj.analyse.mark_finished(self.request)
@@ -307,8 +312,9 @@ class StateInline(admin.TabularInline):
     extra = 1
     can_delete = False
     formset = StateFormSet
-    fields = ('definition', 'comment', 'timestamp', 'updated_at')
-    readonly_fields = ('timestamp', 'updated_at')
+    classes = ('grp-collapse', )
+    fields = ('definition', 'comment', 'timestamp', 'updated_at', 'personnel')
+    readonly_fields = ('timestamp', 'updated_at', 'personnel')
     ordering = ("-timestamp",)
 
     def get_formset(self, request, obj=None, **kwargs):
@@ -316,11 +322,17 @@ class StateInline(admin.TabularInline):
         formset.request = request
         return formset
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'comment':
+            kwargs['widget'] = forms.Textarea()
+        return super().formfield_for_dbfield(db_field, **kwargs)
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
 
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
 
         if db_field.name == 'definition':
+
             if request._obj_ is not None:
                 field.queryset = field.queryset.filter(id__in=request._obj_.applicable_states_ids())
             else:
@@ -337,28 +349,34 @@ class AdminAnalyse(admin.ModelAdmin):
     search_fields = ('admission__id', 'type__name', 'admission__patient__name',
                      'admission__patient__tcno', 'admission__patient__surname')
     readonly_fields = ('id', 'approver', 'approved', 'approve_time', 'finished', 'analyser',
-        'completion_time', 'doctor_institution', 'patient', 'analyse_type')
+                       'completion_time', 'doctor_institution', 'patient', 'analyse_type')
     autocomplete_lookup_fields = {
         'fk': ['type', 'admission'],
     }
     fieldsets = (
-        (_('Admission'),
+        (_('Admission Information'),
          {'classes': ('grp-collapse',),
-          'fields': (('analyse_type','doctor_institution', 'patient'), )
+          'fields': (('analyse_type', 'doctor_institution', 'patient'),
+                     ('sample_type', 'sample_amount',),
+                     )
           },
          ),
         ("State Inline", {"classes": ("placeholder state_set-group",), "fields": ()}),
-        (None,
-                  {'fields': (('short_result', 'comment'),
-                              ('sample_type', 'sample_amount',),
-                              ('finished', 'analyser', 'completion_time'),
-                              ('approved', 'approver', 'approve_time'),
-                              )}),
-                 (_('Advanced'),
-                  {'classes': ('grp-collapse', 'grp-closed'),
-                   'fields': ('result', 'template', 'group_relation','admission', 'type', 'external', 'external_lab')
-                   },
-                  ))
+        ("Result Inline", {"classes": ("placeholder parametervalue_set-group",), "fields": ()}),
+        (_('Analyse Result'),
+         {'classes': ('grp-collapse', 'grp-closed'),
+          'fields': (('short_result', 'comment'),
+
+                     ('finished', 'analyser', 'completion_time'),
+                     ('approved', 'approver', 'approve_time'),
+                     )}),
+        (_('Advanced'),
+         {'classes': ('grp-collapse', 'grp-closed'),
+          'fields': (
+              'result', 'template', 'group_relation', 'admission', 'type', 'external',
+              'external_lab')
+          },
+         ))
 
     list_filter = ('finished', 'timestamp', 'type')
     list_display = ('type', 'admission', 'timestamp', 'finished', 'approved')
@@ -378,29 +396,31 @@ class AdminAnalyse(admin.ModelAdmin):
                 return Analyse.objects.filter(group_relation=search_term), False
             return super().get_search_results(request, queryset, search_term)
 
-
     def get_actions(self, request):
         actions = super().get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
 
-
     def doctor_institution(self, obj):
-        adm  = obj.admission
+        adm = obj.admission
         return '%s / %s' % (adm.institution.name, adm.doctor.full_name() if adm.doctor else '')
+
     doctor_institution.short_description = _("Institution / Doctor")
 
     def patient(self, obj):
         return '<a href="/admin/lab/admission/%s/">%s - %s</a>' % (obj.admission.id,
-                                                                   obj.admission.patient.full_name(30),
+                                                                   obj.admission.patient.full_name(
+                                                                       30),
                                                                    obj.admission.timestamp)
+
     patient.short_description = _("Patient info")
     patient.allow_tags = True
 
     def analyse_type(self, obj):
         external = ' | %s:%s' % (_('Ext.Lab'), obj.external_lab) if obj.external else ''
         return '<span style="font-size:16px">#%s</span> / %s %s' % (obj.id, obj.type.name, external)
+
     analyse_type.short_description = _("Analyse")
     analyse_type.allow_tags = True
 
@@ -528,7 +548,7 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         'fk': ['patient', 'institution', 'doctor'],
     }
 
-    inlines = [AnalyseInline,  AdmissionStateInline]  # AdmissionSampleInline,
+    inlines = [AnalyseInline, AdmissionStateInline]  # AdmissionSampleInline,
 
     def get_form(self, request, obj=None, **kwargs):
         # just save obj reference for future processing in Inline
@@ -551,7 +571,6 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
                 return Admission.objects.filter(pk=search_term_as_int), False
         except ValueError:
             return super().get_search_results(request, queryset, search_term)
-
 
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
@@ -590,14 +609,15 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
             formset.save()
 
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'code',)
 
+
 @admin.register(Method)
 class MethodAdmin(admin.ModelAdmin):
     list_display = ('name', 'code',)
+
 
 app_models = apps.get_app_config('lab').get_models()
 for model in app_models:
@@ -612,5 +632,3 @@ def create_payment_objects(sender, instance, **kwargs):
     # instance.analyse_set.filter(group_relation='GRP').delete()
     for analyse in instance.analyse_set.exclude(group_relation='GRP'):
         analyse.create_empty_values()
-
-
