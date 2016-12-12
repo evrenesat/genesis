@@ -510,12 +510,15 @@ class AnalyseInline(admin.TabularInline):
     # }
     # show_change_link = True
     raw_id_fields = ("type",)
-    readonly_fields = ('finished', 'approved')
-    fields = ('finished', 'approved', 'type', 'sample_type')
+    readonly_fields = ('finished', 'approved', 'ext_lab')
+    fields = ('finished', 'approved', 'type', 'sample_type', 'medium_type', 'ext_lab')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
+    def ext_lab(self, obj):
+        return obj.external_lab if obj.external else ''
+    ext_lab.short_description = _('Ext.Lab')
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0 if obj else self.extra
@@ -607,6 +610,9 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
             if formset.model == Analyse:
                 self._save_analyses(formset.instance, formset.save(commit=False))
             formset.save()
+        customer_charge, new = AdmissionPricing.objects.get_or_create(admission=form.instance)
+        customer_charge.process_payments()
+
 
 
 @admin.register(Category)

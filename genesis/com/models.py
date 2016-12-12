@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django.db import IntegrityError
 
@@ -116,6 +117,9 @@ class AdmissionPricing(models.Model):
                                        null=True,
                                        blank=True)
 
+    # final_amount_shadow = models.DecimalField(editable=False, max_digits=8, decimal_places=2,
+    #                                           null=True, blank=True)
+
     class Meta:
         verbose_name = _('Admission Pricing')
         verbose_name_plural = _('Admission Pricings')
@@ -131,12 +135,11 @@ class AdmissionPricing(models.Model):
         else:
             patient = self.admission.patient
             institution = None
-        payment, is_new = Payment.objects.update_or_create({'amount': self.final_amount},
+        payment, is_new = Payment.objects.update_or_create({'amount': self.final_amount,
+                                                            'institution': institution, },
                                                            admission=self.admission,
                                                            patient=patient,
-                                                           method=10, type=10,
-                                                           institution=institution,
-                                                           )
+                                                           method=10, type=10)
 
     def calculate_pricing_for(self, analyse):
         """
@@ -163,33 +166,36 @@ class AdmissionPricing(models.Model):
         return discounted_price, list_price, institute_discount_rate
 
     def process_amounts_and_create_invoiceitems(self):
-        self.final_amount = Decimal(0)
-        self.list_price = Decimal(0)
         for analyse in self.admission.analyse_set.all():
-            if not analyse.group_relation  or analyse.group_relation == 'GRP':
+            if not analyse.group_relation or analyse.group_relation == 'GRP':
                 # this is not a group member (sub-analysis) so we should count it in our price calc.
                 discounted_price, list_price, discount_rate = self.calculate_pricing_for(analyse)
                 InvoiceItem.objects.get_or_create(admission=self.admission, name=analyse.type.name,
                                                   defaults=dict(amount=discounted_price,
                                                                 quantity=1, total=discounted_price))
-                self.final_amount += discounted_price
-                self.list_price += list_price
-                # if analyse.group_relation == 'GRP':  # if this is a group, delete it
-                #     analyse.delete()
+
+        self.list_price = InvoiceItem.objects.filter(admission=self.admission).aggregate(Sum('total'))['total__sum']
+        if not self.final_amount:
+            self.final_amount = self.list_price
 
     def _calculate_discount(self):
-        self.discount_amount = self.list_price - self.final_amount
+        if not self.tax_included:
+            self.discount_amount = self.list_price - self.final_amount
+        else:
+            self.discount_amount = self.list_price - self.final_amount * Decimal(0.92)  # FIXME: TAX_RATE
         if self.final_amount and self.discount_amount:
             self.discount_percentage = Decimal(float(str(self.final_amount)) /
                                                float(str(self.list_price)))
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if not self.final_amount:
-            self.process_amounts_and_create_invoiceitems()
+            # def save(self, *args, **kwargs):
+            #     super().save(*args, **kwargs)
+            # if not self.final_amount:
+
+    def process_payments(self):
+        self.process_amounts_and_create_invoiceitems()
         self.charge_customer()
         self._calculate_discount()
-        super().save(*args, **kwargs)
+        self.save()
 
 
 DEFAULT_INVOICE_UNIT = 'Adet'
@@ -205,12 +211,16 @@ class Invoice(models.Model):
     discount = models.DecimalField(_('Discount'), max_digits=6, decimal_places=2, null=True,
                                    blank=True)
     subtotal = models.DecimalField(_('SubTotal'), max_digits=8, decimal_places=2,
-                                 null=True, blank=True)
+                                   null=True, blank=True)
     tax = models.DecimalField(_('Tax amount'), null=True, blank=True, max_digits=8,
                               decimal_places=2)
     total = models.DecimalField(_('Grand Total'), max_digits=8, decimal_places=2,
                                 null=True, blank=True)
     timestamp = models.DateTimeField(_('Definition date'), auto_now_add=True)
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "amount__iexact", "name__icontains", "address__icontains")
 
     class Meta:
         verbose_name = _('Invoice')
@@ -224,7 +234,7 @@ class InvoiceItem(models.Model):
     admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Admission'))
     invoice = models.ForeignKey(Invoice, models.SET_NULL, verbose_name=_('Invoice'),
                                 null=True, blank=True)
-    name = models.CharField(_('Name'), max_length=255)
+    name = models.CharField(_('Item name'), max_length=255)
     amount = models.DecimalField(_('Amount'), max_digits=6, decimal_places=2)
     quantity = models.IntegerField(_('Quantity'), default=1)
     unit = models.CharField(_('Unit'), default=DEFAULT_INVOICE_UNIT, max_length=30)

@@ -11,8 +11,8 @@ from lab.admin import AdminAdmission, post_admission_save
 
 @receiver(post_admission_save, sender=Admission)
 def create_payment_objects(sender, instance, **kwargs):
-    if not hasattr(instance, 'admissionpricing'):
-        AdmissionPricing(admission=instance).save()
+    # if not hasattr(instance, 'admissionpricing'):
+        # AdmissionPricing(admission=instance).save()
     instance.analyse_set.filter(group_relation='GRP').delete()
 
 
@@ -27,9 +27,9 @@ class PaymentInline(admin.TabularInline):
 class InvoiceItemInline(admin.TabularInline):
     model = InvoiceItem
     extra = 0
-    max_num = 0
+    # max_num = 0
     fields = ('name', 'amount', 'quantity', 'total')
-    readonly_fields = ('name', 'amount', 'quantity', 'total')
+    # readonly_fields = ('name', 'amount', 'quantity', 'total')
     classes = ('grp-collapse', 'grp-closed')
 
 
@@ -65,6 +65,17 @@ class InvoiceAdmin(admin.ModelAdmin):
     inlines = [InvoiceItemFullInline, ]
     fields = ('id', 'name', 'address', 'amount', 'tax', 'total')
     readonly_fields = ('id', )
+
+
+
+
+
+@admin.register(InvoiceItem)
+class AdminInvoiceItem(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+    raw_id_fields = ('admission', 'invoice')
+    autocomplete_lookup_fields = {
+        'fk': ['admission', 'invoice'],
+    }
 
 
 

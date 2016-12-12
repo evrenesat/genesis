@@ -183,6 +183,8 @@ class Analyse(models.Model):
     sample_amount = models.CharField(_('Sample Amount'), max_length=20, null=True, blank=True)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
+    medium_type = models.ForeignKey(MediumType, models.PROTECT, verbose_name=_('Medium type'),
+                                    null=True, blank=True)
     template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Report template'),
                                  null=True, blank=True, help_text=_(
             'Instead of default one, use this template to create the analyse report.'))

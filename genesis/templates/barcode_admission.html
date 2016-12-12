@@ -2,15 +2,15 @@
 {% block barcode %}
 
     <div id="acodes">
-    {% for acode in analyses %}
-    {{ acode }}
+    {% for scode, catcode, external in analyses %}
+    <span>{{ scode }} {{ catcode }} {% if external %}DL:{{ external }}{% endif %}</span>
     {% endfor %}
     </div>
     <div id="bid">P{{ id }} </div>
     <div id="aid">TC{{ person_id }} </div>
 
     {% if is_urgent %}
-    <div id="urgent" class="invertedtext">|| ACİL ||</div>
+    <div id="urgent" class="invertedtext">ACiL</div>
     {% endif %}
 
     <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.Y" }}</div>

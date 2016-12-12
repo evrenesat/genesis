@@ -140,6 +140,11 @@ class Admission(models.Model):
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)
 
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "patient__name__icontains")
+
     def is_approved(self):
         return all(self.analyse_set.values_list('approved', flat=True))
 

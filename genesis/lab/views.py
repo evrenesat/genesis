@@ -54,6 +54,8 @@ def analyse_check(request):
 
 @login_required
 def analyse_barcode(request, pk):
+    return admission_barcode(request,
+                             Analyse.objects.filter(pk=pk).values_list('admission_id', flat=True)[0])
     analyse = Analyse.objects.get(pk=pk)
     return render(request, 'barcode_analyse.html', {
         'analyse': analyse,
@@ -138,8 +140,20 @@ def multiple_reports_for_panel(request, group_code):
 @login_required
 def admission_barcode(request, pk):
     admission = Admission.objects.get(pk=pk)
+    analyses = set()
+    for analyse in admission.analyse_set.all():
+        try:
+            print(analyse.type.category, '||', analyse.sample_type)
+            analyses.add((analyse.type.category.get_code(),
+                          analyse.sample_type.get_code(),
+            analyse.external_lab.get_code() if analyse.external else ''
+                          )
+                         )
+        except AttributeError:
+            pass
+
     return render(request, 'barcode_admission.html', {
-        'analyses': [an.get_code for an in admission.analyse_set.all()],
+        'analyses': analyses,
         'admission': admission,
         'id': admission.id,
         'admission_id': admission.id,
