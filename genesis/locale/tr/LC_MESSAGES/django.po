@@ -324,11 +324,11 @@ msgstr "Kod"
 
 #: lab/models/analysis.py:43 lab/models/analysis.py:54
 msgid "Medium Type"
-msgstr "Medyum Tipi"
+msgstr "Taşıma Ortamı"
 
 #: lab/models/analysis.py:44
 msgid "Medium Types"
-msgstr "Medyum Tipleri"
+msgstr "Taşıma Ortamları"
 
 #: lab/models/analysis.py:57 lab/models/analysis.py:105
 msgid "Sample Type"
@@ -524,7 +524,7 @@ msgstr "Örnek Türü"
 #: lab/models/analysis.py:186
 #| msgid "Medium Type"
 msgid "Medium type"
-msgstr "Medyum tipi"
+msgstr "Taşıma ortamı"
 
 #: lab/models/analysis.py:188
 msgid "Report template"

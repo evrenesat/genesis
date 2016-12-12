@@ -208,6 +208,27 @@ function swap_add_another_status_row() {
 
 var object_id = get_editing_id();
 
+function show_fieldsets(){
+    if (window.location.hash.indexOf('show_fieldset=') > -1) {
+        fieldsets = window.location.hash.split('show_fieldset=')[1].split(',');
+        // debugger;
+        $('.analyse_box').addClass('grp-closed');
+        for (let fieldset of fieldsets){
+            $('.analyse_box.'+fieldset).removeClass('grp-closed');
+        }
+    }
+}
+function only_show_fieldsets(){
+    if (window.location.hash.indexOf('only_show_fieldset=') > -1) {
+        fieldsets = window.location.hash.split('only_show_fieldset=')[1].split(',');
+        // debugger;
+        $('.analyse_box').addClass('hide_fieldset');
+        for (let fieldset of fieldsets){
+            $('.analyse_box.'+fieldset).removeClass('hide_fieldset');
+        }
+    }
+}
+
 function patch_edit_views() {
 
     // change text of _save
@@ -221,6 +242,8 @@ function patch_edit_views() {
         self = grp.jQuery(this);
         if (self.html() == "&nbsp;") self.hide();
     })
+    show_fieldsets()
+    only_show_fieldsets()
 
     if (is_editing('analyse') && object_id) {
         add_footer_button({
@@ -288,6 +311,21 @@ function patch_edit_views() {
         }
     }
     if (is_editing('admission')) {
+        let customer_is_patient = $('#id_payment_set-0-patient').val();
+
+
+        function link_payment_responsible() {
+
+                    let _patient = $('#id_payment_set-0-patient').val();
+                    let _institute = $('#id_payment_set-0-institution').val();
+                    $('div.grp-td.patient').find('select').val(_patient);
+                    $('div.grp-td.institution').find('select').val(_institute);
+                 }
+
+        $('#payment_set-group a.grp-add-handler').click(function(){
+            setTimeout(link_payment_responsible, 0);
+        });
+
         setTimeout(function () { // allow grapelli to do it's magic
             grp.jQuery('#id_patient-autocomplete').parent().attr('style', 'max-width:440px !important');
         }, 0);

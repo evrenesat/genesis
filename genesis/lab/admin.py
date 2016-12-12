@@ -150,7 +150,7 @@ class AdminParameterValue(admin.ModelAdmin):
 
 
 class ParameterValueInline(admin.TabularInline):
-    classes = ('grp-collapse grp-closed',)
+    classes = ('grp-collapse grp-closed analyse_box result_parameters',)
     model = ParameterValue
     extra = 0
     ordering = ('code',)
@@ -312,7 +312,7 @@ class StateInline(admin.TabularInline):
     extra = 1
     can_delete = False
     formset = StateFormSet
-    classes = ('grp-collapse', )
+    classes = ('grp-collapse analyse_box analyse_states', )
     fields = ('definition', 'comment', 'timestamp', 'updated_at', 'personnel')
     readonly_fields = ('timestamp', 'updated_at', 'personnel')
     ordering = ("-timestamp",)
@@ -355,7 +355,7 @@ class AdminAnalyse(admin.ModelAdmin):
     }
     fieldsets = (
         (_('Admission Information'),
-         {'classes': ('grp-collapse',),
+         {'classes': ('grp-collapse analyse_box admission_info',),
           'fields': (('analyse_type', 'doctor_institution', 'patient'),
                      ('sample_type', 'sample_amount', 'medium_type'),
                      )
@@ -364,14 +364,14 @@ class AdminAnalyse(admin.ModelAdmin):
         ("State Inline", {"classes": ("placeholder state_set-group",), "fields": ()}),
         ("Result Inline", {"classes": ("placeholder parametervalue_set-group",), "fields": ()}),
         (_('Analyse Result'),
-         {'classes': ('grp-collapse', 'grp-closed'),
+         {'classes': ('grp-collapse', 'grp-closed', 'analyse_box', 'analyse_result'),
           'fields': (('short_result', 'comment'),
 
                      ('finished', 'analyser', 'completion_time'),
                      ('approved', 'approver', 'approve_time'),
                      )}),
         (_('Advanced'),
-         {'classes': ('grp-collapse', 'grp-closed'),
+         {'classes': ('grp-collapse', 'grp-closed', 'analyse_box advanced_details'),
           'fields': (
               'result', 'template', 'group_relation', 'admission', 'type', 'external',
               'external_lab')
@@ -511,7 +511,7 @@ class AnalyseInline(admin.TabularInline):
     # show_change_link = True
     raw_id_fields = ("type",)
     readonly_fields = ('finished', 'approved', 'ext_lab')
-    fields = ('finished', 'approved', 'type', 'sample_type', 'medium_type', 'ext_lab')
+    fields = ('finished', 'approved', 'type', 'sample_type', 'sample_amount', 'medium_type', 'ext_lab')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
@@ -623,6 +623,11 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Method)
 class MethodAdmin(admin.ModelAdmin):
     list_display = ('name', 'code',)
+
+@admin.register(MediumType)
+class MethodAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'order')
+    list_editable = ('code', 'order',)
 
 
 app_models = apps.get_app_config('lab').get_models()

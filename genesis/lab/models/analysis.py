@@ -34,14 +34,18 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
+ORDER_CHOICES = [(i, i) for i in range(100)]
 
 class MediumType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
     code = models.CharField(_('Code'), max_length=3)
+    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True,
+                                             choices=ORDER_CHOICES)
 
     class Meta:
         verbose_name = _('Medium Type')
         verbose_name_plural = _('Medium Types')
+        ordering = ('-order',)
 
     def __str__(self):
         return self.name
@@ -52,6 +56,9 @@ class SampleType(models.Model):
     code = models.CharField(_('Code'), max_length=3)
     amount = models.CharField(_('Amount'), max_length=20, null=True, blank=True)
     medium = models.ManyToManyField(MediumType, verbose_name=_('Medium Type'))
+    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True,
+                                             choices=ORDER_CHOICES)
+
 
     class Meta:
         verbose_name = _('Sample Type')
@@ -165,6 +172,7 @@ class ReportTemplate(models.Model):
     def __str__(self):
         return "%s" % (self.name,)
 
+SAMPLE_AMOUNT = [(i, i) for i in range(10)]
 
 class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
@@ -180,7 +188,8 @@ class Analyse(models.Model):
     short_result = models.TextField(_('Result'), blank=True, null=True,
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
-    sample_amount = models.CharField(_('Sample Amount'), max_length=20, null=True, blank=True)
+    sample_amount = models.PositiveIntegerField(_('Sample Amount'), max_length=20, null=True,
+                                                blank=True, default=1, choices=SAMPLE_AMOUNT)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
     medium_type = models.ForeignKey(MediumType, models.PROTECT, verbose_name=_('Medium type'),

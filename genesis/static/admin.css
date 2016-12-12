@@ -357,3 +357,20 @@ div#state_set-group textarea{
 div#state_set-group select.comboin{
     width:270px;
 }
+
+.hide_fieldset{
+    display: none !important;
+}
+
+body.lab-analyse > div > article > header > ul {
+    position: static;
+    top: 125px;
+}
+body.lab-analyse > div > article > header > h1 {
+    display: none;
+}
+
+div.sample_amount  > select, select#id_sample_amount{
+    width:50px !important;
+    min-width: inherit !important;
+}
