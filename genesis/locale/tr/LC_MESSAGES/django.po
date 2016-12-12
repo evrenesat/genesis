@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-11 23:29+0000\n"
+"POT-Creation-Date: 2016-12-12 01:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,159 +21,159 @@ msgstr ""
 msgid "Accounting"
 msgstr "Muhasebe"
 
-#: com/models.py:16 com/models.py:40 com/models.py:79 lab/models/patient.py:40
+#: com/models.py:17 com/models.py:41 com/models.py:80 lab/models/patient.py:40
 #: lab/models/patient.py:129
 msgid "Institution"
 msgstr "Kurum"
 
-#: com/models.py:17 com/models.py:43
+#: com/models.py:18 com/models.py:44
 msgid "Discount rate"
 msgstr "İndirim oranı"
 
-#: com/models.py:19
+#: com/models.py:20
 msgid "Alt. Pricing"
 msgstr "Alt. Fiyatlandırma"
 
-#: com/models.py:20
+#: com/models.py:21
 msgid "Use alternative price"
 msgstr "Alternatif fiyatlandırmayı kullan"
 
-#: com/models.py:21
+#: com/models.py:22
 msgid "Open account"
 msgstr "Açık hesap"
 
-#: com/models.py:22
+#: com/models.py:23
 msgid "This institution makes mountly payments"
 msgstr "Bu kurum aylık ödemeler yapar"
 
-#: com/models.py:23 com/models.py:44 com/models.py:83 com/models.py:108
-#: com/models.py:213 com/models.py:236 lab/models/analysis.py:194
+#: com/models.py:24 com/models.py:45 com/models.py:84 com/models.py:109
+#: com/models.py:219 com/models.py:242 lab/models/analysis.py:194
 msgid "Definition date"
 msgstr "Oluşturulma tarihi"
 
-#: com/models.py:26
+#: com/models.py:27
 msgid "Institue Pricing"
 msgstr "Kurum Fiyatlandırması"
 
-#: com/models.py:27
+#: com/models.py:28
 msgid "Institue Pricings"
 msgstr "Kurum Fiyatlandırmaları"
 
-#: com/models.py:39
+#: com/models.py:40
 msgid "Institute pricing"
 msgstr "Kurum fiyatlandırması"
 
-#: com/models.py:41 lab/models/analysis.py:130 lab/models/analysis.py:146
+#: com/models.py:42 lab/models/analysis.py:130 lab/models/analysis.py:146
 #: lab/models/analysis.py:170 lab/models/analysis.py:359
 #: lab/models/analysis.py:433
 msgid "Analyse Type"
 msgstr "Test Tipi"
 
-#: com/models.py:42
+#: com/models.py:43
 msgid "Exact price"
 msgstr "Net fiyat"
 
-#: com/models.py:47
+#: com/models.py:48
 msgid "Analyse Pricing"
 msgstr "Test Fiyatlandırması"
 
-#: com/models.py:48
+#: com/models.py:49
 msgid "Analyse Pricings"
 msgstr "Test Fiyatlandırmaları"
 
-#: com/models.py:56
+#: com/models.py:57
 msgid "Expense (-)"
 msgstr "Harcama (-)"
 
-#: com/models.py:57
+#: com/models.py:58
 msgid "Customer debt (-)"
 msgstr "Müşteri borcu (-)"
 
-#: com/models.py:58
+#: com/models.py:59
 msgid "Customer payment (+)"
 msgstr "Müşteri ödemesi (+)"
 
-#: com/models.py:62
+#: com/models.py:63
 msgid "Sell"
 msgstr "Satış"
 
-#: com/models.py:63
+#: com/models.py:64
 msgid "Cash"
 msgstr "Nakit"
 
-#: com/models.py:64
+#: com/models.py:65
 msgid "Credit Card"
 msgstr "Kredi Kartı"
 
-#: com/models.py:65
+#: com/models.py:66
 msgid "Bank transfer"
 msgstr "EFT / Havale"
 
-#: com/models.py:75 com/models.py:106 com/models.py:199 com/models.py:228
+#: com/models.py:76 com/models.py:107 com/models.py:205 com/models.py:234
 #: lab/models/patient.py:191
 msgid "Admission"
 msgstr "Hasta Kabul"
 
-#: com/models.py:77 lab/models/patient.py:116 lab/models/patient.py:128
+#: com/models.py:78 lab/models/patient.py:116 lab/models/patient.py:128
 msgid "Patient"
 msgstr "Hasta"
 
-#: com/models.py:80
+#: com/models.py:81
 msgid "Payment method"
 msgstr "Ödeme yöntemi"
 
-#: com/models.py:81
+#: com/models.py:82
 msgid "Record type"
 msgstr "Kayit tipi"
 
-#: com/models.py:82 com/models.py:232 lab/models/analysis.py:53
+#: com/models.py:83 com/models.py:238 lab/models/analysis.py:53
 #: lab/models/patient.py:211
 msgid "Amount"
 msgstr "Miktar"
 
-#: com/models.py:86
+#: com/models.py:87
 msgid "Payment Record"
 msgstr "Ödeme Kaydı"
 
-#: com/models.py:87
+#: com/models.py:88
 msgid "Payment Records"
 msgstr "Ödeme Kayıtları"
 
-#: com/models.py:92
+#: com/models.py:93
 msgid "Only one sell payment can exist per admission"
 msgstr ""
 "Her bir Hasta Kabul kaydı için sadece bir adet satış tipinde ödeme kaydına "
 "izin verilir."
 
-#: com/models.py:107
+#: com/models.py:108
 msgid "Tax included"
 msgstr "KDV Dahil"
 
-#: com/models.py:109
+#: com/models.py:110
 msgid "List price"
 msgstr "Liste fiyatı"
 
-#: com/models.py:111
+#: com/models.py:112
 msgid "Discount percentage"
 msgstr "İndirim yüzdesi"
 
-#: com/models.py:113
+#: com/models.py:114
 msgid "Discount amount"
 msgstr "İndirim miktarı"
 
-#: com/models.py:115
+#: com/models.py:116
 msgid "Customer price"
 msgstr "Müşteri fiyatı"
 
-#: com/models.py:120
+#: com/models.py:124
 msgid "Admission Pricing"
 msgstr "Hasta Kabul Fiyatlandırması"
 
-#: com/models.py:121
+#: com/models.py:125
 msgid "Admission Pricings"
 msgstr "Hasta Kabul Fiyatlandırmaları"
 
-#: com/models.py:200 lab/models/analysis.py:39 lab/models/analysis.py:51
+#: com/models.py:206 lab/models/analysis.py:39 lab/models/analysis.py:51
 #: lab/models/analysis.py:68 lab/models/analysis.py:80
 #: lab/models/analysis.py:106 lab/models/analysis.py:147
 #: lab/models/analysis.py:360 lab/models/analysis.py:430
@@ -182,61 +182,60 @@ msgstr "Hasta Kabul Fiyatlandırmaları"
 msgid "Name"
 msgstr "İsim"
 
-#: com/models.py:201 lab/models/analysis.py:25 lab/models/patient.py:33
+#: com/models.py:207 lab/models/analysis.py:25 lab/models/patient.py:33
 #: lab/models/patient.py:100
 msgid "Address"
 msgstr "Adres"
 
-#: com/models.py:203
+#: com/models.py:209
 msgid "Total"
 msgstr "Toplam"
 
-#: com/models.py:205
+#: com/models.py:211
 msgid "Discount"
 msgstr "İndirim"
 
-#: com/models.py:207
+#: com/models.py:213
 msgid "SubTotal"
 msgstr "Ara toplam"
 
-#: com/models.py:209
+#: com/models.py:215
 msgid "Tax amount"
 msgstr "Vergi tutarı"
 
-#: com/models.py:211
+#: com/models.py:217
 msgid "Grand Total"
 msgstr "Genel Toplam"
 
-#: com/models.py:220 com/models.py:229
+#: com/models.py:226 com/models.py:235
 msgid "Invoice"
 msgstr "Fatura"
 
-#: com/models.py:221
+#: com/models.py:227
 msgid "Invoices"
 msgstr "Faturalar"
 
-#: com/models.py:231
-#| msgid "Code name"
+#: com/models.py:237
 msgid "Item name"
 msgstr "Öge adı"
 
-#: com/models.py:233
+#: com/models.py:239
 msgid "Quantity"
 msgstr "Adet"
 
-#: com/models.py:234
+#: com/models.py:240
 msgid "Unit"
 msgstr "Birim"
 
-#: com/models.py:235
+#: com/models.py:241
 msgid "Line total"
 msgstr "Satır toplamı"
 
-#: com/models.py:239
+#: com/models.py:245
 msgid "Invoice Item"
 msgstr "Fatura Ögesi"
 
-#: com/models.py:240
+#: com/models.py:246
 msgid "Invoice Items"
 msgstr "Fatura Ögeleri"
 
@@ -325,11 +324,11 @@ msgstr "Kod"
 
 #: lab/models/analysis.py:43 lab/models/analysis.py:54
 msgid "Medium Type"
-msgstr "Ortam Türü"
+msgstr "Medyum Tipi"
 
 #: lab/models/analysis.py:44
 msgid "Medium Types"
-msgstr "Ortam Türleri"
+msgstr "Medyum Tipleri"
 
 #: lab/models/analysis.py:57 lab/models/analysis.py:105
 msgid "Sample Type"
@@ -518,10 +517,14 @@ msgstr "Test sonucu sözlüğü"
 msgid "Sample Amount"
 msgstr "Örnek Miktarı"
 
-#: lab/models/analysis.py:184 lab/models/analysis.py:186
-#: lab/models/patient.py:212
+#: lab/models/analysis.py:184 lab/models/patient.py:212
 msgid "Sample type"
 msgstr "Örnek Türü"
+
+#: lab/models/analysis.py:186
+#| msgid "Medium Type"
+msgid "Medium type"
+msgstr "Medyum tipi"
 
 #: lab/models/analysis.py:188
 msgid "Report template"

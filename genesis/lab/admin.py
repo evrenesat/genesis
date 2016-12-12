@@ -357,7 +357,7 @@ class AdminAnalyse(admin.ModelAdmin):
         (_('Admission Information'),
          {'classes': ('grp-collapse',),
           'fields': (('analyse_type', 'doctor_institution', 'patient'),
-                     ('sample_type', 'sample_amount',),
+                     ('sample_type', 'sample_amount', 'medium_type'),
                      )
           },
          ),
