@@ -34,7 +34,9 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
+
 ORDER_CHOICES = [(i, i) for i in range(100)]
+
 
 class MediumType(models.Model):
     name = models.CharField(_('Name'), max_length=100, unique=True)
@@ -47,6 +49,9 @@ class MediumType(models.Model):
         verbose_name_plural = _('Medium Types')
         ordering = ('-order',)
 
+    def get_code(self):
+        return self.code or self.name[:3].upper()
+
     def __str__(self):
         return self.name
 
@@ -56,13 +61,13 @@ class SampleType(models.Model):
     code = models.CharField(_('Code'), max_length=3)
     amount = models.CharField(_('Amount'), max_length=20, null=True, blank=True)
     medium = models.ManyToManyField(MediumType, verbose_name=_('Medium Type'))
-    order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True,
+    order = models.PositiveSmallIntegerField(_('Sort order'), null=True, blank=True,
                                              choices=ORDER_CHOICES)
-
 
     class Meta:
         verbose_name = _('Sample Type')
         verbose_name_plural = _('Sample Types')
+        ordering = ('order',)
 
     def __str__(self):
         return self.name
@@ -86,6 +91,7 @@ class Method(models.Model):
 class Category(models.Model):
     name = models.CharField(_('Name'), max_length=30, unique=True)
     code = models.CharField(_('Code'), max_length=5, null=True, blank=True)
+    states = models.ManyToManyField('StateDefinition', verbose_name=_('State Definitions'))
 
     class Meta:
         verbose_name = _('Analyse Group')
@@ -98,9 +104,24 @@ class Category(models.Model):
         return self.code or self.name[:3].upper()
 
 
+class ProcessLogic(models.Model):
+    name = models.CharField(_('Name'), max_length=30, unique=True)
+    code = models.TextField(_('Process logic code'), null=True, blank=True,
+                            help_text=_('This code will be used to calculate the analyse '
+                                        'result according to entered data'))
+
+    class Meta:
+        verbose_name = _('Process Logic Code')
+        verbose_name_plural = _('Process Logic Codes')
+
+    def __str__(self):
+        return self.name
+
+
 class AnalyseType(models.Model):
     subtypes = models.ManyToManyField('self', verbose_name=_('Sub types'), related_name='main_type',
-                                      null=True, blank=True)
+                                      null=True, blank=True, symmetrical=False
+                                      )
     group_type = models.BooleanField(_('Group'), default=False, editable=False,
                                      help_text=_(
                                          'This is a group type, consist of other analyse types'))
@@ -114,28 +135,33 @@ class AnalyseType(models.Model):
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     footnote = models.TextField(_('Report footnote'), blank=True, null=True,
                                 help_text=_('This will be shown under the report'))
-    external = models.BooleanField(_('Goes to external lab'), default=False,
+    external = models.BooleanField(_('Goes to external lab'), default=False, editable=False,
                                    help_text=_('Analysed by an external lab'))
     external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True,
                                      verbose_name=_('External lab'))
     external_price = models.DecimalField(_('External lab price'), max_digits=6, decimal_places=2,
-                                         default=0)
+                                         default=0, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=6, decimal_places=2, default=0)
     alternative_price = models.DecimalField(_('Alternative price'), max_digits=6, decimal_places=2,
                                             help_text=_('Alternative price definition. '
-                                                        'Can be used for foregeign currencies etc.')
-                                            , default=0)
-    process_logic = models.TextField(_('Process logic code'), null=True, blank=True,
-                                     help_text=_('This code will be used to calculate the analyse '
-                                                 'result according to entered data'))
-    process_time = models.SmallIntegerField(_('Process Time'))
+                                                        'Can be used for foregeign currencies etc.'),
+                                            null=True, blank=True, default=0)
+    process_logic = models.ForeignKey(ProcessLogic, models.SET_NULL, null=True, blank=True,
+                                      verbose_name=_('Process logic'))
+    process_time = models.SmallIntegerField(_('Process Time'), null=True, blank=True)
+    order = models.PositiveSmallIntegerField(_('Sort order'), null=True, blank=True,
+                                             choices=ORDER_CHOICES)
 
     def is_sample_type_compatible(self, sample_type):
         return sample_type in self.sample_type.all()
 
+    def get_code(self):
+        return self.code or self.name[:3].upper()
+
     class Meta:
         verbose_name = _('Analyse Type')
         verbose_name_plural = _('Analyse Types')
+        ordering = ('order',)
 
     def __str__(self):
         return "%s | %s %s" % (self.name,
@@ -172,13 +198,16 @@ class ReportTemplate(models.Model):
     def __str__(self):
         return "%s" % (self.name,)
 
+
 SAMPLE_AMOUNT = [(i, i) for i in range(10)]
+
 
 class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
                              blank=True)
     admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Patient Admission'))
-
+    no_of_groups = models.PositiveIntegerField(_('Work groups'), default=1, null=True,
+                                               blank=True, choices=((1, 1), (2, 2), (3, 3)))
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result parameters'), blank=True, null=True,
                               help_text=_("Can be used to override entered/calculated result "
@@ -188,7 +217,7 @@ class Analyse(models.Model):
     short_result = models.TextField(_('Result'), blank=True, null=True,
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
-    sample_amount = models.PositiveIntegerField(_('Sample Amount'), max_length=20, null=True,
+    sample_amount = models.PositiveIntegerField(_('Sample Amount'), null=True,
                                                 blank=True, default=1, choices=SAMPLE_AMOUNT)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
@@ -202,7 +231,7 @@ class Analyse(models.Model):
     finished = models.BooleanField(_('Finished'), default=False)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 
-    external = models.BooleanField(_('Goes to external lab'), default=False,
+    external = models.BooleanField(_('Goes to external lab'), default=False, editable=False,
                                    help_text=_('Analysed by an external lab'))
     external_lab = models.ForeignKey(ExternalLab, models.SET_NULL, null=True, blank=True,
                                      verbose_name=_('External lab'))
@@ -216,23 +245,25 @@ class Analyse(models.Model):
     approver = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Approver'), null=True,
                                  blank=True, related_name='approved_analyses')
 
-    def _set_state_for(self, approve=False, finish=False, accept=False):
-        state_set = self.state_set.all()
-        if not state_set or (state_set[0].definition.finish != finish
-                             or state_set[0].definition.approve != approve
-                             or state_set[0].definition.accept != accept):
-            state = self.type.statedefinition_set.get(finish=finish, approve=approve, accept=accept)
-            self.state_set.create(definition=state)
+    def _set_state_for(self, user, **kwargs):
+        current_state = self.state_set.filter(current_state=True)
+
+        wanted_state = self.type.statedefinition_set.all()
+        if self.type.category:
+            wanted_state = wanted_state | self.type.category.states.all()
+        wanted_state = wanted_state.distinct().get(**kwargs)
+        if not current_state or current_state[0].definition != wanted_state:
+            self.state_set.create(definition=wanted_state, personnel=user.profile)
 
     def mark_accepted(self, request, set_state=False):
-        if not request.user.has_perm('lab.can_finish_analysis'):
+        if not request.user.has_perm('lab.can_accept_analysis'):
             raise ValidationError('-')  # PermissionDenied(
             # _("You don't have required permissions to mark an analyse as approved"))
         else:
             self.accepted = True
             self.save()
         if set_state:
-            self._set_state_for(accept=True)
+            self._set_state_for(request.user, accept=True)
 
     def mark_approved(self, request, set_state=False):
         if not request.user.has_perm('lab.can_approve_analysis'):
@@ -244,7 +275,7 @@ class Analyse(models.Model):
             self.approver = request.user.profile
             self.save()
         if set_state:
-            self._set_state_for(approve=True)
+            self._set_state_for(request.user, approve=True)
 
     def mark_finished(self, request, set_state=False):
         if not request.user.has_perm('lab.can_finish_analyse'):
@@ -256,17 +287,26 @@ class Analyse(models.Model):
             self.analyser = request.user.profile
             self.save()
         if set_state:
-            self._set_state_for(finish=True)
+            self._set_state_for(request.user, finish=True)
 
     @lazy_property
     def get_code(self):
         return self.type.code or self.type.name[:3]
 
     @lazy_property
+    def process_logic(self):
+        if self.type.process_logic_id:
+            return self.type.process_logic.code
+        else:
+            for parameter_def in self.type.parameter_set.all():
+                if parameter_def.process_logic_id:
+                    return parameter_def.process_logic.code
+
+    @lazy_property
     def result_dict(self):
         d = {}
         for par_val in self.parametervalue_set.all():
-            d[par_val.code] = par_val.val
+            d[par_val.code] = par_val.val.split(',') if par_val.val else par_val.val
         return d
 
     def create_empty_values(self):
@@ -276,11 +316,16 @@ class Analyse(models.Model):
     def calculate_result(self):
         """executes result process logic with result"""
         context = self.result_dict.copy()
-        context['result_set'] = self.result_dict.copy()
-        if self.type.process_logic:
+        context.update({
+            'result_set': self.result_dict.copy(),
+            'sample_type': self.sample_type.get_code(),
+            'medium_type': self.medium_type.get_code(),
+            'test_type': self.type.get_code(),
+        })
+        if self.process_logic:
             context['result'] = ''
             context['comment'] = ''
-            exec(self.type.process_logic, context)
+            exec(self.process_logic, context)
             if context['result']:
                 self.short_result = context['result']
             if context['comment']:
@@ -345,10 +390,11 @@ class Analyse(models.Model):
 
     def clean(self):
         if not self.type.is_sample_type_compatible(self.sample_type):
+            sample_type = _('Following sample types can be selected;')
             raise ValidationError(
-                str(_('Improper Sample Type for the selected analyse %s.' % self.type)) +
-                str(_('Following sample types can be selected;')) +
-                "\n%s" % ', '.join([st.name for st in self.type.sample_type.all()])
+                str(sample_type) +
+                "\n%s" % ', '.join([st.name for st in self.type.sample_type.all()]),
+                code='invalid'
             )
 
     class Meta:
@@ -357,11 +403,18 @@ class Analyse(models.Model):
         permissions = (
             ("can_approve_analysis", "Can approve analysis"),
             ("can_finish_analyse", "Can finish analysis"),
+            ("can_accept_analyse", "Can accept analysis"),
             ("can_enter_data_to_analyse", "Can enter data to analysis"),
         )
 
     def __str__(self):
         return "%s %s" % (self.type, self.admission)
+
+    def save(self, *args, **kwargs):
+        if self.external_lab_id and not self.external:
+            self.external = True
+        super().save(*args, **kwargs)
+
 
 
 class StateDefinition(models.Model):
@@ -371,8 +424,8 @@ class StateDefinition(models.Model):
     finish = models.BooleanField(_('Finished state'), default=False)
     approve = models.BooleanField(_('Approved state'), default=False)
     accept = models.BooleanField(_('Accepted state'), default=False)
+    first = models.BooleanField(_('First state'), default=False)
     order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
-
 
     @classmethod
     def comment_autocomplete_data(cls, definition_id):
@@ -399,15 +452,42 @@ class State(models.Model):
     analyse = models.ForeignKey(Analyse, models.CASCADE, verbose_name=_('Analyse'))
     definition = models.ForeignKey(StateDefinition, models.CASCADE, verbose_name=_('State'))
     comment = models.CharField(_('Notes'), max_length=250, null=True, blank=True)
+    sample_type = models.ForeignKey(SampleType, editable=False, null=True, blank=True,
+                                    verbose_name=_('Sample type'))
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     personnel = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Personnel'), blank=True)
+    current_state = models.BooleanField(_('Current state'), editable=False, default=True)
+    group = models.PositiveSmallIntegerField(_('Group'), choices=((1, 1), (2, 2), (3, 3), (100, _('All'))),
+                                             default=1)
 
     class Meta:
         verbose_name = _('Analyse State')
         verbose_name_plural = _('Analyse States')
         ordering = ('timestamp',)
 
+    def _cleanup_old_currents(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        State.objects.filter(analyse=self.analyse, group=self.group, current_state=True
+                             ).exclude(pk=self.id).update(current_state=False)
+    def save(self, *args, **kwargs):
+
+        is_new = self.id is None
+        is_all = False
+        if is_new:
+            self.sample_type = self.analyse.sample_type
+            if self.group == 100:
+                is_all = True
+                self.group = 1
+            self._cleanup_old_currents(*args, **kwargs)
+        if is_all:
+            self.id = None
+            self.group = 2
+            self._cleanup_old_currents(*args, **kwargs)
+            if self.analyse.no_of_groups == 3:
+                self.id = None
+                self.group = 3
+                self._cleanup_old_currents(*args, **kwargs)
 
     def __str__(self):
         return "%s %s" % (self.analyse, self.definition)
@@ -438,11 +518,13 @@ key_with_preset=val1,val2,val3
 class Parameter(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     type = models.CharField(_('Parameter type'), max_length=12, default='keyval_s',
-                            choices=PARAMETER_TYPES)
+                            choices=PARAMETER_TYPES, editable=False)
     analyze_type = models.ManyToManyField(AnalyseType, verbose_name=_('Analyse Type'))
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     parameter_definition = models.TextField(_('Parameter definition'), null=True, blank=True,
                                             help_text=PARAM_DEF_HELP_TEXT)
+    process_logic = models.ForeignKey(ProcessLogic, models.SET_NULL, null=True, blank=True,
+                                      verbose_name=_('Process logic'))
 
     def create_parameter_key(self, key_name, row_no=None, col_no=None, preset=None):
         code = pythonize(key_name)
@@ -522,6 +604,7 @@ class ParameterKey(models.Model):
                             help_text=_(
                                 'Parameters that their code name starts with underscore "_" will be excluded from reports.'))
     help = models.CharField(_('Help text'), max_length=255, blank=True, null=True)
+    multi = models.BooleanField(_('Multiple options'), default=False)
     type = models.CharField(_('Parameter type'), max_length=5,
                             choices=PARAMETER_VALUE_TYPES, default=1)
     presets = models.TextField(_('Presets'), blank=True, null=True)
@@ -580,14 +663,18 @@ class ParameterValue(models.Model):
         ckey = "PKEYDATA:%s" % self.key_id
         data = cache.get(ckey, None)
         if data is None:
-            data = {'auto_preset': False, 'presets': []}
+            data = {'auto_preset': False, 'presets': [], 'is_multiple': self.key.multi}
             if self.key.presets:
                 data['presets'] = json.loads(self.key.presets)
             else:
                 data['auto_preset'] = True
-                data['presets'] = list(
-                    filter(None, self.key.parametervalue_set.distinct().values_list('value',
-                                                                                    flat=True)))
+            for v in self.key.parametervalue_set.distinct().values_list('value', flat=True):
+                if v:
+                    if ',' in v:
+                        data['presets'].extend(v.split(','))
+                    else:
+                        data['presets'].append(v)
+            data['presets'] = list(set(data['presets']))
             cache.set(ckey, data, 30)
         return "<input class=keydata type=hidden value='%s'>" % json.dumps(data)
 

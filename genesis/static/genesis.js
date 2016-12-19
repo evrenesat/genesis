@@ -16,8 +16,8 @@ function add_footer_button(params) {
 }
 
 function is_editing(name) {
-    let klses = grp.jQuery('body').attr('class').split(' ');
-    for (let kls of klses) {
+    var klses = grp.jQuery('body').attr('class').split(' ');
+    for (var kls of klses) {
         if (kls.indexOf('-') > 0 && kls.split('-')[1] == name) {
             return true;
         }
@@ -31,121 +31,36 @@ function get_editing_id() {
     return parseInt(document.documentURI.split('/change/')[0].split('/').pop())
 }
 
-function print_barcode_iframe() {
-    // this method will be called from iframe
-    // ie: window.parent.print_barcode_iframe()
-
-    // set portrait orientation
-    jsPrintSetup.setPrinter('ZDesigner GC420t');
-    // jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
-    // set top margins in millimeters
-    jsPrintSetup.setOption('marginTop', 0);
-    jsPrintSetup.setOption('marginBottom', 0);
-    jsPrintSetup.setOption('marginLeft', 0);
-    jsPrintSetup.setOption('marginRight', 0);
-    // set page header
-    jsPrintSetup.setOption('headerStrLeft', '');
-    jsPrintSetup.setOption('headerStrCenter', '');
-    jsPrintSetup.setOption('headerStrRight', '');
-    // set empty page footer
-    jsPrintSetup.setOption('footerStrLeft', '');
-    jsPrintSetup.setOption('footerStrCenter', '');
-    jsPrintSetup.setOption('footerStrRight', '');
-    // clears user preferences always silent print value
-    // to enable using 'printSilent' option
-    jsPrintSetup.clearSilentPrint();
-    // Suppress print dialog (for this context only)
-    jsPrintSetup.setOption('printSilent', 1);
-    // Do Print
-    // When print is submitted it is executed asynchronous and
-    // script flow continues after print independently of completetion of print process!
-    jsPrintSetup.printWindow(window.frames[0]);
-    // next commands
+function add_value_span($obj, $sibling) {
+    add_after = $sibling || $obj;
+    add_after.after($('<span class="info_label"></span>').html($obj.text() || $obj.val())).addClass('hide_it_f');
 }
-
-function print_invoice_iframe() {
-    // this method will be called from iframe
-    // ie: window.parent.print_barcode_iframe()
-
-    // set portrait orientation
-    jsPrintSetup.setPrinter('EPSON LX-350 ESC/P');
-    // jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
-    // set top margins in millimeters
-    jsPrintSetup.setOption('marginTop', 0);
-    jsPrintSetup.setOption('marginBottom', 0);
-    jsPrintSetup.setOption('marginLeft', 0);
-    jsPrintSetup.setOption('marginRight', 0);
-    // set page header
-    jsPrintSetup.setOption('headerStrLeft', '');
-    jsPrintSetup.setOption('headerStrCenter', '');
-    jsPrintSetup.setOption('headerStrRight', '');
-    // set empty page footer
-    jsPrintSetup.setOption('footerStrLeft', '');
-    jsPrintSetup.setOption('footerStrCenter', '');
-    jsPrintSetup.setOption('footerStrRight', '');
-    // clears user preferences always silent print value
-    // to enable using 'printSilent' option
-    jsPrintSetup.clearSilentPrint();
-    // Suppress print dialog (for this context only)
-    jsPrintSetup.setOption('printSilent', 1);
-    // Do Print
-    // When print is submitted it is executed asynchronous and
-    // script flow continues after print independently of completetion of print process!
-    jsPrintSetup.printWindow(window.frames[0]);
-    // next commands
-}
-function popup_error(msg) {
-    alert(msg);
-}
-function print_report_iframe() {
-    // this method will be called from iframe
-    // ie: window.parent.print_barcode_iframe()
-
-    // set portrait orientation
-    jsPrintSetup.setPrinter('report');
-    // jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
-    // jsPrintSetup.setPaperSizeData(9);
-    console.log(jsPrintSetup.getPaperMeasure());
-    // set top margins in millimeters
-    jsPrintSetup.setOption('marginTop', 10);
-    jsPrintSetup.setOption('marginBottom', 0);
-    // jsPrintSetup.setOption('marginLeft', 0);
-    // jsPrintSetup.setOption('marginRight', 0)
-    // set page header
-    jsPrintSetup.setOption('headerStrLeft', '');
-    jsPrintSetup.setOption('headerStrCenter', '');
-    jsPrintSetup.setOption('headerStrRight', '');
-    // set empty page footer
-    jsPrintSetup.setOption('footerStrLeft', '');
-    jsPrintSetup.setOption('footerStrCenter', '');
-    jsPrintSetup.setOption('footerStrRight', '');
-    // clears user preferences always silent print value
-    // to enable using 'printSilent' option
-    jsPrintSetup.clearSilentPrint();
-    // Suppress print dialog (for this context only)
-    jsPrintSetup.setOption('printSilent', 1);
-    // Do Print
-    // When print is submitted it is executed asynchronous and
-    // script flow continues after print independently of completetion of print process!
-    jsPrintSetup.printWindow(window.frames[0]);
-    // next commands
-}
-
 function lock_unlock_analyse_states() {
     // prevent changing of existing analyse  states
-    // ( double click on container div allows editin albeiting warning)
-    $('#state_set-group select').each(function () {
-        var selbox = $(this);
-        let id = selbox.attr('id').replace('definition', '') + 'id';
-        if (id.indexOf('_prefix') == -1 && $('#' + id).val()) {
-            selbox.attr("disabled", true);
-            selbox.after($('<input type=hidden>').val(selbox.val()).attr('name', selbox.attr('name')));
-            selbox.closest('.definition').dblclick(function () {
-                alert("Çok gerekmedikçe mevcut bir durum kaydını değiştirmek yerine yeni bir kayıt eklemeyi tercih ediniz.");
-                selbox.attr("disabled", false);
-                selbox.siblings('input').remove();
-            })
-        }
+    // ( double click on container div allows editing with a warning)
+    no_of_wg = $('#id_no_of_groups').val();
+    if (no_of_wg == 1) {
+        $('div.grp-td.group').hide();
+        $('div.grp-td.current_state').hide();
+        $('div.grp-th.son-durum').hide();
+        $('div.grp-th.grup').hide();
+    } else if (no_of_wg == 2) {
+        $('div.grp-td.group input[type=radio][value=3]').parent().hide();
+    }
+    $('div[id^=state_set].has_original div.grp-tr').each(function () {
+        var row = $(this);
+        row.find('input[type=radio][checked=checked]').each(function () {
+            inrad = $(this);
+            add_value_span(inrad, inrad.closest('ul'));
+        });
+        select = row.find('select');
+        add_value_span(select.find('option:selected'), select);
+        add_value_span(row.find('textarea'));
+        row.dblclick(function () {
+            alert("Mecbur kalmadıkça değiştirmek yerine yeni bir kayıt eklemeyi tercih ediniz.");
+            row.find('.hide_it_f').removeClass('hide_it_f');
+            row.find('.info_label').addClass('hide_it_f');
+        })
     });
 }
 
@@ -158,6 +73,58 @@ function get_pk(obj, $obj) {
         return -1;
     }
 }
+
+
+
+function create_selectbox(optionList, toElem, selections, is_multiple) {
+    var combo = $("<select class='comboin'></select>");
+    if (is_multiple) {
+        combo.attr('multiple', 'multiple');
+    }
+    combo.append($("<option value=''> --- </option>"));
+    $.each(optionList, function (i, el) {
+        var option = $("<option>" + el + "</option>");
+        if (selections.indexOf(el) > -1) {
+            option.attr('selected', true);
+        }
+        combo.append(option);
+    });
+    $(combo).change(function () {
+        console.log("Change", toElem);
+        toElem.val(is_multiple ? combo.val().join(',') : combo.val());
+    });
+
+    return combo;
+}
+
+function modify_parameter_list_edit(selector, data_field_selector) {
+    $(selector).each(function () {
+
+        var tr = $(this);
+        window.tr = tr;
+        console.log(tr);
+        console.log(tr.find('input.keydata').val());
+        var keyData = JSON.parse(tr.find('input.keydata').val());
+        if (keyData.presets.length) {
+            var txt_field = tr.find('input.vTextField');
+            txt_field.hide();
+            var combo = create_selectbox(keyData.presets, txt_field, txt_field.val().split(','), keyData.is_multiple);
+            // combo.val(txt_field.val());
+            txt_field.after(combo);
+            var manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
+            manual_button.click(function () {
+                if (!keyData.auto_preset && txt_field.css('display') == 'none') {
+                    alert("Öntanımlı değerler dışında bir değer girmek üzeresiniz!")
+                }
+                combo.toggle();
+                txt_field.toggle();
+            })
+            combo.after(manual_button);
+        }
+    })
+}
+
+
 
 function create_selectbox_for_analyse_state() {
     var selbox = $(this);
@@ -184,10 +151,10 @@ function remove_selectbox(txt_field) {
 function create_autocomplete_widget(data, txt_field) {
     if (data.presets.length) {
         txt_field.hide();
-        let combo = create_selectbox(data.presets, txt_field);
-        combo.val(txt_field.val());
+        var combo = create_selectbox(data.presets, txt_field, txt_field.val().split(','), data.is_multiple);
+        // combo.val(txt_field.val());
         txt_field.after(combo);
-        let manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
+        var manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
         manual_button.click(function () {
             if (!data.auto_preset && txt_field.css('display') == 'none') {
                 alert("Öntanımlı değerler dışında bir değer girmek üzeresiniz!")
@@ -201,30 +168,31 @@ function create_autocomplete_widget(data, txt_field) {
 
 function swap_add_another_status_row() {
     // move top the analyse change_form add new state line
-    let add_new = $('#state_set-group div.grp-dynamic-form.grp-module.grp-tbody').not('.has_original');
-    let th = add_new.siblings('.grp-thead');
+    var add_new = $('#state_set-group div.grp-dynamic-form.grp-module.grp-tbody').not('.has_original');
+    var th = add_new.siblings('.grp-thead');
     th.after(add_new.detach()[0]);
+    $('div#state_set-group div.grp-dynamic-form').not('.has_original').not('.grp-transparent').find('div.grp-td.current_state > div > img').css('opacity',0.3);
 }
 
 var object_id = get_editing_id();
 
-function show_fieldsets(){
+function show_fieldsets() {
     if (window.location.hash.indexOf('show_fieldset=') > -1) {
         fieldsets = window.location.hash.split('show_fieldset=')[1].split(',');
         // debugger;
         $('.analyse_box').addClass('grp-closed');
-        for (let fieldset of fieldsets){
-            $('.analyse_box.'+fieldset).removeClass('grp-closed');
+        for (var fieldset of fieldsets) {
+            $('.analyse_box.' + fieldset).removeClass('grp-closed');
         }
     }
 }
-function only_show_fieldsets(){
+function only_show_fieldsets() {
     if (window.location.hash.indexOf('only_show_fieldset=') > -1) {
         fieldsets = window.location.hash.split('only_show_fieldset=')[1].split(',');
         // debugger;
         $('.analyse_box').addClass('hide_fieldset');
-        for (let fieldset of fieldsets){
-            $('.analyse_box.'+fieldset).removeClass('hide_fieldset');
+        for (var fieldset of fieldsets) {
+            $('.analyse_box.' + fieldset).removeClass('hide_fieldset');
         }
     }
 }
@@ -246,10 +214,10 @@ function patch_edit_views() {
     only_show_fieldsets()
 
     if (is_editing('analyse') && object_id) {
-        add_footer_button({
-            url: '/lab/analyse_barcode/' + object_id + '/',
-            name: 'Barkod Yazdır'
-        });
+        // add_footer_button({
+        //     url: '/lab/analyse_barcode/' + object_id + '/',
+        //     name: 'Barkod Yazdır'
+        // });
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
 
@@ -259,6 +227,8 @@ function patch_edit_views() {
         setTimeout(swap_add_another_status_row, 0);
 
         $("select[id$=-definition]:not([id*=prefix])").change(create_selectbox_for_analyse_state);
+
+        // fade check mark image of new state form
 
 
         if (group_membership) {
@@ -311,18 +281,18 @@ function patch_edit_views() {
         }
     }
     if (is_editing('admission')) {
-        let customer_is_patient = $('#id_payment_set-0-patient').val();
+        var customer_is_patient = $('#id_payment_set-0-patient').val();
 
 
         function link_payment_responsible() {
 
-                    let _patient = $('#id_payment_set-0-patient').val();
-                    let _institute = $('#id_payment_set-0-institution').val();
-                    $('div.grp-td.patient').find('select').val(_patient);
-                    $('div.grp-td.institution').find('select').val(_institute);
-                 }
+            var _patient = $('#id_payment_set-0-patient').val();
+            var _institute = $('#id_payment_set-0-institution').val();
+            $('div.grp-td.patient').find('select').val(_patient);
+            $('div.grp-td.institution').find('select').val(_institute);
+        }
 
-        $('#payment_set-group a.grp-add-handler').click(function(){
+        $('#payment_set-group a.grp-add-handler').click(function () {
             setTimeout(link_payment_responsible, 0);
         });
 
@@ -380,10 +350,10 @@ function patch_edit_views() {
                 onclick: function () {
                     $.featherlight({
                         iframe: '/admin/lab/analyse/?admission__id__exact=' + object_id + '#pop_up=1',
-                        iframeWidth: 1100, iframeHeight: 600
+                        iframeWidth: window.innerWidth * 0.93, iframeHeight: 600,
                     });
                 },
-                name: 'Analizleri Listele',
+                name: 'Testleri Listele',
                 target: '_self'
             });
         } else {
@@ -421,56 +391,13 @@ function patch_edit_views() {
 
 }
 
-
-function create_selectbox(optionList, toElem) {
-    var combo = $("<select class='comboin'></select>");
-
-    $.each(optionList, function (i, el) {
-        combo.append("<option>" + el + "</option>");
-    });
-    $(combo).change(function () {
-        console.log("Change", toElem);
-        toElem.val($(this).val());
-    })
-
-    return combo;
-}
-
-function modify_parameter_list_edit(selector) {
-    $(selector).each(function () {
-
-        let tr = $(this);
-        window.tr = tr;
-        console.log(tr);
-        console.log(tr.find('input.keydata').val());
-        let keyData = JSON.parse(tr.find('input.keydata').val());
-        if (keyData.presets.length) {
-            let txt_field = tr.find('input.vTextField');
-            txt_field.hide();
-            var combo = create_selectbox(keyData.presets, txt_field);
-            combo.val(txt_field.val());
-            txt_field.after(combo);
-            let manual_button = $('<input class="manualb" type="button" value="  ❄  ">');
-            manual_button.click(function () {
-                if (!keyData.auto_preset && txt_field.css('display') == 'none') {
-                    alert("Öntanımlı değerler dışında bir değer girmek üzeresiniz!")
-                }
-                combo.toggle();
-                txt_field.toggle();
-            })
-            combo.after(manual_button);
-        }
-    })
-}
-
-
 function dashbox(box_id, data, url) {
-    let _data = data || {};
-    let _url = url || '/lab/get_admissions_by_analyses/';
+    var _data = data || {};
+    var _url = url || '/lab/get_admissions_by_analyses/';
     var box = $('#' + box_id);
     $.get(_url, _data, function (result) {
         // result = JSON.parse(result);
-        for (let itm of result.admissions) {
+        for (var itm of result.admissions) {
             box.append($('<li class="grp-row grp-add-link"></li>').html(itm.title + ' | ' + itm.state).click(
                 function () {
                     $.featherlight({
@@ -507,13 +434,45 @@ function get_selected_record_ids() {
     }).get().join(',')
 }
 
-
+TIME_DIFF = 10 * 60; // sec
 function patch_list_views() {
-
-    if (_actions_icnt == "1" && location.search.indexOf('q=') > -1) {
-        location.pathname = location.pathname + $('.action-select').val() + '/'
+    try {
+        // open the edit view if current listing has only 1 object
+        if (_actions_icnt == "1" && location.search.indexOf('q=') > -1) {
+            location.pathname = location.pathname + $('.action-select').val() + '/'
+        }
+    } catch (e) {
+        // ignoring popup windows which doesn't have actions
     }
 
+    $('a.icons-add-another').each(function () {
+        // $(document).ready(function () { $("#OpenDialog").click(function () { $("#dialog").dialog({ modal: true, height: 590, width: 1005 }); }); });
+    });
+
+    function change_color() {
+        colors = ['#f4f4f4', '#bdcfd0', '#d0bdc6', '#b0d2ae', '#eccfa8'];
+        idx = 0;
+        while (colors[idx] == window.__color) {
+            idx = Math.floor(Math.random() * colors.length);
+        }
+        window.__color = colors[idx];
+    }
+
+    if (is_listing('state')) {
+        // paint background of analyse states to different colors according to their timestamp
+        // TODO:
+        window.__color = 'gray';
+        var last_time = 0;
+        $('td.field-tdt').each(function () {
+            var td = $(this);
+            tmstmp = parseInt(td.text());
+            var change_it = (tmstmp - last_time) > TIME_DIFF;
+            if (change_it) change_color();
+            last_time = tmstmp;
+            td.parent().children().css('background', window.__color);
+
+        });
+    }
     if (is_listing('analyse')) {
         add_footer_button({
             onclick: function () {
@@ -551,7 +510,7 @@ function patch_everywhere() {
     });
 
     // align True/False check marks to center
-    grp.jQuery('img[alt="False"],img[alt="True"]').parent().attr('style', 'text-align:center;');
+    grp.jQuery('img[alt="False"],img[alt="True"]').parent().addClass('iconcenter');
 
     if (window.location.hash.indexOf('pop_up=1') > -1) {
         $('#grp-navigation, #grp-context-navigation, #grp-content-title, div.grp-module:first').hide();

@@ -40,6 +40,10 @@ input[type="url"], input[type="email"], input.vTextField, input.vURLField, input
     width: auto !important;
 }
 
+input#id_code.vTextField, td.field-code > input {
+    width:50px !important;
+}
+
 .grp-module.grp-table select, .grp-module.grp-table .grp-autocomplete-wrapper-m2m, .grp-module.grp-table .grp-autocomplete-wrapper-fk {
     max-width: 350px;
 }
@@ -81,13 +85,12 @@ body.dashboard .grp-module .grp-row:not(tr) {
 
 }
 
+.hide_it_f {
+    display: none !important;
+}
+
 .hide_it {
     display: none;
-
-    /*visibility: hidden;*/
-    /*opacity: 0;*/
-    /*transition: visibility 0s, opacity 0.5s linear;*/
-
 }
 
 div.big_app_icon:hover span {
@@ -235,8 +238,11 @@ div.small-icon:hover {
     opacity: 1;
 }
 
-div.small-icon {
+div#footer_modules div.small-icon {
     opacity: .4;
+}
+div.small-icon {
+
     position: relative;
     margin: 10px;
     border-radius: 10px;
@@ -373,4 +379,29 @@ body.lab-analyse > div > article > header > h1 {
 div.sample_amount  > select, select#id_sample_amount{
     width:50px !important;
     min-width: inherit !important;
+}
+td.field-order  > select{
+    width:50px !important;
+    min-width: inherit !important;
+}
+span.info_label{
+    font-weight:bold;
+}
+
+td.field-tdt, th.column-tdt{
+    display: none;
+}
+
+.iconcenter{
+    text-align:center !important;
+}
+div#analyse_set-group  a.icons-tools-viewsite-link, div#analyse_set-group  a.icons-add-another {
+    display:none !important;
+}
+select#id_no_of_groups{
+    width:50px;
+}
+
+select{
+    min-width: auto !important;
 }

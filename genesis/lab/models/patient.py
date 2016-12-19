@@ -174,8 +174,9 @@ class AdmissionStateDefinition(models.Model):
     name = models.CharField(_('Name'), max_length=50)
     explanation = models.TextField(_('Explanation'), null=True, blank=True)
     hardcoded = models.BooleanField(_('Cannot be deleted'), default=False, editable=False)
-    # all_finished = models.BooleanField(_('Finished state'), default=False)
-    # all_approved = models.BooleanField(_('Approved state'), default=False)
+    first = models.BooleanField(_('First state'), default=False)
+    reject = models.BooleanField(_('Reject state'), default=False)
+    finished = models.BooleanField(_('Finish state'), default=False)
     order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
 
     class Meta:

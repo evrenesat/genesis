@@ -5,6 +5,7 @@ from functools import partial
 from uuid import uuid4
 
 from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import PermissionDenied
 from django.dispatch import receiver
 from django.forms import BaseInlineFormSet
@@ -25,14 +26,6 @@ from com.models import *
 from django.contrib.auth.admin import UserAdmin
 
 from django.contrib.auth.models import Permission
-
-#
-# class AppConfig(dbsettings.Group):
-#     barcode_printer = dbsettings.StringValue('Barcode printer')
-#     report_printer = dbsettings.StringValue('Report printer')
-#     invoice_printer = dbsettings.StringValue('Invoice printer')
-
-# app_settings = AppConfig()
 
 admin.site.register(Permission)
 
@@ -185,38 +178,39 @@ class ParameterInline(admin.TabularInline):
     classes = ('grp-collapse',)  # grp-closed
 
 
-class AnalyseTypeForm(forms.ModelForm):
+class ProcessLogicForm(forms.ModelForm):
     class Meta:
-        model = AnalyseType
+        model = ProcessLogic
         widgets = {
-            'process_logic': AceWidget(mode='python', theme='twilight', width="700px",
-                                       height="400px"),
+            'code': AceWidget(mode='python', theme='twilight', width="900px", height="700px"),
         }
         fields = '__all__'
 
 
+@admin.register(ProcessLogic)
+class AdminProcessLogic(admin.ModelAdmin):
+    form = ProcessLogicForm
+
+
 @admin.register(AnalyseType)
 class AdminAnalyseType(admin.ModelAdmin):
-    form = AnalyseTypeForm
     list_filter = ('group_type', 'category',)
     search_fields = ('name',)
-    list_display = ('name', 'code', 'group_type', 'category', 'method', 'price', 'external')
-    list_editable = ('category', 'method', 'price', 'code')
+    list_display = (
+        'name', 'code', 'group_type', 'category', 'method', 'price', 'external', 'order')
+    list_editable = ('category', 'method', 'price', 'code', 'order')
     filter_horizontal = ('subtypes',)
     readonly_fields = ('group_type',)
     fieldsets = (
         (None, {
-            'fields': ('group_type', 'name', 'category', 'method', 'sample_type',
-                       'code', 'process_time', 'footnote', 'price', 'external_price', 'external',
-                       'external_lab', 'alternative_price')
+            'fields': ('group_type', ('name', 'code',), ('sample_type', 'category', 'method'),
+                       'process_time', 'footnote',
+                       ('price', 'alternative_price'),
+                       ('external_lab', 'external_price'),)
         }),
-        (_('Subtypes'),
-         {'classes': ('grp-collapse',),
-          'fields': ('subtypes',)
-          }),
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed'),
-          'fields': ('process_logic',)
+          'fields': ('subtypes', 'process_logic',)
           })
     )
     inlines = [ParameterInline, ]
@@ -227,14 +221,16 @@ class AdminAnalyseType(admin.ModelAdmin):
             '/static/tinymce/setup.js',
         ]
 
-    def save_related(self, request, form, formset, change):
-        super().save_related(request, form, formset, change)
-        if form.instance.subtypes.exists() and not form.instance.group_type:
-            form.instance.group_type = True
-            form.instance.save()
-
-            # if obj.parameter_definition.strip():
-            #     obj.create_update_parameter_keys()
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        if form.instance.subtypes.filter(group_type=True).count():
+            if not form.instance.group_type:
+                form.instance.group_type = True
+                form.instance.save()
+        else:
+            if form.instance.group_type:
+                form.instance.group_type = False
+                form.instance.save()
 
 
 @admin.register(StateDefinition)
@@ -242,6 +238,27 @@ class AdminStateDefinition(admin.ModelAdmin):
     list_filter = ('type',)
     search_fields = ('name',)
     filter_horizontal = ('type',)
+
+
+@admin.register(State)
+class AdminState(admin.ModelAdmin):
+    list_filter = (
+        'definition', 'group', 'sample_type', 'analyse__type', 'analyse__type__category',
+        'timestamp',
+        'current_state')
+    list_display = (
+        'definition', 'comment', 'sample_type', 'analyse_info', 'timestamp', 'current_state',
+        'group',
+        'tdt')
+    search_fields = ('definition__name', 'comment')
+    date_hierarchy = 'timestamp'
+    change_list_template = "admin/change_list_filter_sidebar.html"
+
+    def analyse_info(self, obj):
+        return "%s %s" % (obj.analyse.type.name, obj.analyse.admission.patient.full_name(15))
+
+    def tdt(self, obj):
+        return str(int(obj.timestamp.timestamp()))
 
 
 @admin.register(Parameter)
@@ -260,7 +277,7 @@ class AdminParameter(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'type', 'analyze_type')
+            'fields': ('name', 'process_logic', 'analyze_type')
         }),
         (_('Quick parameter definition'), {
             'classes': ('grp-collapse',),  # grp-closed
@@ -312,9 +329,10 @@ class StateInline(admin.TabularInline):
     extra = 1
     can_delete = False
     formset = StateFormSet
-    classes = ('grp-collapse analyse_box analyse_states', )
-    fields = ('definition', 'comment', 'timestamp', 'updated_at', 'personnel')
-    readonly_fields = ('timestamp', 'updated_at', 'personnel')
+    classes = ('grp-collapse analyse_box analyse_states',)
+    radio_fields = {"group": admin.VERTICAL}
+    fields = ('current_state', 'group', 'definition', 'comment', 'timestamp', 'personnel')
+    readonly_fields = ('current_state', 'timestamp', 'personnel')
     ordering = ("-timestamp",)
 
     def get_formset(self, request, obj=None, **kwargs):
@@ -349,7 +367,8 @@ class AdminAnalyse(admin.ModelAdmin):
     search_fields = ('admission__id', 'type__name', 'admission__patient__name',
                      'admission__patient__tcno', 'admission__patient__surname')
     readonly_fields = ('id', 'approver', 'approved', 'approve_time', 'finished', 'analyser',
-                       'completion_time', 'doctor_institution', 'patient', 'analyse_type')
+                       'completion_time', 'doctor_institution', 'patient', 'analyse_type',
+                       'result_json')
     autocomplete_lookup_fields = {
         'fk': ['type', 'admission'],
     }
@@ -357,7 +376,7 @@ class AdminAnalyse(admin.ModelAdmin):
         (_('Admission Information'),
          {'classes': ('grp-collapse analyse_box admission_info',),
           'fields': (('analyse_type', 'doctor_institution', 'patient'),
-                     ('sample_type', 'sample_amount', 'medium_type'),
+                     ('sample_type', 'sample_amount', 'medium_type', 'no_of_groups'),
                      )
           },
          ),
@@ -373,7 +392,7 @@ class AdminAnalyse(admin.ModelAdmin):
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed', 'analyse_box advanced_details'),
           'fields': (
-              'result', 'template', 'group_relation', 'admission', 'type', 'external',
+              'result', 'result_json', 'template', 'admission', 'type',
               'external_lab')
           },
          ))
@@ -429,6 +448,7 @@ class AdminAnalyse(admin.ModelAdmin):
         # if is_new:
         obj.create_empty_values()
         super().save_model(request, obj, form, change)
+
 
     def save_related(self, request, form, formset, change):
         super().save_related(request, form, formset, change)
@@ -510,14 +530,26 @@ class AnalyseInline(admin.TabularInline):
     # }
     # show_change_link = True
     raw_id_fields = ("type",)
-    readonly_fields = ('finished', 'approved', 'ext_lab')
-    fields = ('finished', 'approved', 'type', 'sample_type', 'sample_amount', 'medium_type', 'ext_lab')
+    readonly_fields = ('get_state', 'finished', 'approved', 'ext_lab')
+    fields = (
+        'get_state', 'approved', 'type', 'sample_type', 'sample_amount', 'medium_type', 'ext_lab')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
     }
+
+    def get_state(self, obj):
+        states = obj.state_set.filter(current_state=True)
+        if len(states) == 1:
+            return states[0].definition.name
+        else:
+            return '<br/>'.join('%s - %s' % (st.group, st.definition.name) for st in states)
+    get_state.short_description = _('Analyse state')
+    get_state.allow_tags = True
+
     def ext_lab(self, obj):
         return obj.external_lab if obj.external else ''
+
     ext_lab.short_description = _('Ext.Lab')
 
     def get_extra(self, request, obj=None, **kwargs):
@@ -539,7 +571,7 @@ post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
 @admin.register(Admission)
 class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
     date_hierarchy = 'timestamp'
-    search_fields = ('id', 'patient__name', 'patient__tcno', 'patient__surname')
+    search_fields = ('patient__name', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
     readonly_fields = ('id', 'timestamp')
     raw_id_fields = ('patient', 'institution', 'doctor')
@@ -570,8 +602,8 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         # integer search_term means we want to list values of a certain admission
         try:
             search_term_as_int = int(search_term)
-            if len(search_term.strip()) < 7:
-                return Admission.objects.filter(pk=search_term_as_int), False
+            return (Admission.objects.filter(pk=search_term_as_int) |
+                    Admission.objects.filter(patient__tcno__contains=search_term_as_int), False)
         except ValueError:
             return super().get_search_results(request, queryset, search_term)
 
@@ -581,16 +613,20 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
                 analyse.group_relation = 'GRP'  # this is a group
                 rand_group_code = uuid4().hex
                 for sub_analyse_type in analyse.type.subtypes.all():
-                    Analyse(type=sub_analyse_type,
+                    anl = Analyse(type=sub_analyse_type,
                             sample_type=analyse.sample_type,
                             group_relation=rand_group_code,
                             external=sub_analyse_type.external,
                             external_lab=sub_analyse_type.external_lab,
                             admission=admission).save()
+                    anl._set_state_for(self.request.user, first=True)
             if analyse.type.external:
                 analyse.external = analyse.type.external
                 analyse.external_lab = analyse.type.external_lab
+            is_new = not analyse.id
             analyse.save()
+            if is_new:
+                analyse._set_state_for(self._request.user, first=True)
         post_admission_save.send(sender=Admission, instance=admission)
 
     def save_related(self, request, form, formsets, change):
@@ -599,6 +635,7 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         - create payment and payment-items
         """
         form.save_m2m()
+        self._request = request
         if not change:
             adm = form.instance
             # payment = Payment(admission=adm, patient=adm.patient)
@@ -614,18 +651,49 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
         customer_charge.process_payments()
 
 
+class MethodAdminForm(forms.ModelForm):
+    analysetype_set = forms.ModelMultipleChoiceField(
+        queryset=AnalyseType.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(
+            verbose_name=_('Analyse Types'),
+            is_stacked=False
+        )
+    )
+
+    class Meta:
+        model = AnalyseType
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['analysetype_set'].initial = self.instance.analysetype_set.all()
+
+    def save(self, *args, **kwargs):
+        kwargs['commit'] = True
+        return super().save(*args, **kwargs)
+
+    def save_m2m(self):
+        self.instance.analysetype_set.clear()
+        self.instance.analysetype_set.add(*self.cleaned_data['analysetype_set'])
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'code',)
+    form = MethodAdminForm
+    filter_horizontal = ('states',)
 
 
 @admin.register(Method)
-class MethodAdmin(admin.ModelAdmin):
+class AdminMethod(admin.ModelAdmin):
     list_display = ('name', 'code',)
+    form = MethodAdminForm
+
 
 @admin.register(MediumType)
-class MethodAdmin(admin.ModelAdmin):
+class AdminMedium(admin.ModelAdmin):
     list_display = ('name', 'code', 'order')
     list_editable = ('code', 'order',)
 

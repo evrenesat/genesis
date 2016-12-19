@@ -25,7 +25,7 @@
             width: 220px;
             margin-bottom: 2px;
             overflow: hidden;
-            bottom: 17px;
+            top: 52px;
             position: absolute;
             left: 3px;
             height: 14px;
@@ -49,10 +49,10 @@
 
         #adate {
             position: absolute;
-            top: 29px;
+            bottom: 7px;
             right: 0px;
             font-size: 12px;
-            padding: 2px 3px 0px 2px;
+            padding: 1px 0px 0px 1px;
         }
 
         #bid {
@@ -63,11 +63,12 @@
             width: 69px;
             border: 1px solid;
             padding: 0px 1px 0px 1px;
+            height: 11px;
         }
 
         #aid {
             position: absolute;
-            top: 44px;
+            top: 28px;
             right: 14px;
             font-size: 9px;
             width: 54px;
@@ -118,7 +119,7 @@
         #acodes {
             position: absolute;
             left: 2px;
-            bottom: 0px;
+            bottom: 21px;
             font-size: 8px;
             text-transform: uppercase;
             width: 211px;
@@ -128,8 +129,8 @@
 
         #urgent {
             position: absolute;
-            right: 0;
-            top: 52px;
+            right: 52px;
+            top: 38px;
             font-size: 9px;
             letter-spacing: -1px;
             width: 17px;
@@ -140,8 +141,9 @@
         #brithdate {
             position: absolute;
             right: 0;
-            bottom: 36px;
+            top: 43px;
             font-weight: bold;
+            font-size: 8px;
         }
 
         #inst {
@@ -158,13 +160,20 @@
 </head>
 <body style="font-family: sans-serif">
 <div id="bcodediv">
-    <img src="" id="barcode" style="width:140px;"/>
+    <img src="" id="barcode" style="width:140px;height:50px;"/>
     {% block barcode %}{% endblock %}
     <div id="inst">{{ institution }}</div>
     <div id="brithdate" >D{{ birthdate|date:"d/m/Y" }}</div>
 </div>
 <script>
-    JsBarcode("#barcode", "{{ barcode }}");
+{#    JsBarcode("#barcode", "{{ barcode }}",{displayValue: false,});#}
+{#    JsBarcode("#barcode").options({displayValue: false,}).EAN(3434343343).render();#}
+JsBarcode("#barcode", "{{ barcode }}", {
+  format: "ean13",
+    displayValue: false,
+  flat: true
+});
+{#JsBarcode("#barcode", "123456789999", {format: "UPC"});#}
     window.parent.print_barcode_iframe();
 
 </script>

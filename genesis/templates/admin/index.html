@@ -61,8 +61,32 @@
                 <div class="big_app_icon">
                     <a href="/admin/lab/analyse/">
                         <img src="/static/icons/microscope1.svg">
-                        <span>Analizler</span>
+                        <span>Testler</span>
                     </a>
+                </div>
+            </div>
+            <div id="">
+                <div class="grp-module">
+                    <div class="small-icon">
+                        <a href="/admin/lab/state/">
+                            <img src="/static/icons/status.svg">
+                            <span>Test<br>Aşamaları</span>
+                        </a>
+                    </div>
+
+                    <div class="small-icon">
+                        <a href="/admin/lab/state/?current_state__exact=1&definition__id__exact=9&sample_type__in=3,4,6">
+                            <img src="/static/icons/seeding.svg">
+                            <span>Ekimi Yapıldı</span>
+                        </a>
+                    </div>
+
+                    <div class="small-icon">
+                        <a href="/admin/lab/state/?current_state__exact=1&definition__id__exact=10&sample_type__in=3,4,6">
+                            <img src="/static/icons/harvest.svg">
+                            <span>Harvest Yapıldı</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div id="footer_modules">
@@ -76,9 +100,10 @@
                     <div class="small-icon">
                         <a href="/admin/lab/analysetype/">
                             <img src="/static/icons/tubes.svg">
-                            <span>Analiz<br>Tipleri</span>
+                            <span>Test<br>Tipleri</span>
                         </a>
                     </div>
+
                 </div>
             </div>
 
@@ -129,7 +154,7 @@
                 <div class="grp-module">
                     <h2>Yeni Gelenler</h2>
                     <ul class="grp-listing-small" id="new_admissions">
-{#                        <li style="zoom:0.8" class="grp-row grp-add-link"><span class="grp-font-color-quiet"> * </span></li>#}
+                        {#                        <li style="zoom:0.8" class="grp-row grp-add-link"><span class="grp-font-color-quiet"> * </span></li>#}
                     </ul>
                 </div>
 

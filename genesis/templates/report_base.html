@@ -158,7 +158,7 @@
             {% if report_title %}
                 {{ report_title }}
             {% else %}
-                {{ title }} ANALİZ RAPORU
+                {{ title }} TEST RAPORU
             {% endif %}
         </div>
 
@@ -180,7 +180,7 @@
                 <div>{{ admission_id }}</div>
             </div>
             {% if analyse_id %}
-                <div><span>Analiz No</span>
+                <div><span>Lab No</span>
                     <div>{{ analyse_id }}</div>
                 </div>{% endif %}
             {% if institution %}
@@ -222,7 +222,7 @@
                 <div class="boxed_data pad-up1">
                     {% for result in results %}
                         <div class="multi_analyse_title">{{ result.title }}
-                            <span>( Analiz No: {{ result.analyse_id }} )</span></div>
+                            <span>( Lab No: {{ result.analyse_id }} )</span></div>
                         {% for k, v in result.items %}
                             {% if v.value %}
                                 <div><span>{{ v.title }}</span>

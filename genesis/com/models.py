@@ -78,8 +78,8 @@ class Payment(models.Model):
                                 verbose_name=_('Patient'), null=True, blank=True)
     institution = models.ForeignKey(Institution, models.PROTECT,
                                     verbose_name=_('Institution'), null=True, blank=True)
-    type = models.SmallIntegerField(_('Payment method'), choices=PAYMENT_METHODS)
-    method = models.SmallIntegerField(_('Record type'), choices=PAYMENT_TYPES, default=10)
+    method = models.SmallIntegerField(_('Payment method'), choices=PAYMENT_METHODS, default=30)
+    type = models.SmallIntegerField(_('Record type'), choices=PAYMENT_TYPES, default=20)
     amount = models.DecimalField(_('Amount'), max_digits=8, decimal_places=2, null=True, blank=True)
     timestamp = models.DateTimeField(_('Definition date'), editable=False, auto_now_add=True)
 
@@ -91,8 +91,12 @@ class Payment(models.Model):
         if (not self.id and self.type == 10 and self.method == 10 and Payment.objects.filter(
                 admission=self.admission, type=10, method=10).exists()):
             raise IntegrityError(_('Only one sell payment can exist per admission'))
-
-        if self.type == 10 and self.amount > 0:
+        if (hasattr(self.admission.institution, 'institutepricing') and
+                self.admission.institution.institutepricing.open_account):
+            self.institution = self.admission.institution
+        else:
+            self.patient = self.admission.patient
+        if self.type == 10 and (self.amount and self.amount > 0):
             self.amount = 0 - self.amount
         super().save(*args, **kwargs)
 
@@ -179,6 +183,8 @@ class AdmissionPricing(models.Model):
             self.final_amount = self.list_price
 
     def _calculate_discount(self):
+        if not self.list_price or not self.final_amount:
+            return
         if not self.tax_included:
             self.discount_amount = self.list_price - self.final_amount
         else:

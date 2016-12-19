@@ -20,7 +20,7 @@ def create_payment_objects(sender, instance, **kwargs):
 class PaymentInline(admin.TabularInline):
     model = Payment
     extra = 0
-    fields = ('type', 'method', 'amount', 'institution', 'patient')
+    fields = ('type', 'method', 'amount',)
     classes = ('grp-collapse',)
 
 

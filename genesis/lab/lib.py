@@ -42,7 +42,8 @@ def render_report(pk, signed=False):
     cnt_dict.update({'multi': False,
                      'with_sign': signed})
     tpl, tpl_object = load_analyse_template(analyse)
-    cnt_dict['generic'] = tpl_object.generic
+    if tpl_object:
+        cnt_dict['generic'] = tpl_object.generic
     return tpl.render(Context(cnt_dict))
 
 def render_combo_report(ids, signed=False):

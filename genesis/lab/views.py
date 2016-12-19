@@ -64,7 +64,7 @@ def analyse_barcode(request, pk):
         'patient_name': analyse.admission.patient.full_name(),
         'admission_time': analyse.admission.timestamp,
         'institution': analyse.admission.institution,
-        'barcode': str(analyse.id).zfill(13),
+        'barcode': str(analyse.id).zfill(11),
         'is_urgent': analyse.admission.is_urgent,
         'birthdate': analyse.admission.patient.birthdate,
     })
@@ -101,6 +101,14 @@ def get_analyses(request):
 
 @login_required
 def get_admissions_by_analyses(request):
+    """
+    for dashboard boxes
+    Args:
+        request:
+
+    Returns:
+
+    """
     admissions = set()
     query = dict(
         (k, (v == 'True' if v in ('False', 'True') else v)) for k, v in request.GET.items())
@@ -161,7 +169,7 @@ def admission_barcode(request, pk):
         'patient_name': admission.patient.full_name(),
         'admission_time': admission.timestamp,
         'institution': admission.institution,
-        'barcode': str(admission.id).zfill(13),
+        'barcode': str(admission.id).zfill(12),
         'is_urgent': admission.is_urgent,
         'birthdate': admission.patient.birthdate,
     })
