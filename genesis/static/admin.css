@@ -2,6 +2,11 @@ header#grp-header #grp-navigation ul#grp-user-tools > li.grp-user-options-contai
     width: auto;
 }
 
+div.grp-tr div.grp-td.type{
+    max-width: 337px !important;
+}
+
+
 .grp-row input[type="checkbox"], .grp-row input[type="radio"] {
     transform: scale(1.5);
 }
@@ -92,7 +97,10 @@ body.dashboard .grp-module .grp-row:not(tr) {
 .hide_it {
     display: none;
 }
-
+div.big_app_icon > a{
+    display:table-cell;
+    vertical-align: middle;
+}
 div.big_app_icon:hover span {
     color: black;
 }
@@ -131,6 +139,7 @@ div.big_app_icon {
     width: 125px;
     float: left;
     height: 130px;
+    display: table;
 
     -webkit-transition: background .55s ease;
     -moz-transition: background .55s ease;
@@ -404,4 +413,20 @@ select#id_no_of_groups{
 
 select{
     min-width: auto !important;
+}
+.grp-td.medium_type select, .grp-td.sample_type select {
+    width: 65px;
+    font-size: 10px;
+}
+div.grp-td.get_state{
+    max-width: 140px;
+}
+
+div.grp-td.ext_lab{
+    max-width:40px !important;
+}
+
+
+body.grp-change-form #grp-content-container > form, body.grp-change-form #grp-content-container > form > div {
+    width: 100%;
 }

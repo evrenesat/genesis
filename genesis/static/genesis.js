@@ -75,7 +75,6 @@ function get_pk(obj, $obj) {
 }
 
 
-
 function create_selectbox(optionList, toElem, selections, is_multiple) {
     var combo = $("<select class='comboin'></select>");
     if (is_multiple) {
@@ -125,7 +124,6 @@ function modify_parameter_list_edit(selector, data_field_selector) {
 }
 
 
-
 function create_selectbox_for_analyse_state() {
     var selbox = $(this);
     pk = get_pk(this);
@@ -171,7 +169,7 @@ function swap_add_another_status_row() {
     var add_new = $('#state_set-group div.grp-dynamic-form.grp-module.grp-tbody').not('.has_original');
     var th = add_new.siblings('.grp-thead');
     th.after(add_new.detach()[0]);
-    $('div#state_set-group div.grp-dynamic-form').not('.has_original').not('.grp-transparent').find('div.grp-td.current_state > div > img').css('opacity',0.3);
+    $('div#state_set-group div.grp-dynamic-form').not('.has_original').not('.grp-transparent').find('div.grp-td.current_state > div > img').css('opacity', 0.3);
 }
 
 var object_id = get_editing_id();
@@ -197,6 +195,20 @@ function only_show_fieldsets() {
     }
 }
 
+function patch_fk_plus_icons() {
+    $('a.icons-add-another').remove();
+    $('a.grp-icon.grp-add-handler').remove();
+    $('a.icons-tools-viewsite-link').remove();
+    // $('a.icons-add-another').each(function () {
+    //     $a = $(this);
+    //     var hrf = $a.attr('href');
+    //     $a.click(function () {
+    //         window.open(hrf + '?_changelist_filters=_to_field%3Did%26_popup%3D1&_popup=1&_to_field=id','', "width=600, height=600");
+    //         return false;
+    //     }).attr('href', '').attr('target', '');
+    // });
+}
+
 function patch_edit_views() {
 
     // change text of _save
@@ -210,8 +222,9 @@ function patch_edit_views() {
         self = grp.jQuery(this);
         if (self.html() == "&nbsp;") self.hide();
     })
-    show_fieldsets()
-    only_show_fieldsets()
+    show_fieldsets();
+    only_show_fieldsets();
+    setTimeout(patch_fk_plus_icons, 0);
 
     if (is_editing('analyse') && object_id) {
         // add_footer_button({
@@ -445,9 +458,6 @@ function patch_list_views() {
         // ignoring popup windows which doesn't have actions
     }
 
-    $('a.icons-add-another').each(function () {
-        // $(document).ready(function () { $("#OpenDialog").click(function () { $("#dialog").dialog({ modal: true, height: 590, width: 1005 }); }); });
-    });
 
     function change_color() {
         colors = ['#f4f4f4', '#bdcfd0', '#d0bdc6', '#b0d2ae', '#eccfa8'];
@@ -533,3 +543,4 @@ grp.jQuery('document').ready(function () {
 
     patch_everywhere();
 });
+

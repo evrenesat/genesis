@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.views.defaults import server_error
 from django.views.generic import RedirectView
 
 urlpatterns = [
@@ -24,5 +25,7 @@ urlpatterns = [
     # url(r'^settings/', include('dbsettings.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^grappelli/', include('grappelli.urls')),
-    url(r'^.*$', RedirectView.as_view(url='/admin/', permanent=False)),
+
+    url(r'^500/$', server_error),
+    url(r'^$', RedirectView.as_view(url='/admin/', permanent=False)),
 ]

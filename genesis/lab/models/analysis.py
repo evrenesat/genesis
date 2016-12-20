@@ -199,15 +199,16 @@ class ReportTemplate(models.Model):
         return "%s" % (self.name,)
 
 
-SAMPLE_AMOUNT = [(i, i) for i in range(10)]
+SAMPLE_AMOUNT = [(i, i) for i in range(200)]
+MEDIUM_AMOUNT = [(i, i) for i in range(5)]
 
 
 class Analyse(models.Model):
-    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'), null=True,
-                             blank=True)
+    type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Patient Admission'))
-    no_of_groups = models.PositiveIntegerField(_('Work groups'), default=1, null=True,
-                                               blank=True, choices=((1, 1), (2, 2), (3, 3)))
+    no_of_groups = models.PositiveIntegerField(_('Work group #'), default=1, null=True,
+                                               blank=True, choices=((1, 1), (2, 2), (3, 3)),
+                                               help_text=_('Number of work groups'))
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result parameters'), blank=True, null=True,
                               help_text=_("Can be used to override entered/calculated result "
@@ -218,9 +219,13 @@ class Analyse(models.Model):
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
     sample_amount = models.PositiveIntegerField(_('Sample Amount'), null=True,
-                                                blank=True, default=1, choices=SAMPLE_AMOUNT)
+                                                blank=True,  choices=SAMPLE_AMOUNT)
+    sample_unit = models.CharField(_('Unit'), null=True, blank=True, choices=(('cc', 'cc'), ),
+                                   max_length=10)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
+    medium_amount = models.PositiveIntegerField(_('Medium Amount'), choices=MEDIUM_AMOUNT,
+                                                null=True, blank=True)
     medium_type = models.ForeignKey(MediumType, models.PROTECT, verbose_name=_('Medium type'),
                                     null=True, blank=True)
     template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Report template'),
@@ -306,7 +311,7 @@ class Analyse(models.Model):
     def result_dict(self):
         d = {}
         for par_val in self.parametervalue_set.all():
-            d[par_val.code] = par_val.val.split(',') if par_val.val else par_val.val
+            d[par_val.code] = par_val.val.split(',') if par_val.val and par_val.key.multi else par_val.val
         return d
 
     def create_empty_values(self):
@@ -319,7 +324,7 @@ class Analyse(models.Model):
         context.update({
             'result_set': self.result_dict.copy(),
             'sample_type': self.sample_type.get_code(),
-            'medium_type': self.medium_type.get_code(),
+            'medium_type': self.medium_type.get_code() if self.medium_type else '',
             'test_type': self.type.get_code(),
         })
         if self.process_logic:
@@ -359,7 +364,7 @@ class Analyse(models.Model):
             if k.startswith('_'):
                 continue
             results[k]['value'] = v
-            results[k]['title'] = titles[k]
+            results[k]['title'] = titles.get(k, k.title())
             results[k]['code'] = k
         results['title'] = self.type.name
         results['analyse_id'] = self.id
@@ -386,9 +391,16 @@ class Analyse(models.Model):
         return self.type.sample_type.values_list('id', flat=True)
 
     def applicable_states_ids(self):
-        return self.type.statedefinition_set.values_list('id', flat=True)
+        if self.type.category:
+            return list(set(list(self.type.statedefinition_set.values_list('id', flat=True)) +
+                    list(self.type.category.states.values_list('id', flat=True))))
+        else:
+            return list(self.type.statedefinition_set.values_list('id', flat=True))
+
 
     def clean(self):
+        if not hasattr(self,'type'):
+            return
         if not self.type.is_sample_type_compatible(self.sample_type):
             sample_type = _('Following sample types can be selected;')
             raise ValidationError(

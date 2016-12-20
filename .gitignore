@@ -1,5 +1,3 @@
-# this is temporary, will not use migrations until I reach to first beta
-migrations
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

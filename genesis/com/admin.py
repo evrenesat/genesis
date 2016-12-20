@@ -9,11 +9,6 @@ from .models import *
 from lab.admin import AdminAdmission, post_admission_save
 
 
-@receiver(post_admission_save, sender=Admission)
-def create_payment_objects(sender, instance, **kwargs):
-    # if not hasattr(instance, 'admissionpricing'):
-        # AdmissionPricing(admission=instance).save()
-    instance.analyse_set.filter(group_relation='GRP').delete()
 
 
 

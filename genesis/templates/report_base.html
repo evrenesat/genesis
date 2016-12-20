@@ -202,9 +202,9 @@
             <div><span>İncelenen Materyal</span>
                 <div>{{ sample_type }}</div>
             </div>
-            {% if sample_amount %}
+            {% if sample_unit %}
                 <div><span>Materyal Miktarı</span>
-                    <div>{{ sample_amount }}</div>
+                    <div>{{ sample_amount }} {{ sample_unit }}</div>
                 </div>{% endif %}
         </div>
         <div class="big_data boxed_data">
@@ -217,6 +217,7 @@
                     <div>{{ comment|safe }}</div>
                 </div>{% endif %}
         </div>
+{#    {% debug %}#}
         {% if generic %}
             {% if multi %}
                 <div class="boxed_data pad-up1">
@@ -236,6 +237,7 @@
                 <div class="boxed_data pad-up1">
                     {% for result in results %}
                         {% for k, v in result.items %}
+
                             {% if v.value %}
                                 <div><span>{{ v.title }}</span>
                                     <div>{{ v.value }}</div>

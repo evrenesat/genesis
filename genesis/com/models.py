@@ -171,6 +171,8 @@ class AdmissionPricing(models.Model):
 
     def process_amounts_and_create_invoiceitems(self):
         for analyse in self.admission.analyse_set.all():
+            if not hasattr(analyse,'type'):
+                continue
             if not analyse.group_relation or analyse.group_relation == 'GRP':
                 # this is not a group member (sub-analysis) so we should count it in our price calc.
                 discounted_price, list_price, discount_rate = self.calculate_pricing_for(analyse)

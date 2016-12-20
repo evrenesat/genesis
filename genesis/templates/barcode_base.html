@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <script src="/static/JsBarcode.min.js" type="text/javascript"></script>
 <head>
@@ -23,7 +23,7 @@
         div#name {
             font-size: 15px;
             width: 220px;
-            margin-bottom: 2px;
+            padding-bottom: 2px;
             overflow: hidden;
             top: 52px;
             position: absolute;
@@ -56,6 +56,7 @@
         }
 
         #bid {
+            height: 14px;
             position: absolute;
             top: 14px;
             right: 0px;
@@ -63,13 +64,12 @@
             width: 69px;
             border: 1px solid;
             padding: 0px 1px 0px 1px;
-            height: 11px;
         }
 
         #aid {
             position: absolute;
-            top: 28px;
-            right: 14px;
+            top: 30px;
+            right: 19px;
             font-size: 9px;
             width: 54px;
         }
@@ -81,6 +81,7 @@
             width: 32px;
             padding: 3px 2px 0px 2px;
         }
+
         #extcode {
             position: absolute;
             right: 0px;
@@ -99,6 +100,7 @@
             border: 1px solid;
             padding: 2px 1px 0 1px;
         }
+
         #catcode {
             position: absolute;
             left: 1px;
@@ -110,12 +112,13 @@
             padding: 2px 1px 0 1px;
         }
 
-        #acodes span{
+        #acodes span {
             display: inline-block;
-            border-right:1px solid #000;
-            padding-right:1px;
+            border-right: 1px solid #000;
+            padding-right: 1px;
             height: 8px;
         }
+
         #acodes {
             position: absolute;
             left: 2px;
@@ -129,13 +132,12 @@
 
         #urgent {
             position: absolute;
-            right: 52px;
-            top: 38px;
-            font-size: 9px;
-            letter-spacing: -1px;
-            width: 17px;
-            height: 7px;
-            border: 1px dashed;
+            right: 47px;
+            top: 40px;
+            font-size: 10px;
+            letter-spacing: 0px;
+            width: 23px;
+            height: 8px;
         }
 
         #brithdate {
@@ -154,7 +156,7 @@
             width: 75px;
             font-size: 9px;
             overflow: hidden;
-            height: 8px;
+            height: 10px;
         }
     </style>
 </head>
@@ -163,17 +165,17 @@
     <img src="" id="barcode" style="width:140px;height:50px;"/>
     {% block barcode %}{% endblock %}
     <div id="inst">{{ institution }}</div>
-    <div id="brithdate" >D{{ birthdate|date:"d/m/Y" }}</div>
+    <div id="brithdate">D{{ birthdate|date:"d/m/Y" }}</div>
 </div>
 <script>
-{#    JsBarcode("#barcode", "{{ barcode }}",{displayValue: false,});#}
-{#    JsBarcode("#barcode").options({displayValue: false,}).EAN(3434343343).render();#}
-JsBarcode("#barcode", "{{ barcode }}", {
-  format: "ean13",
-    displayValue: false,
-  flat: true
-});
-{#JsBarcode("#barcode", "123456789999", {format: "UPC"});#}
+    {#    JsBarcode("#barcode", "{{ barcode }}",{displayValue: false,});#}
+    {#    JsBarcode("#barcode").options({displayValue: false,}).EAN(3434343343).render();#}
+    JsBarcode("#barcode", "{{ barcode }}", {
+        format: "ean13",
+        displayValue: false,
+        flat: true
+    });
+    {#JsBarcode("#barcode", "123456789999", {format: "UPC"});#}
     window.parent.print_barcode_iframe();
 
 </script>

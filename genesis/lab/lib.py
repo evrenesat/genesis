@@ -19,6 +19,7 @@ def get_base_context(analyse):
         'admission_id': analyse.admission.id,
         'doctor': analyse.admission.doctor,
 
+        'sample_unit': analyse.sample_unit,
         'sample_amount': analyse.sample_amount,
         'sample_type': analyse.sample_type,
         'comment': analyse.comment,
@@ -44,6 +45,8 @@ def render_report(pk, signed=False):
     tpl, tpl_object = load_analyse_template(analyse)
     if tpl_object:
         cnt_dict['generic'] = tpl_object.generic
+    else:
+        cnt_dict['generic'] = True
     return tpl.render(Context(cnt_dict))
 
 def render_combo_report(ids, signed=False):

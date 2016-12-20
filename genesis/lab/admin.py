@@ -376,7 +376,8 @@ class AdminAnalyse(admin.ModelAdmin):
         (_('Admission Information'),
          {'classes': ('grp-collapse analyse_box admission_info',),
           'fields': (('analyse_type', 'doctor_institution', 'patient'),
-                     ('sample_type', 'sample_amount', 'medium_type', 'no_of_groups'),
+                     ('sample_type', 'sample_amount', 'sample_unit'),
+                     ('no_of_groups', 'medium_amount', 'medium_type')
                      )
           },
          ),
@@ -524,15 +525,16 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 class AnalyseInline(admin.TabularInline):
     model = Analyse
+    extra = 0
     classes = ('grp-collapse',)
     # autocomplete_lookup_fields = {
     #     'type_fk': ['type'],
     # }
     # show_change_link = True
     raw_id_fields = ("type",)
-    readonly_fields = ('get_state', 'finished', 'approved', 'ext_lab')
-    fields = (
-        'get_state', 'approved', 'type', 'sample_type', 'sample_amount', 'medium_type', 'ext_lab')
+    readonly_fields = ('get_state', 'finished', 'ext_lab')
+    fields = ('get_state', 'type', 'sample_type', 'sample_amount', 'sample_unit', 'medium_amount', 'medium_type',
+              'ext_lab')
     # list_filter = ('category__name',)
     autocomplete_lookup_fields = {
         'fk': ['type'],
@@ -609,6 +611,8 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
 
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
+            if not analyse.type:
+                continue
             if analyse.type.group_type:
                 analyse.group_relation = 'GRP'  # this is a group
                 rand_group_code = uuid4().hex
@@ -711,3 +715,4 @@ def create_payment_objects(sender, instance, **kwargs):
     # instance.analyse_set.filter(group_relation='GRP').delete()
     for analyse in instance.analyse_set.exclude(group_relation='GRP'):
         analyse.create_empty_values()
+    instance.analyse_set.filter(group_relation='GRP').delete()
