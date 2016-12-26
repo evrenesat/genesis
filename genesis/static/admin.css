@@ -42,9 +42,12 @@ fieldset.grp-module .grp-row label {
 
 input[type="url"], input[type="email"], input.vTextField, input.vURLField, input.vFileBrowseField, textarea, .vLargeTextField, .vXMLLargeTextField {
     /*max-width: 100% !important;*/
-    width: auto !important;
+    width: inherit !important;
 }
 
+input#id_name.vTextField{
+    width:250px !important;
+}
 input#id_code.vTextField, td.field-code > input {
     width:50px !important;
 }
@@ -316,9 +319,13 @@ footer li input[name="_continue"]:hover{
     color:#000 !important;
 }
 
-/*body:not(.grp-popup) footer li input[name="_addanother"], body:not(.grp-popup) footer li input[name="_save"]{*/
-    /*display: none;*/
-/*}*/
+body:not(.grp-popup) footer li input[name="_continue"]{
+    opacity: 0.7 !important;
+}
+body:not(.grp-popup) footer li input[name="_addanother"]{
+    opacity: 1;
+    font-size: 17px;
+}
 
 div#admissionpricing-group a.grp-add-handler{
     display: none !important;
@@ -430,3 +437,4 @@ div.grp-td.ext_lab{
 body.grp-change-form #grp-content-container > form, body.grp-change-form #grp-content-container > form > div {
     width: 100%;
 }
+

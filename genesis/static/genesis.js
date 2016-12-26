@@ -188,10 +188,12 @@ function only_show_fieldsets() {
     if (window.location.hash.indexOf('only_show_fieldset=') > -1) {
         fieldsets = window.location.hash.split('only_show_fieldset=')[1].split(',');
         // debugger;
-        $('.analyse_box').addClass('hide_fieldset');
+        $('.analyse_box, header').addClass('hide_fieldset');
         for (var fieldset of fieldsets) {
             $('.analyse_box.' + fieldset).removeClass('hide_fieldset');
         }
+    }else if(window.location.hash.indexOf('hide_header')){
+        $('header').hide();
     }
 }
 
@@ -212,9 +214,11 @@ function patch_fk_plus_icons() {
 function patch_edit_views() {
 
     // change text of _save
-    grp.jQuery('input[name="_continue"]').val(grp.jQuery('input[name="_save"]').val());
+
     // hide empty (looking) <li> elements of hided "_save" and "_addanother" buttons.
-    grp.jQuery('body:not(.grp-popup) input[name="_save"], body:not(.grp-popup) input[name="_addanother"]').parent().hide()
+    // grp.jQuery('body:not(.grp-popup) input[name="_save"], body:not(.grp-popup) input[name="_addanother"]').parent().hide()
+    grp.jQuery('body:not(.grp-popup) input[name="_save"]').parent().hide()
+
 
 
     // get rid of those empty cells
@@ -296,7 +300,8 @@ function patch_edit_views() {
     if (is_editing('admission')) {
         var customer_is_patient = $('#id_payment_set-0-patient').val();
 
-
+        grp.jQuery('input[name="_continue"]').val('Kaydet ve Düzenle');
+        grp.jQuery('input[name="_addanother"]').val('Kaydet');
         function link_payment_responsible() {
 
             var _patient = $('#id_payment_set-0-patient').val();
@@ -334,15 +339,15 @@ function patch_edit_views() {
                 }
             });
 
-            add_footer_button({
-                onclick: function () {
-                    $.featherlight({
-                        iframe: '/admin/lab/parametervalue/?q=' + object_id + '#pop_up=1',
-                        iframeWidth: 1100, iframeHeight: 600
-                    });
-                },
-                name: 'Sonuç Gir'
-            });
+            // add_footer_button({
+            //     onclick: function () {
+            //         $.featherlight({
+            //             iframe: '/admin/lab/parametervalue/?q=' + object_id + '#pop_up=1',
+            //             iframeWidth: 1100, iframeHeight: 600
+            //         });
+            //     },
+            //     name: 'Sonuç Gir'
+            // });
 
             add_footer_button({
                 onclick: function () {
@@ -425,16 +430,17 @@ function dashbox(box_id, data, url) {
 
 function handle_dashboard() {
 
+    if ($('body').hasClass('dashboard')) {
+        grp.jQuery("div#advanced_settings").click(function () {
+            grp.jQuery("div.hide_it").toggleClass('show_it');
+        })
 
-    grp.jQuery("div#advanced_settings").click(function () {
-        grp.jQuery("div.hide_it").toggleClass('show_it');
-    })
 
+        dashbox('new_admissions', {accepted: 'False'});
+        dashbox('finished_admissions', {finished: 'True', approved: 'False'});
+        dashbox('approved_admissions', {approved: 'True'});
 
-    dashbox('new_admissions', {accepted: 'False'})
-    dashbox('finished_admissions', {finished: 'True', approved: 'False'})
-    dashbox('approved_admissions', {approved: 'True'})
-
+    }
 }
 
 function check_all_records() {
@@ -519,6 +525,10 @@ function patch_everywhere() {
         window.location = '/admin'
     });
 
+    $('input.vDateField').each(function () {
+        date_formatter(this);
+    })
+
     // align True/False check marks to center
     grp.jQuery('img[alt="False"],img[alt="True"]').parent().addClass('iconcenter');
 
@@ -528,8 +538,24 @@ function patch_everywhere() {
     }
 
 }
+function date_formatter(selector) {
+    $jqDate = $(selector);
+    $jqDate.bind('keyup', 'keydown', function (e) {
+
+        //To accomdate for backspacing, we detect which key was pressed - if backspace, do nothing:
+        if (e.which !== 8) {
+            var numChars = $jqDate.val().length;
+            if (numChars === 2 || numChars === 5) {
+                var thisVal = $jqDate.val();
+                thisVal += '/';
+                $jqDate.val(thisVal);
+            }
+        }
+    });
+}
 
 grp.jQuery('document').ready(function () {
+
     grp.jQuery('#_ifrm').attr('src', '');
 
 
@@ -543,4 +569,3 @@ grp.jQuery('document').ready(function () {
 
     patch_everywhere();
 });
-

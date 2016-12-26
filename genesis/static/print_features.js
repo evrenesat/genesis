@@ -28,6 +28,7 @@ function print_barcode_iframe() {
     // When print is submitted it is executed asynchronous and
     // script flow continues after print independently of completetion of print process!
     jsPrintSetup.printWindow(window.frames[0]);
+    $('#_ifrm').attr('src','about:blank');
     // next commands
 }
 
@@ -60,6 +61,7 @@ function print_invoice_iframe() {
     // When print is submitted it is executed asynchronous and
     // script flow continues after print independently of completetion of print process!
     jsPrintSetup.printWindow(window.frames[0]);
+    $('#_ifrm').attr('src','about:blank');
     // next commands
 }
 function popup_error(msg) {
@@ -96,5 +98,6 @@ function print_report_iframe() {
     // When print is submitted it is executed asynchronous and
     // script flow continues after print independently of completetion of print process!
     jsPrintSetup.printWindow(window.frames[0]);
+    $('#_ifrm').attr('src','about:blank');
     // next commands
 }

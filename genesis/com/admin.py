@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
+# from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
 
 from .models import *
 from lab.admin import AdminAdmission, post_admission_save
@@ -66,7 +66,7 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(InvoiceItem)
-class AdminInvoiceItem(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+class AdminInvoiceItem(admin.ModelAdmin):
     raw_id_fields = ('admission', 'invoice')
     autocomplete_lookup_fields = {
         'fk': ['admission', 'invoice'],

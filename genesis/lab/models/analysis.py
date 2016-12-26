@@ -131,7 +131,7 @@ class AnalyseType(models.Model):
     method = models.ForeignKey(Method, models.SET_NULL, verbose_name=_('Method'), null=True,
                                blank=True)
     sample_type = models.ManyToManyField(SampleType, verbose_name=_('Sample Type'))
-    name = models.CharField(_('Name'), max_length=100, unique=True)
+    name = models.CharField(_('Name'), max_length=100, unique=True, db_index=True)
     code = models.CharField(_('Code name'), max_length=10, null=True, blank=True)
     footnote = models.TextField(_('Report footnote'), blank=True, null=True,
                                 help_text=_('This will be shown under the report'))
@@ -219,8 +219,8 @@ class Analyse(models.Model):
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
     sample_amount = models.PositiveIntegerField(_('Sample Amount'), null=True,
-                                                blank=True,  choices=SAMPLE_AMOUNT)
-    sample_unit = models.CharField(_('Unit'), null=True, blank=True, choices=(('cc', 'cc'), ),
+                                                blank=True, choices=SAMPLE_AMOUNT)
+    sample_unit = models.CharField(_('Unit'), null=True, blank=True, choices=(('cc', 'cc'),),
                                    max_length=10)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
@@ -311,7 +311,8 @@ class Analyse(models.Model):
     def result_dict(self):
         d = {}
         for par_val in self.parametervalue_set.all():
-            d[par_val.code] = par_val.val.split(',') if par_val.val and par_val.key.multi else par_val.val
+            d[par_val.code] = par_val.val.split(
+                ',') if par_val.val and par_val.key.multi else par_val.val
         return d
 
     def create_empty_values(self):
@@ -393,13 +394,12 @@ class Analyse(models.Model):
     def applicable_states_ids(self):
         if self.type.category:
             return list(set(list(self.type.statedefinition_set.values_list('id', flat=True)) +
-                    list(self.type.category.states.values_list('id', flat=True))))
+                            list(self.type.category.states.values_list('id', flat=True))))
         else:
             return list(self.type.statedefinition_set.values_list('id', flat=True))
 
-
     def clean(self):
-        if not hasattr(self,'type'):
+        if not hasattr(self, 'type'):
             return
         if not self.type.is_sample_type_compatible(self.sample_type):
             sample_type = _('Following sample types can be selected;')
@@ -426,7 +426,6 @@ class Analyse(models.Model):
         if self.external_lab_id and not self.external:
             self.external = True
         super().save(*args, **kwargs)
-
 
 
 class StateDefinition(models.Model):
@@ -470,7 +469,8 @@ class State(models.Model):
     updated_at = models.DateTimeField(_('Update date'), editable=False, auto_now=True)
     personnel = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Personnel'), blank=True)
     current_state = models.BooleanField(_('Current state'), editable=False, default=True)
-    group = models.PositiveSmallIntegerField(_('Group'), choices=((1, 1), (2, 2), (3, 3), (100, _('All'))),
+    group = models.PositiveSmallIntegerField(_('Group'),
+                                             choices=((1, 1), (2, 2), (3, 3), (100, _('All'))),
                                              default=1)
 
     class Meta:
@@ -482,6 +482,7 @@ class State(models.Model):
         super().save(*args, **kwargs)
         State.objects.filter(analyse=self.analyse, group=self.group, current_state=True
                              ).exclude(pk=self.id).update(current_state=False)
+
     def save(self, *args, **kwargs):
 
         is_new = self.id is None
@@ -731,3 +732,16 @@ class ParameterValue(models.Model):
 
     def __str__(self):
         return "%s: %s" % (self.code, self.value)
+
+
+class Setting(models.Model):
+    name = models.CharField(_('Name'), max_length=100, editable=False)
+    value = models.CharField(_('Value'), max_length=255)
+    key = models.CharField(_('Code name'), max_length=30, editable=False)
+
+    def __str__(self):
+        return "%s: %s" % (self.key[:20], self.value[:20])
+
+    class Meta:
+        verbose_name = _('Application Setting')
+        verbose_name_plural = _('Application Settings')

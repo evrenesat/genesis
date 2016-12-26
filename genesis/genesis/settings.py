@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'grappelli',
     # 'grappelli.dashboard',
-    'grappelli_autocomplete_fk_edit_link',
+    # 'grappelli_autocomplete_fk_edit_link',
     # 'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -197,6 +197,7 @@ STATIC_URL = '/static/'
 
 # GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 GRAPPELLI_ADMIN_TITLE = 'GENESIS'
+GRAPPELLI_AUTOCOMPLETE_LIMIT = 20
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),

@@ -63,9 +63,11 @@ class ExternalLab(models.Model):
         return self.code or self.name[:3].upper()
 
 class Doctor(models.Model):
+    title = models.CharField(_('Title'), max_length=20)
     name = models.CharField(_('Name'), max_length=50)
     surname = models.CharField(_('Surname'), max_length=50)
     institution = models.ForeignKey(Institution, models.SET_NULL, blank=True, null=True,
+                                    verbose_name=_('Institution'),
                                     help_text=_("If left blank, an institution record will be created for this doctor"))
     timestamp = models.DateTimeField(_('Timestamp'), editable=False, auto_now_add=True)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)

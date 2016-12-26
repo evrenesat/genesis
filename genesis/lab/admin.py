@@ -7,6 +7,7 @@ from uuid import uuid4
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.dispatch import receiver
 from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
@@ -18,7 +19,8 @@ from django.apps import apps
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 from django_ace import AceWidget
-from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
+# from grappelli_autocomplete_fk_edit_link import AutocompleteEditLinkAdminMixin
+from lab.utils import tlower, tupper
 
 from .models import *
 from com.models import *
@@ -203,7 +205,7 @@ class AdminAnalyseType(admin.ModelAdmin):
     readonly_fields = ('group_type',)
     fieldsets = (
         (None, {
-            'fields': ('group_type', ('name', 'code',), ('sample_type', 'category', 'method'),
+            'fields': (('name', 'code','group_type',), ('sample_type', 'category', 'method'),
                        'process_time', 'footnote',
                        ('price', 'alternative_price'),
                        ('external_lab', 'external_price'),)
@@ -220,6 +222,11 @@ class AdminAnalyseType(admin.ModelAdmin):
             '/static/tinymce/tinymce.min.js',
             '/static/tinymce/setup.js',
         ]
+
+    def get_search_results(self, request, queryset, search_term):
+        # integer search_term means we want to list values of a certain admission
+        return AnalyseType.objects.filter(Q(name__contains=tupper(search_term))|Q(name__contains=tlower(search_term))), False
+
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
@@ -525,7 +532,7 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 class AnalyseInline(admin.TabularInline):
     model = Analyse
-    extra = 0
+    extra = 1
     classes = ('grp-collapse',)
     # autocomplete_lookup_fields = {
     #     'type_fk': ['type'],
@@ -571,7 +578,7 @@ post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
 
 
 @admin.register(Admission)
-class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
+class AdminAdmission(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     search_fields = ('patient__name', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
@@ -607,7 +614,8 @@ class AdminAdmission(AutocompleteEditLinkAdminMixin, admin.ModelAdmin):
             return (Admission.objects.filter(pk=search_term_as_int) |
                     Admission.objects.filter(patient__tcno__contains=search_term_as_int), False)
         except ValueError:
-            return super().get_search_results(request, queryset, search_term)
+            return Admission.objects.filter(Q(patient__name__icontains=search_term)|
+                                            Q(patient__surname__icontains=search_term)), False
 
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:
@@ -702,12 +710,6 @@ class AdminMedium(admin.ModelAdmin):
     list_editable = ('code', 'order',)
 
 
-app_models = apps.get_app_config('lab').get_models()
-for model in app_models:
-    try:
-        admin.site.register(model)
-    except AlreadyRegistered:
-        pass
 
 
 @receiver(post_admission_save, sender=Admission)
@@ -716,3 +718,19 @@ def create_payment_objects(sender, instance, **kwargs):
     for analyse in instance.analyse_set.exclude(group_relation='GRP'):
         analyse.create_empty_values()
     instance.analyse_set.filter(group_relation='GRP').delete()
+
+
+@admin.register(Setting)
+class AdminSetting(admin.ModelAdmin):
+    search_fields = ('name',)
+    list_display = ('name', 'value', 'key')
+    list_editable = ('value', )
+    readonly_fields = ('name', 'key')
+
+
+app_models = apps.get_app_config('lab').get_models()
+for model in app_models:
+    try:
+        admin.site.register(model)
+    except AlreadyRegistered:
+        pass

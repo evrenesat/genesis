@@ -1,6 +1,8 @@
-Django==1.9
-django-autocomplete-light==3.1.8
-django-grappelli==2.8.1
-django-grappelli-autocomplete-fk-edit-link==0.1.1
-django_ace
+Django==1.10.4
 psycopg2==2.6.2
+django-autocomplete-light==3.1.8
+https://github.com/evrenesat/django-grappelli/archive/master.zip
+django_ace
+#django-grappelli==2.8.1
+#-e git://github.com/evrenesat/django-grappelli.git#egg=django-grappelli
+#django-grappelli-autocomplete-fk-edit-link==0.1.1

@@ -34,3 +34,11 @@ class lazy_property(object):
         value = self.fget(obj)
         obj.__dict__[self.func_name] = value
         return value
+
+
+def tupper(w):
+    return w.replace('i', 'İ').replace('ı', 'I').upper()
+
+
+def tlower(w):
+    return w.replace('I', 'ı').replace('İ', 'i').lower()
