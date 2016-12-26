@@ -192,8 +192,6 @@ function only_show_fieldsets() {
         for (var fieldset of fieldsets) {
             $('.analyse_box.' + fieldset).removeClass('hide_fieldset');
         }
-    }else if(window.location.hash.indexOf('hide_header')){
-        $('header').hide();
     }
 }
 
@@ -517,6 +515,10 @@ function patch_list_views() {
             check_all_records();
         }, name: ' ✓ '
     });
+    if(window.location.hash.indexOf('hide_header')>-1){
+            $('header').remove();
+            $('#grp-content').css('top','0');
+        }
 }
 
 function patch_everywhere() {
