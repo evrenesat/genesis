@@ -8,12 +8,12 @@
     </div>
     <div id="bid">P{{ id }} </div>
     <div id="aid">TC{{ person_id }} </div>
-
+    <div id="noa">{{ num_of_analyses }} Test</div>
     {% if is_urgent %}
     <div id="urgent" class="invertedtext">ACiL</div>
     {% endif %}
 
-    <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.Y" }}</div>
+    <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.y" }}</div>
 
     <div id="name" class="invertedtext">{{ patient_name }}</div>
 

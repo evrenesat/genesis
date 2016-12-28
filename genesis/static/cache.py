@@ -196,3 +196,8 @@ class AnalyseStateCache(Cache):
     PREFIX = 'STCMT'
     def __init__(self, defid):
         super().__init__(defid)
+
+class AppSettingCache(Cache):
+    PREFIX = 'APPST'
+    def __init__(self, key):
+        super().__init__(key)

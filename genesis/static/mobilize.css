@@ -1,0 +1,8 @@
+header {
+    display: none;
+}
+
+article#grp-content {
+    padding: 4px !important;
+    top: 5px
+}

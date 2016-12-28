@@ -206,7 +206,7 @@ class AdminAnalyseType(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (('name', 'code','group_type',), ('sample_type', 'category', 'method'),
-                       'process_time', 'footnote',
+                       'process_time', 'footnote','barcode_count',
                        ('price', 'alternative_price'),
                        ('external_lab', 'external_price'),)
         }),
@@ -365,6 +365,13 @@ class StateInline(admin.TabularInline):
         return field
 
 
+@admin.register(Patient)
+class AdminPatient(admin.ModelAdmin):
+    list_display = ("name", 'surname', 'tcno', 'birthdate', 'timestamp')
+    date_hierarchy = 'timestamp'
+    # list_filter = []
+    search_fields = ('name', 'surname', 'tcno')
+
 @admin.register(Analyse)
 class AdminAnalyse(admin.ModelAdmin):
     form = AnalyseAdminForm
@@ -482,9 +489,6 @@ class AdminAnalyse(admin.ModelAdmin):
         #     return super().changelist_view(request, extra_context=extra_context)
 
 
-@admin.register(Patient)
-class PatientAdmin(admin.ModelAdmin):
-    search_fields = ('name', 'id', 'surname', 'tcno')
 
 
 @admin.register(ReportTemplate)
@@ -611,11 +615,12 @@ class AdminAdmission(admin.ModelAdmin):
         # integer search_term means we want to list values of a certain admission
         try:
             search_term_as_int = int(search_term)
-            return (Admission.objects.filter(pk=search_term_as_int) |
-                    Admission.objects.filter(patient__tcno__contains=search_term_as_int), False)
+            queryset = (queryset.filter(pk=search_term_as_int) |
+                  queryset.filter(patient__tcno__contains=search_term_as_int))
         except ValueError:
-            return Admission.objects.filter(Q(patient__name__icontains=search_term)|
-                                            Q(patient__surname__icontains=search_term)), False
+            queryset = queryset.filter(Q(patient__name__icontains=search_term)|
+                                            Q(patient__surname__icontains=search_term))
+        return queryset, False
 
     def _save_analyses(self, admission, analyses):
         for analyse in analyses:

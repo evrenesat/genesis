@@ -3,7 +3,7 @@
 
     <div id="bid">L{{ id }} </div>
     <div id="aid">P{{ admission_id }} </div>
-    <div id="acode" class="invertedtext">{{ analyse.get_code }}</div>
+    <div id="acode">{{ analyse.get_code }}</div>
     {% if analyse.external %}<div id="extcode" class="invertedtext">DL:{{ analyse.external_lab.get_code }}</div>{% endif %}
     <div id="scode">{{ analyse.sample_type.get_code }}</div>
     <div id="catcode">{{ analyse.type.category.get_code }}</div>
@@ -11,7 +11,7 @@
     <div id="urgent" class="invertedtext">ACiL</div>
     {% endif %}
 
-    <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.Y" }}</div>
+    <div class="invertedtext" id="adate">{{ admission_time|date:"d.m.y" }}</div>
 
     <div id="name" class="invertedtext">{{ patient_name }}</div>
 

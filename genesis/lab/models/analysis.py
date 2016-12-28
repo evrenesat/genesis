@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from django import forms
+from django import template
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
@@ -10,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
 # Create your models here.
-from static.cache import AnalyseStateCache
+from static.cache import AnalyseStateCache, AppSettingCache
 
 from ..utils import pythonize, lazy_property
 
@@ -151,6 +152,8 @@ class AnalyseType(models.Model):
     process_time = models.SmallIntegerField(_('Process Time'), null=True, blank=True)
     order = models.PositiveSmallIntegerField(_('Sort order'), null=True, blank=True,
                                              choices=ORDER_CHOICES)
+    barcode_count = models.SmallIntegerField(_('Barcode count'), default=0,
+                                             help_text=_('Number of barcodes to print'))
 
     def is_sample_type_compatible(self, sample_type):
         return sample_type in self.sample_type.all()
@@ -476,7 +479,7 @@ class State(models.Model):
     class Meta:
         verbose_name = _('Analyse State')
         verbose_name_plural = _('Analyse States')
-        ordering = ('timestamp',)
+        ordering = ('-timestamp',)
 
     def _cleanup_old_currents(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -739,9 +742,34 @@ class Setting(models.Model):
     value = models.CharField(_('Value'), max_length=255)
     key = models.CharField(_('Code name'), max_length=30, editable=False)
 
+    @classmethod
+    def get_val(cls, key, default=None):
+        cache = AppSettingCache(key)
+        data = cache.get(None)
+        if data is None:
+            data = cls.objects.filter(key=key).values_list('value', flat=True)[0]
+            cache.set(data, lifetime=99999)
+        return data or default
+
+    @classmethod
+    def get_all_val(cls, default=None):
+        cache = AppSettingCache('ALL')
+        data = cache.get(None)
+        if data is None:
+            data = json.dumps(dict(cls.objects.all().values_list('key','value')))
+            cache.set(data, lifetime=99999)
+        return data or default
+
     def __str__(self):
         return "%s: %s" % (self.key[:20], self.value[:20])
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        AppSettingCache(self.key).set(self.value)
+        AppSettingCache('ALL').delete()
 
     class Meta:
         verbose_name = _('Application Setting')
         verbose_name_plural = _('Application Settings')
+
+

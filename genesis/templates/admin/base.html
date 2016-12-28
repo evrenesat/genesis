@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% load grp_tags %}
-{% load i18n  log static %}
+{% load i18n  log static appsettings %}
 {% block stylesheets %}
 {{block.super}}
 <link href="{% static "admin.css" %}" rel="stylesheet" type="text/css" media="screen" />
@@ -12,6 +12,7 @@
 <script src="/static/genesis.js?v=1" type="text/javascript"></script>
 <script src="/static/jquery-3.1.1.min.js" type="text/javascript"></script>
 <script src="/static/featherlight.min.js" type="text/javascript"></script>
+    {% AppSetting %}
 {% endblock %}
 
 {% block breadcrumbs %}

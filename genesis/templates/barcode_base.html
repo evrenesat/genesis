@@ -21,14 +21,14 @@
         }
 
         div#name {
-            font-size: 15px;
-            width: 220px;
+            font-size: 10px;
+            width: 168px;
             padding-bottom: 2px;
             overflow: hidden;
-            top: 52px;
+            top: 44px;
             position: absolute;
-            left: 3px;
-            height: 14px;
+            left: 0px;
+            height: 9px;
             white-space: nowrap;
         }
 
@@ -42,44 +42,51 @@
             filter: invert(100%);
             padding: 2px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 11px;
             background-color: #fff;
+            height: 10px;
         {#            color:#fff;#}
         }
 
         #adate {
             position: absolute;
             bottom: 7px;
-            right: 0px;
-            font-size: 12px;
+            font-size: 9px;
             padding: 1px 0px 0px 1px;
+            height: 9px;
+            left: 60px;
+            top: 35px;
         }
 
         #bid {
-            height: 14px;
+            height: 11px;
             position: absolute;
             top: 14px;
-            right: 0px;
-            font-size: 13px;
+            right: 39px;
+            font-size: 12px;
             width: 69px;
-            border: 1px solid;
             padding: 0px 1px 0px 1px;
+            border-bottom: 1px solid;
+            left: 98px;
         }
 
         #aid {
             position: absolute;
-            top: 30px;
+            top: 27px;
             right: 19px;
             font-size: 9px;
-            width: 54px;
+            width: 63px;
+            left: 99px;
         }
 
         #acode {
             position: absolute;
-            left: 61px;
-            bottom: 0px;
-            width: 32px;
-            padding: 3px 2px 0px 2px;
+            left: 39px;
+            width: 20px;
+            padding: 0;
+            border-bottom: 1px solid;
+            font-size: 9px;
+            top: 35px;
         }
 
         #extcode {
@@ -92,24 +99,34 @@
 
         #scode {
             position: absolute;
-            left: 31px;
-            bottom: 1px;
-            font-size: 12px;
+            left: 22px;
+            font-size: 9px;
             text-transform: uppercase;
-            width: 25px;
-            border: 1px solid;
-            padding: 2px 1px 0 1px;
+            width: 15px;
+            padding: 0;
+            border-bottom: 1px solid;
+            top: 35px;
         }
 
         #catcode {
             position: absolute;
             left: 1px;
-            bottom: 1px;
-            font-size: 12px;
+            font-size: 9px;
             text-transform: uppercase;
-            width: 25px;
-            border: 1px solid;
-            padding: 2px 1px 0 1px;
+            width: 15px;
+            padding: 0;
+            border-bottom: 1px solid;
+            top: 35px;
+        }
+
+        #noa {
+            position: absolute;
+            left: 1px;
+            font-size: 9px;
+            width: 30px;
+            padding: 0;
+            border-bottom: 1px solid;
+            top: 35px;
         }
 
         #acodes span {
@@ -122,35 +139,35 @@
         #acodes {
             position: absolute;
             left: 2px;
-            bottom: 21px;
             font-size: 8px;
             text-transform: uppercase;
             width: 211px;
             height: 18px;
             overflow: hidden;
+            top: 57px;
         }
 
         #urgent {
             position: absolute;
-            right: 47px;
-            top: 40px;
-            font-size: 10px;
+            top: 34px;
+            font-size: 9px;
             letter-spacing: 0px;
-            width: 23px;
-            height: 8px;
+            width: 21px;
+            height: 6px;
+            left: 139px;
         }
 
         #brithdate {
             position: absolute;
-            right: 0;
-            top: 43px;
+            top: 36px;
             font-weight: bold;
             font-size: 8px;
+            left: 99px;
         }
 
         #inst {
             position: absolute;
-            right: 0px;
+            right: 37px;
             top: 5px;
             font-weight: bold;
             width: 75px;
@@ -158,25 +175,40 @@
             overflow: hidden;
             height: 10px;
         }
+        img#barcode{
+            height:30px;
+            width:90px;
+        }
     </style>
 </head>
 <body style="font-family: sans-serif">
 <div id="bcodediv">
-    <img src="" id="barcode" style="width:140px;height:50px;"/>
+    <img src="" id="barcode"/>
     {% block barcode %}{% endblock %}
     <div id="inst">{{ institution }}</div>
-    <div id="brithdate">D{{ birthdate|date:"d/m/Y" }}</div>
+    <div id="brithdate">D{{ birthdate|date:"d/m/y" }}</div>
 </div>
 <script>
     {#    JsBarcode("#barcode", "{{ barcode }}",{displayValue: false,});#}
     {#    JsBarcode("#barcode").options({displayValue: false,}).EAN(3434343343).render();#}
     JsBarcode("#barcode", "{{ barcode }}", {
         format: "ean13",
+{#        width: 1,#}
+{#        height: 30,#}
+        margin: 2,
         displayValue: false,
         flat: true
     });
     {#JsBarcode("#barcode", "123456789999", {format: "UPC"});#}
-    window.parent.print_barcode_iframe();
+    var _next = '';
+        {% if next %}
+            _next = "/lab/analyse_barcode/{{ next }}/?set={{ analyse_set }}";
+        {% endif %}
+    try {
+        window.parent.print_barcode_iframe({{ barcode_num_copies }}, _next);
+    }catch(e){
+        console.log(e);
+    }
 
 </script>
 </body>

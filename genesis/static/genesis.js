@@ -218,7 +218,6 @@ function patch_edit_views() {
     grp.jQuery('body:not(.grp-popup) input[name="_save"]').parent().hide()
 
 
-
     // get rid of those empty cells
     grp.jQuery('div.c-1').map(function () {
         self = grp.jQuery(this);
@@ -229,10 +228,10 @@ function patch_edit_views() {
     setTimeout(patch_fk_plus_icons, 0);
 
     if (is_editing('analyse') && object_id) {
-        // add_footer_button({
-        //     url: '/lab/analyse_barcode/' + object_id + '/',
-        //     name: 'Barkod Yazdır'
-        // });
+        add_footer_button({
+            url: '/lab/analyse_barcode/' + object_id + '/',
+            name: 'Barkod Yazdır'
+        });
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
 
@@ -316,6 +315,10 @@ function patch_edit_views() {
             grp.jQuery('#id_patient-autocomplete').parent().attr('style', 'max-width:440px !important');
         }, 0);
         if (object_id) {
+            add_footer_button({
+                url: '/lab/admission_barcode/' + object_id + '/?print_analyses=1',
+                name: 'Barkod-Set Yazdır'
+            });
             add_footer_button({
                 url: '/lab/admission_barcode/' + object_id + '/',
                 name: 'Barkod Yazdır'
@@ -475,12 +478,14 @@ function patch_list_views() {
     if (is_listing('state')) {
         // paint background of analyse states to different colors according to their timestamp
         // TODO:
+        $('input#grp-changelist-search').attr('disabled', true);
+        setTimeout('$("input#grp-changelist-search").attr("disabled", false)', 200);
         window.__color = 'gray';
         var last_time = 0;
         $('td.field-tdt').each(function () {
             var td = $(this);
             tmstmp = parseInt(td.text());
-            var change_it = (tmstmp - last_time) > TIME_DIFF;
+            var change_it = (last_time - tmstmp) > TIME_DIFF;
             if (change_it) change_color();
             last_time = tmstmp;
             td.parent().children().css('background', window.__color);
@@ -515,10 +520,10 @@ function patch_list_views() {
             check_all_records();
         }, name: ' ✓ '
     });
-    if(window.location.hash.indexOf('hide_header')>-1){
-            $('header').remove();
-            $('#grp-content').css('top','0');
-        }
+    if (window.location.hash.indexOf('hide_header') > -1) {
+        $('header').remove();
+        $('#grp-content').css('top', '0');
+    }
 }
 
 function patch_everywhere() {
