@@ -129,7 +129,7 @@ function create_selectbox_for_analyse_state() {
     pk = get_pk(this);
     remove_selectbox();
     if (selbox.val()) {
-        $.get('/lab/analyse_state_comments_for_statetype/' + selbox.val(), function (data, st, xhr) {
+        $.get('/lab/api/analyse_state_comments_for_statetype/' + selbox.val(), function (data, st, xhr) {
             window._last_selbox_id = pk;
             create_autocomplete_widget(data, $('#id_state_set-' + pk + '-comment'));
         });
