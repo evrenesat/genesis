@@ -155,6 +155,14 @@ class AnalyseType(models.Model):
     barcode_count = models.SmallIntegerField(_('Barcode count'), default=0,
                                              help_text=_('Number of barcodes to print'))
 
+    def applicable_states_ids(self):
+        if self.category:
+            return list(set(list(self.statedefinition_set.values_list('id', flat=True)) +
+                            list(self.category.states.values_list('id', flat=True))))
+        else:
+            return list(self.statedefinition_set.values_list('id', flat=True))
+
+
     def is_sample_type_compatible(self, sample_type):
         return sample_type in self.sample_type.all()
 
@@ -395,11 +403,7 @@ class Analyse(models.Model):
         return self.type.sample_type.values_list('id', flat=True)
 
     def applicable_states_ids(self):
-        if self.type.category:
-            return list(set(list(self.type.statedefinition_set.values_list('id', flat=True)) +
-                            list(self.type.category.states.values_list('id', flat=True))))
-        else:
-            return list(self.type.statedefinition_set.values_list('id', flat=True))
+        return self.type.applicable_states_ids()
 
     def clean(self):
         if not hasattr(self, 'type'):
@@ -439,6 +443,7 @@ class StateDefinition(models.Model):
     approve = models.BooleanField(_('Approved state'), default=False)
     accept = models.BooleanField(_('Accepted state'), default=False)
     first = models.BooleanField(_('First state'), default=False)
+    require_double_check = models.BooleanField(_('Requires double check'), default=False)
     order = models.PositiveSmallIntegerField(_('Order'), null=True, blank=True)
 
     @classmethod

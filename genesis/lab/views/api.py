@@ -7,7 +7,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
-from lab.models import Admission, ParameterKey, StateDefinition, User
+from django.views.decorators.csrf import csrf_exempt
+from lab.models import Admission, ParameterKey, StateDefinition, User, AnalyseType, State
 from lab.models import Analyse
 from django.contrib.auth import login
 from lab.utils import tlower
@@ -22,6 +23,51 @@ def choices_for_parameter(request, pk):
         'presets': json.loads(pk.presets),
         'has_preset': True if pk.presets else False
     })
+
+
+@staff_member_required
+def list_analyse_types(request):
+    return JsonResponse(
+        {'analyse_types': list(AnalyseType.objects.values('name', 'code', 'id', 'category__name'))})
+
+
+@staff_member_required
+def list_analyse_type_states(request, pk):
+    ids = AnalyseType.objects.get(pk=pk).applicable_states_ids()
+    return JsonResponse({'analyse_type_states':
+        list(StateDefinition.objects.filter(pk__in=ids).values(
+            'accept', 'approve', 'category', 'explanation', 'finish', 'first',
+            'id', 'name', 'order', 'require_double_check'))})
+
+
+@csrf_exempt
+@staff_member_required
+def set_analyse_state(request):
+    analyse_id = request.POST.get('analyse')
+    analyse_type_id = request.POST.get('analyse_type', None)
+    state_id = request.POST.get('state', None)
+    definition_id = request.POST.get('state_definition', None)
+    admission_id = request.POST.get('admission', None)
+    comment = request.POST.get('comment', '')
+    if not analyse_id and admission_id:
+        try:
+            analyse_id = Analyse.objects.filter(admission_id=admission_id, type_id=analyse_type_id,
+                                                external=False).values_list('id', flat=True)[0]
+        except IndexError:
+            return JsonResponse({'result': 'Error', 'error': _(
+                'No analyse found for given admission for selected type')})
+    if analyse_id and Analyse.objects.filter(pk=analyse_id, type_id=analyse_type_id).exists():
+        return JsonResponse({'result': 'Error',
+                             'error': _('Selected anaylse type and given analyse does not match')})
+    if state_id:
+        state = State.objects.get(pk=state_id)
+    else:
+        state = State(definition_id=definition_id, analyse_id=analyse_id)
+    if comment:
+        state.comment = comment
+    state.personnel = request.user.profile
+    state.save()
+    return JsonResponse({'result': 'Success', 'state_id': state.id, 'analyse_id': analyse_id})
 
 
 @staff_member_required
@@ -65,6 +111,7 @@ def _get_analyse(analyse, state_filter=None):
     state_filter = state_filter or {}
     return {
         'id': analyse.id,
+        'type': analyse.type_id,
         'name': analyse.type.name,
         'admission_id': analyse.admission.id,
         'person_id': analyse.admission.patient.tcno,

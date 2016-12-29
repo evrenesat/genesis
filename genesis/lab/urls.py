@@ -10,6 +10,11 @@ urlpatterns = [
     url(r'^api/get_admission/(?P<pk>\d+)/?$', views.get_admission),
     url(r'^api/get_analyse/(?P<pk>\d+)/?$', views.get_analyse),
     url(r'^api/get_admissions/$', views.get_admissions),
+
+    url(r'^api/list_analyse_types/$', views.list_analyse_types),
+    url(r'^api/list_analyse_type_states/(?P<pk>\d+)/?$', views.list_analyse_type_states),
+    url(r'^api/set_analyse_state/$', views.set_analyse_state),
+
     url(r'^api/get_user_info/$', views.get_user_info),
     url(r'^api/switch_user/$', views.switch_user),
     url(r'^api/list_analysis/$', views.list_analysis),
