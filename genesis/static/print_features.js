@@ -80,6 +80,7 @@ function popup_error(msg) {
     alert(msg);
 }
 function print_report_iframe() {
+    if(!$('#_ifrm').attr('src'))return;
     // this method will be called from iframe
     // ie: window.parent.print_barcode_iframe()
 

@@ -17,7 +17,9 @@ def get_base_context(analyse):
         'indications': analyse.admission.indications,
         'pregnancy_week': analyse.admission.week,
         'admission_id': analyse.admission.id,
+        'analyse_id': analyse.id,
         'doctor': analyse.admission.doctor,
+        'title': analyse.type.name,
 
         'sample_unit': analyse.sample_unit,
         'sample_amount': analyse.sample_amount,
@@ -33,7 +35,7 @@ def get_base_context(analyse):
         data['institution']= analyse.admission.institution
     return data
 
-def render_report(pk, signed=False):
+def render_report(pk, for_digital=False):
     analyse = Analyse.objects.get(pk=pk)
     cnt_dict = get_base_context(analyse)
     if analyse.result_json:
@@ -41,15 +43,16 @@ def render_report(pk, signed=False):
         cnt_dict.update(result['KV'])
         cnt_dict['results'] = [result]
     cnt_dict.update({'multi': False,
-                     'with_sign': signed})
+                     'for_digital': for_digital})
     tpl, tpl_object = load_analyse_template(analyse)
     if tpl_object:
         cnt_dict['generic'] = tpl_object.generic
+        cnt_dict['report_title'] = tpl_object.title
     else:
         cnt_dict['generic'] = True
     return tpl.render(Context(cnt_dict))
 
-def render_combo_report(ids, signed=False):
+def render_combo_report(ids, for_digital=False):
     analyse_results = []
     comment = ''
     short_result  = ''
@@ -67,7 +70,7 @@ def render_combo_report(ids, signed=False):
                      'comment': comment,
                      'short_result': short_result,
                      'multi': True,
-                     'with_sign': signed,
+                     'for_digital': for_digital,
                      })
     if tpl_object:
         cnt_dict.update({

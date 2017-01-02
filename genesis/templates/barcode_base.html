@@ -64,9 +64,10 @@
             bottom: 7px;
             font-size: 10px;
             padding: 1px 0px 0px 1px;
-            height: 9px;
-            left: 60px;
-            top: 35px;
+            height: 11px;
+            left: 59px;
+            top: 33px;
+            z-index: 998;
         }
 
         #bid {
@@ -110,7 +111,7 @@
 
         #scode {
             position: absolute;
-            left: 22px;
+            left: 21px;
             font-size: 9px;
             text-transform: uppercase;
             width: 15px;
@@ -183,7 +184,8 @@
             top: 36px;
             font-weight: bold;
             font-size: 8px;
-            left: 105px;
+            left: 103px;
+            letter-spacing: 0.07em;
         }
 
         #inst {
@@ -194,11 +196,12 @@
             width: 75px;
             font-size: 9px;
             overflow: hidden;
-            height: 10px;
+            height: 9px !important;
+            left: 99px;
         }
         img#barcode{
-            height:30px;
-            width:90px;
+{#            height:30px;#}
+{#            width: 99px;#}
         }
     </style>
 </head>
@@ -214,8 +217,8 @@
     {#    JsBarcode("#barcode").options({displayValue: false,}).EAN(3434343343).render();#}
     JsBarcode("#barcode", "{{ barcode }}", {
         format: "ean13",
-{#        width: 1,#}
-{#        height: 30,#}
+        width: 1,
+        height: 25,
         margin: 2,
         displayValue: false,
         flat: true

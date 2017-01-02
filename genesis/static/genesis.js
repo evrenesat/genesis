@@ -511,6 +511,13 @@ function patch_list_views() {
 
 
     }
+    if (is_listing('setting')) {
+        printers = jsPrintSetup.getPrintersList().split(',');
+        $('td.field-key').each(function () {
+            console.log($(this).closest('tr').find('input.vTextField'))
+        })
+
+    }
     if (is_listing('parametervalue')) {
         modify_parameter_list_edit('table#result_list tr.grp-row')
 

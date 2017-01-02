@@ -592,11 +592,12 @@ class AdminAdmission(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     search_fields = ('patient__name', 'patient__surname')
     list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
-    readonly_fields = ('id', 'timestamp')
+    readonly_fields = ('id', ) #'timestamp'
     raw_id_fields = ('patient', 'institution', 'doctor')
     fields = (('id', 'timestamp'), ('patient', 'is_urgent'), ('doctor', 'institution'),
               ('week', 'upd_week', 'lmp_date'),
               ('indications', 'history'),
+
               )
     autocomplete_lookup_fields = {
         'fk': ['patient', 'institution', 'doctor'],

@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -137,7 +139,7 @@ class Admission(models.Model):
     week = models.CharField(_('Pregnancy week'), null=True, blank=True, max_length=7)
     upd_week = models.CharField(_('UPD'), null=True, blank=True, max_length=7)
     lmp_date = models.DateField(_('LMP'), null=True, blank=True)
-    timestamp = models.DateTimeField(_('Admission date'), editable=False, auto_now_add=True)
+    timestamp = models.DateTimeField(_('Admission date'), default=timezone.now)
     updated_at = models.DateTimeField(_('Timestamp'), editable=False, auto_now=True)
 
     # operator = models.ForeignKey(User, verbose_name=_('Operator'), editable=False)

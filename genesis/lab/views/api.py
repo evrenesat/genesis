@@ -8,7 +8,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
-from lab.models import Admission, ParameterKey, StateDefinition, User, AnalyseType, State
+from lab.models import Admission, ParameterKey, StateDefinition, User, AnalyseType, State, \
+    ValidationError
 from lab.models import Analyse
 from django.contrib.auth import login
 from lab.utils import tlower
@@ -24,6 +25,12 @@ def choices_for_parameter(request, pk):
         'has_preset': True if pk.presets else False
     })
 
+
+@staff_member_required
+def dashboard_stats(request):
+    data = {}
+    Analyse.objects
+    return JsonResponse(data)
 
 @staff_member_required
 def list_analyse_types(request):
@@ -80,6 +87,14 @@ def set_analyse_state(request):
         state = State(definition_id=definition_id, analyse_id=analyse_id, group=group)
     if comment:
         state.comment = comment
+    try:
+        if state.definition.finish:
+            state.analyse.mark_finished(request)
+        if state.definition.approve:
+            state.analyse.mark_approved(request)
+    except ValidationError:
+        return JsonResponse({'result': 'Error',
+                             'error': _('You don\'t have the required permissions to complete this action.')})
 
     state.personnel = request.user.profile
     state.save()

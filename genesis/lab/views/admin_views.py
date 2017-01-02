@@ -10,11 +10,6 @@ from lab.models import Admission
 from lab.models import Analyse
 
 
-@staff_member_required
-def analyse_report(request, pk):
-    content = render_report(pk)
-    return HttpResponse(content)
-
 
 @staff_member_required
 def get_admissions_by_analyses(request):

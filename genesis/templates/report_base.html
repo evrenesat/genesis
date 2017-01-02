@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gentan Analyse Report</title>
+    <title>Gentan Test Raporu</title>
     <style media="screen">
 {#        body {#}
 {#            background-color: #4f5b66;#}
@@ -151,7 +151,7 @@
 <div id="container">
     <body style="font-family: sans-serif">
     <header>
-        <div id="logo"><img src="/static/images/gentan_logo.jpg"></div>
+        <div id="logo">{% if for_digital %}<img src="/static/images/gentan_logo.jpg">{% endif %}</div>
     </header>
     <main>
         <div id="title">
@@ -179,7 +179,7 @@
             <div><span>Protokol No</span>
                 <div>{{ admission_id }}</div>
             </div>
-            {% if analyse_id %}
+            {% if analyse_id and not multi %}
                 <div><span>Lab No</span>
                     <div>{{ analyse_id }}</div>
                 </div>{% endif %}
@@ -262,14 +262,14 @@
             <div id="analyser">
                 {{ analyser.prefix }} {{ analyser.user.get_full_name }}<br/>
                 {{ analyser.title }}<br>
-                {% if with_sign and analyser.signature %}<img src="/{{ analyser.signature.url }}">{% endif %}
+                {% if for_digital and analyser.signature %}<img src="/{{ analyser.signature.url }}">{% endif %}
             </div>
         {% endif %}
         {% if approved %}
             <div id="approver">
                 {{ approver.prefix }} {{ approver.user.get_full_name }}<br/>
                 {{ approver.title }}<br>
-                {% if with_sign and approver.signature %}<img src="/{{ approver.signature.url }}">{% endif %}
+                {% if for_digital and approver.signature %}<img src="/{{ approver.signature.url }}">{% endif %}
             </div>
         {% endif %}
     </footer>

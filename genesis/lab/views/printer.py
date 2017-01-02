@@ -4,7 +4,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from django.shortcuts import render
-from lab.lib import render_combo_report
+from lab.lib import render_combo_report, render_report
 from lab.models import Admission, Analyse
 from lab.models import Setting
 
@@ -59,17 +59,22 @@ def analyse_barcode(request, pk, group=1):
     _set = request.GET.get('set', '')
     nxt = None
     nxt_grp = None
-    set_list = _set.split(',')
+
+    analyse = Analyse.objects.get(pk=pk)
+    if not _set and analyse.no_of_groups > 1:
+        _set = ','.join(['%s-%s' % (analyse.id, group) for group in range(1, analyse.no_of_groups + 1)])
     if _set:
+        set_list = _set.split(',')
         try:
             nxt, nxt_grp = set_list[set_list.index('%s-%s' % (pk, group)) + 1].split('-')
         except IndexError:
             pass
-    analyse = Analyse.objects.get(pk=pk)
+
     return render(request, 'barcode_analyse.html', {
         'analyse': analyse,
         'id': analyse.id,
         'group': group,
+        'no_of_groups': analyse.no_of_groups,
         'barcode_num_copies': analyse.type.barcode_count,
         'admission_id': analyse.admission_id,
         'patient_name': analyse.admission.patient.full_name(),
@@ -95,4 +100,10 @@ def multiple_reports(request):
 def multiple_reports_for_panel(request, group_code):
     ids = Analyse.objects.filter(group_relation=group_code).values_list('id', flat=True)
     content = render_combo_report(ids)
+    return HttpResponse(content)
+
+
+@staff_member_required
+def analyse_report(request, pk):
+    content = render_report(pk)
     return HttpResponse(content)

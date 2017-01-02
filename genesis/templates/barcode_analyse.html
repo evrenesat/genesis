@@ -7,7 +7,7 @@
     {% if analyse.external %}<div id="extcode" class="invertedtext">DL:{{ analyse.external_lab.get_code }}</div>{% endif %}
     <div id="scode">{{ analyse.sample_type.get_code }}</div>
     <div id="catcode">{{ analyse.type.category.get_code }}</div>
-    <div id="group">G-<span class="invertedtext">{{ group }}</span></div>
+    {% if no_of_groups > 1 %}<div id="group">G-<span class="invertedtext">{{ group }}</span></div>{% endif %}
     <div id="aname">{{ analyse.type.name }}</div>
     {% if is_urgent %}
     <div id="urgent" class="invertedtext">ACiL</div>

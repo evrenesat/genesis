@@ -247,12 +247,12 @@ class Analyse(models.Model):
                                     help_text=_('Normal Karyotype, Trisomy 21'))
     result_json = models.TextField(_('Analyse result dict'), editable=False, null=True)
     sample_amount = models.PositiveIntegerField(_('Sample Amount'), null=True,
-                                                blank=True, choices=SAMPLE_AMOUNT)
+                                                blank=True)
     sample_unit = models.CharField(_('Unit'), null=True, blank=True, choices=(('cc', 'cc'),),
                                    max_length=10)
     sample_type = models.ForeignKey(SampleType, models.PROTECT, verbose_name=_('Sample type'),
                                     null=True, blank=True)
-    medium_amount = models.PositiveIntegerField(_('Medium Amount'), choices=MEDIUM_AMOUNT,
+    medium_amount = models.PositiveIntegerField(_('Medium Amount'),
                                                 null=True, blank=True)
     medium_type = models.ForeignKey(MediumType, models.PROTECT, verbose_name=_('Medium type'),
                                     null=True, blank=True)
@@ -360,10 +360,10 @@ class Analyse(models.Model):
             context['result'] = ''
             context['comment'] = ''
             exec(self.process_logic, context)
-            if context['result']:
-                self.short_result = context['result']
-            if context['comment']:
-                self.comment = context['comment']
+            # if context['result']:
+            self.short_result = context['result']
+            # if context['comment']:
+            self.comment = context['comment']
         return context['result_set']
 
     def get_result_dict(self):
