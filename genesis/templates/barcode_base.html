@@ -21,11 +21,22 @@
         }
 
         div#name {
-            font-size: 10px;
+            font-size: 11px;
             width: 168px;
             padding-bottom: 2px;
             overflow: hidden;
             top: 44px;
+            position: absolute;
+            left: 0px;
+            height: 9px;
+            white-space: nowrap;
+        }
+        div#aname {
+            font-size: 9px;
+            width: 168px;
+            padding-bottom: 2px;
+            overflow: hidden;
+            top: 58px;
             position: absolute;
             left: 0px;
             height: 9px;
@@ -51,7 +62,7 @@
         #adate {
             position: absolute;
             bottom: 7px;
-            font-size: 9px;
+            font-size: 10px;
             padding: 1px 0px 0px 1px;
             height: 9px;
             left: 60px;
@@ -59,7 +70,7 @@
         }
 
         #bid {
-            height: 11px;
+            height: 12px;
             position: absolute;
             top: 14px;
             right: 39px;
@@ -154,7 +165,17 @@
             letter-spacing: 0px;
             width: 21px;
             height: 6px;
-            left: 139px;
+            left: 147px;
+        }
+
+        #group {
+            position: absolute;
+            top: 17px;
+            font-size: 9px;
+            letter-spacing: 0px;
+            width: 21px;
+            height: 6px;
+            left: 152px;
         }
 
         #brithdate {
@@ -162,7 +183,7 @@
             top: 36px;
             font-weight: bold;
             font-size: 8px;
-            left: 99px;
+            left: 105px;
         }
 
         #inst {
@@ -202,7 +223,7 @@
     {#JsBarcode("#barcode", "123456789999", {format: "UPC"});#}
     var _next = '';
         {% if next %}
-            _next = "/lab/analyse_barcode/{{ next }}/?set={{ analyse_set }}";
+            _next = "/lab/analyse_barcode/{{ next }}/{{ next_group }}/?set={{ analyse_set }}";
         {% endif %}
     try {
         window.parent.print_barcode_iframe({{ barcode_num_copies }}, _next);

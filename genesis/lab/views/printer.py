@@ -20,8 +20,8 @@ def admission_barcode(request, pk):
         try:
             num_of_analyses += 1
             if print_analyses and analyse.type.barcode_count:
-                analyse_ids.append(str(analyse.id))
-            print(analyse.type.category, '||', analyse.sample_type)
+                analyse_ids.extend(['%s-%s' % (analyse.id, group) for group in range(1,analyse.no_of_groups+1)])
+            # print(analyse.type.category, '||', analyse.sample_type)
             analyses.add((analyse.type.category.get_code(),
                           analyse.sample_type.get_code(),
                           analyse.external_lab.get_code() if analyse.external else ''
@@ -45,29 +45,31 @@ def admission_barcode(request, pk):
         'birthdate': admission.patient.birthdate}
 
     if print_analyses and analyse_ids:
-        context.update({'analyse_set': ','.join(analyse_ids),
-                        'next': analyse_ids[0],
-                        })
+        context['analyse_set'] = ','.join(analyse_ids)
+        context['next'], context['next_group'] = analyse_ids[0].split('-')
     return render(request, 'barcode_admission.html', context)
 
 
 @staff_member_required
-def analyse_barcode(request, pk):
+def analyse_barcode(request, pk, group=1):
     # return admission_barcode(request,
     #                          Analyse.objects.filter(pk=pk).values_list('admission_id', flat=True)[
     #                              0])
+    # 12-1,12-2,12-3
     _set = request.GET.get('set', '')
     nxt = None
+    nxt_grp = None
     set_list = _set.split(',')
     if _set:
         try:
-            nxt = set_list[set_list.index(str(pk)) + 1]
+            nxt, nxt_grp = set_list[set_list.index('%s-%s' % (pk, group)) + 1].split('-')
         except IndexError:
             pass
     analyse = Analyse.objects.get(pk=pk)
     return render(request, 'barcode_analyse.html', {
         'analyse': analyse,
         'id': analyse.id,
+        'group': group,
         'barcode_num_copies': analyse.type.barcode_count,
         'admission_id': analyse.admission_id,
         'patient_name': analyse.admission.patient.full_name(),
@@ -78,6 +80,7 @@ def analyse_barcode(request, pk):
         'birthdate': analyse.admission.patient.birthdate,
         'analyse_set': _set,
         'next': nxt,
+        'next_group': nxt_grp,
     })
 
 

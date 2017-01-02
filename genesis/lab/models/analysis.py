@@ -15,7 +15,7 @@ from static.cache import AnalyseStateCache, AppSettingCache
 
 from ..utils import pythonize, lazy_property
 
-from .patient import Admission, ExternalLab
+from .patient import Admission, ExternalLab, Institution
 
 
 class Profile(models.Model):
@@ -154,6 +154,9 @@ class AnalyseType(models.Model):
                                              choices=ORDER_CHOICES)
     barcode_count = models.SmallIntegerField(_('Barcode count'), default=0,
                                              help_text=_('Number of barcodes to print'))
+    no_of_groups = models.PositiveIntegerField(_('Work group #'), default=1, null=True,
+                                               blank=True, choices=((1, 1), (2, 2), (3, 3), (4, 4)),
+                                               help_text=_('Number of work groups'))
 
     def applicable_states_ids(self):
         if self.category:
@@ -161,7 +164,6 @@ class AnalyseType(models.Model):
                             list(self.category.states.values_list('id', flat=True))))
         else:
             return list(self.statedefinition_set.values_list('id', flat=True))
-
 
     def is_sample_type_compatible(self, sample_type):
         return sample_type in self.sample_type.all()
@@ -184,6 +186,21 @@ class AnalyseType(models.Model):
     @staticmethod
     def autocomplete_search_fields():
         return ("id__iexact", "name__icontains",)
+
+
+class InstitutionAnalyse(models.Model):
+    analyse_type = models.ForeignKey(AnalyseType, models.CASCADE, verbose_name=_('Analyse type'))
+    institution = models.ForeignKey(Institution, models.CASCADE, verbose_name=_('Institution'))
+    no_of_groups = models.PositiveIntegerField(_('Work group #'), default=1, null=True,
+                                               blank=True, choices=((1, 1), (2, 2), (3, 3), (4, 4)),
+                                               help_text=_('Number of work groups'))
+
+    class Meta:
+        verbose_name = _('Analyse Type for Institution')
+        verbose_name_plural = _('Analyse Types for Institution')
+
+    def __str__(self):
+        return "%s %s" % (self.institution, self.analyse_type)
 
 
 class ReportTemplate(models.Model):
@@ -218,7 +235,7 @@ class Analyse(models.Model):
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Patient Admission'))
     no_of_groups = models.PositiveIntegerField(_('Work group #'), default=1, null=True,
-                                               blank=True, choices=((1, 1), (2, 2), (3, 3)),
+                                               blank=True, choices=((1, 1), (2, 2), (3, 3), (4, 4)),
                                                help_text=_('Number of work groups'))
     result_copy = models.TextField(_('Copy of result'), blank=True, null=True, editable=False)
     result = models.TextField(_('Result parameters'), blank=True, null=True,
@@ -429,9 +446,20 @@ class Analyse(models.Model):
     def __str__(self):
         return "%s %s" % (self.type, self.admission)
 
+    def get_no_of_groups(self):
+        conf = InstitutionAnalyse.objects.filter(analyse_type=self.type,
+                                                 institution=self.admission.institution)
+        if conf:
+            return conf[0].no_of_groups
+        else:
+            return self.type.no_of_groups
+
     def save(self, *args, **kwargs):
         if self.external_lab_id and not self.external:
             self.external = True
+        is_new = not self.id
+        if is_new:
+            self.no_of_groups = self.get_no_of_groups()
         super().save(*args, **kwargs)
 
 
@@ -453,7 +481,8 @@ class StateDefinition(models.Model):
         if data is None:
             state_def = cls.objects.get(pk=definition_id)
             data = {'auto_preset': True,
-                    'presets': list(filter(None, state_def.state_set.distinct().values_list(
+                    'presets': list(filter(None, state_def.state_set.distinct('comment').order_by(
+                        'comment').values_list(
                         'comment', flat=True)))}
             cache.set(data)
         return data
@@ -478,7 +507,8 @@ class State(models.Model):
     personnel = models.ForeignKey(Profile, models.PROTECT, verbose_name=_('Personnel'), blank=True)
     current_state = models.BooleanField(_('Current state'), editable=False, default=True)
     group = models.PositiveSmallIntegerField(_('Group'),
-                                             choices=((1, 1), (2, 2), (3, 3), (100, _('All'))),
+                                             choices=(
+                                                 (1, 1), (2, 2), (3, 3), (4, 4), (100, _('All'))),
                                              default=1)
 
     class Meta:
@@ -508,6 +538,10 @@ class State(models.Model):
             if self.analyse.no_of_groups == 3:
                 self.id = None
                 self.group = 3
+                self._cleanup_old_currents(*args, **kwargs)
+            if self.analyse.no_of_groups == 4:
+                self.id = None
+                self.group = 4
                 self._cleanup_old_currents(*args, **kwargs)
 
     def __str__(self):
@@ -761,7 +795,7 @@ class Setting(models.Model):
         cache = AppSettingCache('ALL')
         data = cache.get(None)
         if data is None:
-            data = json.dumps(dict(cls.objects.all().values_list('key','value')))
+            data = json.dumps(dict(cls.objects.all().values_list('key', 'value')))
             cache.set(data, lifetime=99999)
         return data or default
 
@@ -776,5 +810,3 @@ class Setting(models.Model):
     class Meta:
         verbose_name = _('Application Setting')
         verbose_name_plural = _('Application Settings')
-
-

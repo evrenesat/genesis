@@ -29,6 +29,7 @@ urlpatterns = [
 
     url(r'^papi/analyse_check$', views.analyse_check),
     url(r'^analyse_barcode/(?P<pk>\d+)/$', views.analyse_barcode),
+    url(r'^analyse_barcode/(?P<pk>\d+)/(?P<group>\d+)/$', views.analyse_barcode),
     url(r'^report_for_panel/(?P<group_code>\w+)/$', views.multiple_reports_for_panel),
     url(r'^analyse_report/(?P<pk>\d+)/$', views.analyse_report),
     url(r'^admission_barcode/(?P<pk>\d+)/$', views.admission_barcode),

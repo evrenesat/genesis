@@ -33,11 +33,24 @@ def list_analyse_types(request):
 
 @staff_member_required
 def list_analyse_type_states(request, pk):
-    ids = AnalyseType.objects.get(pk=pk).applicable_states_ids()
-    return JsonResponse({'analyse_type_states':
+    return JsonResponse(_list_analyse_type_states(type_id=pk))
+
+
+def _list_analyse_type_states(**kw):
+    if 'analyse_id' in kw:
+        kw['analyse'] = Analyse.objects.get(pk=kw['analyse_id'])
+
+    if 'analyse' in kw:
+        ids = kw['analyse'].applicable_states_ids()
+    elif 'type_id' in kw:
+        ids = AnalyseType.objects.get(pk=kw['type_id']).applicable_states_ids()
+    elif 'type' in kw:
+        ids = kw['type'].applicable_states_ids()
+
+    return {'analyse_type_states':
         list(StateDefinition.objects.filter(pk__in=ids).values(
             'accept', 'approve', 'category', 'explanation', 'finish', 'first',
-            'id', 'name', 'order', 'require_double_check'))})
+            'id', 'name', 'order', 'require_double_check'))}
 
 
 @csrf_exempt
@@ -45,26 +58,29 @@ def list_analyse_type_states(request, pk):
 def set_analyse_state(request):
     analyse_id = request.POST.get('analyse')
     analyse_type_id = request.POST.get('analyse_type', None)
+    group = int(request.POST.get('group', 1))
     state_id = request.POST.get('state', None)
     definition_id = request.POST.get('state_definition', None)
     admission_id = request.POST.get('admission', None)
     comment = request.POST.get('comment', '')
-    if not analyse_id and admission_id:
-        try:
+    if analyse_id and Analyse.objects.filter(pk=analyse_id, type_id=analyse_type_id).exists():
+        return JsonResponse({'result': 'Error',
+                             'error': _('Selected anaylse type and given analyse does not match')})
+    elif not analyse_id and admission_id:
+        try: # to get the analyse from admission by selected type
             analyse_id = Analyse.objects.filter(admission_id=admission_id, type_id=analyse_type_id,
                                                 external=False).values_list('id', flat=True)[0]
         except IndexError:
             return JsonResponse({'result': 'Error', 'error': _(
-                'No analyse found for given admission for selected type')})
-    if analyse_id and Analyse.objects.filter(pk=analyse_id, type_id=analyse_type_id).exists():
-        return JsonResponse({'result': 'Error',
-                             'error': _('Selected anaylse type and given analyse does not match')})
+                'No analyse found for given admission in selected analyse type')})
+
     if state_id:
         state = State.objects.get(pk=state_id)
     else:
-        state = State(definition_id=definition_id, analyse_id=analyse_id)
+        state = State(definition_id=definition_id, analyse_id=analyse_id, group=group)
     if comment:
         state.comment = comment
+
     state.personnel = request.user.profile
     state.save()
     return JsonResponse({'result': 'Success', 'state_id': state.id, 'analyse_id': analyse_id})
@@ -117,6 +133,7 @@ def _get_analyse(analyse, state_filter=None):
         'person_id': analyse.admission.patient.tcno,
         'patient_name': analyse.admission.patient.full_name(),
         'institution': analyse.admission.institution.name,
+        'no_of_groups': analyse.no_of_groups,
         'is_urgent': analyse.admission.is_urgent,
         'birthdate': analyse.admission.patient.birthdate,
         'timestamp': analyse.admission.timestamp,
@@ -126,6 +143,7 @@ def _get_analyse(analyse, state_filter=None):
         'states': list(
             analyse.state_set.filter(**state_filter).values('definition__name',
                                                             'timestamp',
+                                                            'id',
                                                             'personnel__user__username',
                                                             'comment',
                                                             'group'))
@@ -134,7 +152,15 @@ def _get_analyse(analyse, state_filter=None):
 
 @staff_member_required
 def get_analyse(request, pk):
-    return JsonResponse(_get_analyse(Analyse.objects.get(pk=pk)))
+    analyse = Analyse.objects.get(pk=pk)
+    selected_definition_id = int(request.GET.get('selected_definition_id', 0))
+    analyse_dict = _get_analyse(analyse)
+    if request.GET.get('add_type_states', None):
+        analyse_dict.update(_list_analyse_type_states(analyse=analyse))
+    if selected_definition_id:
+        analyse_dict.update({'comments':
+                                 StateDefinition.comment_autocomplete_data(selected_definition_id)})
+    return JsonResponse(analyse_dict)
 
 
 @staff_member_required
@@ -174,7 +200,7 @@ def get_admission(request, pk):
 
 def _get_analysis(admission):
     analyses = []
-    for analyse in admission.analyse_set.all():
+    for analyse in admission.analyse_set.exclude(group_relation='GRP'):
         try:
             analyses.append(_get_analyse(analyse, {'current_state': True}))
         except AttributeError:

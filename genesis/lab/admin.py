@@ -180,6 +180,12 @@ class ParameterInline(admin.TabularInline):
     classes = ('grp-collapse',)  # grp-closed
 
 
+class InstitutionAnalyseInline(admin.TabularInline):
+    model = InstitutionAnalyse
+    extra = 0
+    classes = ('grp-collapse',)  # grp-closed
+
+
 class ProcessLogicForm(forms.ModelForm):
     class Meta:
         model = ProcessLogic
@@ -207,7 +213,7 @@ class AdminAnalyseType(admin.ModelAdmin):
         (None, {
             'fields': (('name', 'code','group_type',), ('sample_type', 'category', 'method'),
                        'process_time', 'footnote','barcode_count',
-                       ('price', 'alternative_price'),
+                       ('price', 'alternative_price', 'no_of_groups'),
                        ('external_lab', 'external_price'),)
         }),
         (_('Advanced'),
@@ -215,7 +221,7 @@ class AdminAnalyseType(admin.ModelAdmin):
           'fields': ('subtypes', 'process_logic',)
           })
     )
-    inlines = [ParameterInline, ]
+    inlines = [ParameterInline, InstitutionAnalyseInline]
 
     class Media:
         js = [
