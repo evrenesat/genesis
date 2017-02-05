@@ -16,7 +16,9 @@ urlpatterns = [
     url(r'^api/set_analyse_state/$', views.set_analyse_state),
 
     url(r'^api/get_user_info/$', views.get_user_info),
+    url(r'^api/dashboard_stats/$', views.dashboard_stats),
     url(r'^api/switch_user/$', views.switch_user),
+    url(r'^api/logout_user/$', views.logout_user),
     url(r'^api/list_analysis/$', views.list_analysis),
     url(r'^api/analyse_state_comments_for_statetype/(?P<pk>\d+)$', views.analyse_state_comments_for_statetype),
     # TODO: this is unused, why!?
@@ -32,6 +34,7 @@ urlpatterns = [
     url(r'^analyse_barcode/(?P<pk>\d+)/(?P<group>\d+)/$', views.analyse_barcode),
     url(r'^report_for_panel/(?P<group_code>\w+)/$', views.multiple_reports_for_panel),
     url(r'^analyse_report/(?P<pk>\d+)/$', views.analyse_report),
+    url(r'^report_for_panel_grouper/(?P<pk>\d+)/?$', views.multiple_reports_for_panel_grouper),
     url(r'^admission_barcode/(?P<pk>\d+)/$', views.admission_barcode),
     url(r'^multiple_reports/$', views.multiple_reports),
 ]

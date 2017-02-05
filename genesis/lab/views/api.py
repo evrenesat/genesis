@@ -1,19 +1,21 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from collections import defaultdict
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from django.db.models import F, Sum, Max, Min, Avg, Count, Q
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from lab.models import Admission, ParameterKey, StateDefinition, User, AnalyseType, State, \
-    ValidationError
+    ValidationError, Institution
 from lab.models import Analyse
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from lab.utils import tlower
 from lab.utils import tupper
+from django.utils import timezone
 
 
 # TODO: unused why???
@@ -25,12 +27,6 @@ def choices_for_parameter(request, pk):
         'has_preset': True if pk.presets else False
     })
 
-
-@staff_member_required
-def dashboard_stats(request):
-    data = {}
-    Analyse.objects
-    return JsonResponse(data)
 
 @staff_member_required
 def list_analyse_types(request):
@@ -67,14 +63,14 @@ def set_analyse_state(request):
     analyse_type_id = request.POST.get('analyse_type', None)
     group = int(request.POST.get('group', 1))
     state_id = request.POST.get('state', None)
-    definition_id = request.POST.get('state_definition', None)
+    definition_id = request.POST.get('state_definition', 0) or None
     admission_id = request.POST.get('admission', None)
     comment = request.POST.get('comment', '')
     if analyse_id and Analyse.objects.filter(pk=analyse_id, type_id=analyse_type_id).exists():
         return JsonResponse({'result': 'Error',
                              'error': _('Selected anaylse type and given analyse does not match')})
     elif not analyse_id and admission_id:
-        try: # to get the analyse from admission by selected type
+        try:  # to get the analyse from admission by selected type
             analyse_id = Analyse.objects.filter(admission_id=admission_id, type_id=analyse_type_id,
                                                 external=False).values_list('id', flat=True)[0]
         except IndexError:
@@ -83,8 +79,10 @@ def set_analyse_state(request):
 
     if state_id:
         state = State.objects.get(pk=state_id)
-    else:
+    elif definition_id:
         state = State(definition_id=definition_id, analyse_id=analyse_id, group=group)
+    else:
+        return JsonResponse({'result': 'Error', 'error': _('Missing data received')})
     if comment:
         state.comment = comment
     try:
@@ -94,7 +92,8 @@ def set_analyse_state(request):
             state.analyse.mark_approved(request)
     except ValidationError:
         return JsonResponse({'result': 'Error',
-                             'error': _('You don\'t have the required permissions to complete this action.')})
+                             'error': _(
+                                 'You don\'t have the required permissions to complete this action.')})
 
     state.personnel = request.user.profile
     state.save()
@@ -150,6 +149,9 @@ def _get_analyse(analyse, state_filter=None):
         'institution': analyse.admission.institution.name,
         'no_of_groups': analyse.no_of_groups,
         'is_urgent': analyse.admission.is_urgent,
+        'finished': analyse.finished,
+        'approved': analyse.approved,
+        'group_relation': analyse.group_relation,
         'birthdate': analyse.admission.patient.birthdate,
         'timestamp': analyse.admission.timestamp,
         'category': analyse.type.category.name if analyse.type.category else '-',
@@ -190,9 +192,10 @@ def get_user_info(request):
         'fullname': request.user.get_full_name(),
         'username': request.user.username,
         'fist_name': request.user.first_name,
-        'other_users': [{'username': u.username, 'fullname': u.get_full_name()}
-                        for u in request.user.__class__.objects.exclude(pk=request.user.id,
-                                                                        is_superuser=True)]
+        # 'other_users': [{'username': u.username, 'fullname': u.get_full_name()}
+        'other_users': [u.username
+                        for u in
+                        request.user.__class__.objects.filter(is_active=True, is_staff=True)]
     })
 
 
@@ -200,6 +203,12 @@ def get_user_info(request):
 def switch_user(request):
     user = User.objects.get(username=request.GET.get('username'), is_superuser=False)
     login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
+    return JsonResponse({'result': 'success'})
+
+
+@staff_member_required
+def logout_user(request):
+    logout(request)
     return JsonResponse({'result': 'success'})
 
 
@@ -215,9 +224,68 @@ def get_admission(request, pk):
 
 def _get_analysis(admission):
     analyses = []
-    for analyse in admission.analyse_set.exclude(group_relation='GRP'):
+    # .exclude(group_relation='GRP'):
+    for analyse in admission.analyse_set.all():
         try:
             analyses.append(_get_analyse(analyse, {'current_state': True}))
         except AttributeError:
             pass
     return analyses
+
+
+############## STATS & GRAPHS #####################
+
+def _compile_timeseries(input):
+    data = defaultdict(int)
+    for id, timestamp in input:
+        data[timestamp.strftime("%d/%m/%Y")] += 1
+    return list(data.items())
+
+# FIXME: Expanding week and month to prevent empty charts
+A_W_EARLIER_DELTA = 20
+A_M_EARLIER_DELTA = 45
+
+def _most_popular():
+    now = timezone.now()
+
+    a_w_earlier = now - timedelta(days=A_W_EARLIER_DELTA)
+    a_m_earlier = now - timedelta(days=A_M_EARLIER_DELTA)
+    result = {
+        'Son 30 Günde En Çok İstenen Testler': {'data': list(
+            AnalyseType.objects.filter(analyse__timestamp__range=(a_m_earlier, now)).annotate(
+                usage=Count('analyse')).order_by('-usage').values_list('code', 'usage')[:10]),
+            'type': 'Pie'},
+        'Son 30 Günde En Çok Hasta Gönderen Kurumlar': {'data': list(
+            Institution.objects.filter(admission__timestamp__range=(a_m_earlier, now)).annotate(
+                usage=Count('admission')).order_by('-usage').values_list('name', 'usage')[:10]),
+            'type': 'Pie'},
+        'Son 7 Günde En Çok İstenen Testler': {'data': list(
+            AnalyseType.objects.filter(analyse__timestamp__range=(a_w_earlier, now)).annotate(
+                usage=Count('analyse')).order_by('-usage').values_list('code', 'usage')[:10]),
+            'type': 'Pie'},
+        'Son 7 Günde En Çok Hasta Gönderen Kurumlar': {'data': list(
+            Institution.objects.filter(admission__timestamp__range=(a_w_earlier, now)).annotate(
+                usage=Count('admission')).order_by('-usage').values_list('name', 'usage')[:10]),
+            'type': 'Pie'},
+    }
+
+    return result
+
+
+@staff_member_required
+def dashboard_stats(request):
+    data = {}
+    data.update(_most_popular())
+    data['chart_list'] = list(data.keys())
+
+    now = timezone.now()
+    a_w_earlier = now - timedelta(days=A_W_EARLIER_DELTA)
+    a_m_earlier = now - timedelta(days=A_M_EARLIER_DELTA)
+
+    series_data = Analyse.objects.filter(timestamp__range=(a_m_earlier, now)).values_list('id',
+                                                                                       'timestamp')
+    data['Günlük Toplamlar'] = {'data': _compile_timeseries(series_data), 'type': 'Bar'}
+    data['chart_list'].append('Günlük Toplamlar')
+    return JsonResponse(data)
+
+############## ENDOF STATS & GRAPHS ###############

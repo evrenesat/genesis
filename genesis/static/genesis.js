@@ -234,6 +234,15 @@ function patch_edit_views() {
         });
         var is_finished = grp.jQuery('div.finished img[alt=True]').length;
         var group_membership = $('input#id_group_relation').val();
+        if(!group_membership || group_membership=='GRP'){
+            var main_analyse = true;
+            $('fieldset.analyse_box.advanced_details > h2').click(function(){tiny_tinymce('id_report_override');});
+
+        }
+        if (group_membership == 'GRP') {
+            var group_membership = object_id;
+        }
+
 
         modify_parameter_list_edit('div#parametervalue_set-group div.form-row.has_original');
 
@@ -243,7 +252,6 @@ function patch_edit_views() {
         $("select[id$=-definition]:not([id*=prefix])").change(create_selectbox_for_analyse_state);
 
         // fade check mark image of new state form
-
 
         if (group_membership) {
 
@@ -255,28 +263,29 @@ function patch_edit_views() {
                         iframeWidth: 1100, iframeHeight: 600
                     });
                 },
-                name: 'Tüm Paneli Görüntüle'
+                name: 'Panel Sonuç Gir'
             });
-
-            add_footer_button({
-                url: '/lab/report_for_panel/' + group_membership + '/',
-                name: 'Panel Rapor Yazdır',
-            });
-
-            add_footer_button({
-                onclick: function () {
-                    $.featherlight({
-                        iframe: '/lab/report_for_panel/' + group_membership + '/',
-                        iframeWidth: 1100, iframeHeight: 600
-                    });
-                },
-                name: 'Panel Rapor Görüntüle',
-            });
-
-
         }
 
+
         if (is_finished) {
+
+            if (group_membership) {
+                add_footer_button({
+                    url: '/lab/report_for_panel_grouper/' + group_membership + '/',
+                    name: 'Panel Rapor Yazdır',
+                });
+
+                add_footer_button({
+                    onclick: function () {
+                        $.featherlight({
+                            iframe: '/lab/report_for_panel_grouper/' + group_membership + '/',
+                            iframeWidth: 1100, iframeHeight: 600
+                        });
+                    },
+                    name: 'Panel Rapor Görüntüle',
+                });
+            }
 
             add_footer_button({
                 url: '/lab/analyse_report/' + object_id + '/',
@@ -465,6 +474,11 @@ function patch_list_views() {
         // ignoring popup windows which doesn't have actions
     }
 
+    // requried attr of action selectbox prevents saving of list
+    if ($('input[name=_save]').length) {
+        $('select[name=action]').attr('required', null);
+    }
+
 
     function change_color() {
         colors = ['#f4f4f4', '#bdcfd0', '#d0bdc6', '#b0d2ae', '#eccfa8'];
@@ -480,7 +494,7 @@ function patch_list_views() {
         // TODO:
         $('input#grp-changelist-search').attr('disabled', true);
         setTimeout('$("input#grp-changelist-search").attr("disabled", false)', 200);
-        window.__color = 'gray';
+        change_color()
         var last_time = 0;
         $('td.field-tdt').each(function () {
             var td = $(this);

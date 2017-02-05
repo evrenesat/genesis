@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-31 10:53+0000\n"
+"POT-Creation-Date: 2017-01-10 14:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,8 +22,8 @@ msgid "Accounting"
 msgstr "Muhasebe"
 
 #: com/models.py:17 com/models.py:41 com/models.py:80
-#: lab/models/analysis.py:196 lab/models/patient.py:40 lab/models/patient.py:70
-#: lab/models/patient.py:131
+#: lab/models/analysis.py:193 lab/models/patient.py:42 lab/models/patient.py:72
+#: lab/models/patient.py:133
 msgid "Institution"
 msgstr "Kurum"
 
@@ -48,7 +48,7 @@ msgid "This institution makes mountly payments"
 msgstr "Bu kurum aylık ödemeler yapar"
 
 #: com/models.py:24 com/models.py:45 com/models.py:84 com/models.py:113
-#: com/models.py:227 com/models.py:250 lab/models/analysis.py:271
+#: com/models.py:227 com/models.py:250 lab/models/analysis.py:269
 msgid "Definition date"
 msgstr "Oluşturulma tarihi"
 
@@ -64,8 +64,8 @@ msgstr "Kurum Fiyatlandırmaları"
 msgid "Institute pricing"
 msgstr "Kurum fiyatlandırması"
 
-#: com/models.py:42 lab/models/analysis.py:179 lab/models/analysis.py:213
-#: lab/models/analysis.py:241 lab/models/analysis.py:473
+#: com/models.py:42 lab/models/analysis.py:175 lab/models/analysis.py:207
+#: lab/models/analysis.py:237 lab/models/analysis.py:471
 #: lab/models/analysis.py:581
 msgid "Analyse Type"
 msgstr "Test Tipi"
@@ -111,11 +111,11 @@ msgid "Bank transfer"
 msgstr "EFT / Havale"
 
 #: com/models.py:76 com/models.py:111 com/models.py:213 com/models.py:242
-#: lab/models/patient.py:194
+#: lab/models/patient.py:196
 msgid "Admission"
 msgstr "Hasta Kabul"
 
-#: com/models.py:78 lab/models/patient.py:118 lab/models/patient.py:130
+#: com/models.py:78 lab/models/patient.py:120 lab/models/patient.py:132
 msgid "Patient"
 msgstr "Hasta"
 
@@ -127,8 +127,8 @@ msgstr "Ödeme yöntemi"
 msgid "Record type"
 msgstr "Kayit tipi"
 
-#: com/models.py:83 com/models.py:246 lab/models/analysis.py:64
-#: lab/models/patient.py:214
+#: com/models.py:83 com/models.py:246 lab/models/analysis.py:63
+#: lab/models/patient.py:216
 msgid "Amount"
 msgstr "Miktar"
 
@@ -174,18 +174,18 @@ msgstr "Hasta Kabul Fiyatlandırması"
 msgid "Admission Pricings"
 msgstr "Hasta Kabul Fiyatlandırmaları"
 
-#: com/models.py:214 lab/models/analysis.py:44 lab/models/analysis.py:62
-#: lab/models/analysis.py:82 lab/models/analysis.py:94
-#: lab/models/analysis.py:110 lab/models/analysis.py:136
-#: lab/models/analysis.py:214 lab/models/analysis.py:474
+#: com/models.py:214 lab/models/analysis.py:43 lab/models/analysis.py:61
+#: lab/models/analysis.py:81 lab/models/analysis.py:93
+#: lab/models/analysis.py:109 lab/models/analysis.py:135
+#: lab/models/analysis.py:208 lab/models/analysis.py:472
 #: lab/models/analysis.py:578 lab/models/analysis.py:660
-#: lab/models/analysis.py:784 lab/models/patient.py:25 lab/models/patient.py:51
-#: lab/models/patient.py:67 lab/models/patient.py:94 lab/models/patient.py:176
+#: lab/models/analysis.py:784 lab/models/patient.py:27 lab/models/patient.py:53
+#: lab/models/patient.py:69 lab/models/patient.py:96 lab/models/patient.py:178
 msgid "Name"
 msgstr "İsim"
 
-#: com/models.py:215 lab/models/analysis.py:27 lab/models/patient.py:33
-#: lab/models/patient.py:102
+#: com/models.py:215 lab/models/analysis.py:26 lab/models/patient.py:35
+#: lab/models/patient.py:104
 msgid "Address"
 msgstr "Adres"
 
@@ -225,7 +225,7 @@ msgstr "Öge adı"
 msgid "Quantity"
 msgstr "Adet"
 
-#: com/models.py:248 lab/models/analysis.py:257
+#: com/models.py:248 lab/models/analysis.py:253
 msgid "Unit"
 msgstr "Birim"
 
@@ -253,7 +253,7 @@ msgstr "Tamamlandı yap"
 msgid "Mark as Approved"
 msgstr "Onaylandı yap"
 
-#: lab/admin.py:219 lab/admin.py:413
+#: lab/admin.py:219 lab/admin.py:415
 msgid "Advanced"
 msgstr "Gelişmiş"
 
@@ -261,123 +261,123 @@ msgstr "Gelişmiş"
 msgid "Quick parameter definition"
 msgstr "Hızlı parametre tanımlama"
 
-#: lab/admin.py:396
+#: lab/admin.py:398
 msgid "Admission Information"
 msgstr "Hasta Kabul Bilgisi"
 
-#: lab/admin.py:406
+#: lab/admin.py:408
 msgid "Analyse Result"
 msgstr "Test Sonucu"
 
-#: lab/admin.py:449
+#: lab/admin.py:452
 msgid "Institution / Doctor"
 msgstr "Kurum / Doktor"
 
-#: lab/admin.py:457
+#: lab/admin.py:460
 msgid "Patient info"
 msgstr "Hasta bilgisi"
 
-#: lab/admin.py:461 lab/admin.py:572 lab/models/analysis.py:186
+#: lab/admin.py:464 lab/admin.py:580 lab/models/analysis.py:182
 msgid "Ext.Lab"
 msgstr "Dış.Lab"
 
-#: lab/admin.py:464 lab/models/analysis.py:443 lab/models/analysis.py:505
+#: lab/admin.py:467 lab/models/analysis.py:441 lab/models/analysis.py:504
 #: lab/models/analysis.py:713
 msgid "Analyse"
 msgstr "Test"
 
-#: lab/admin.py:566 lab/models/analysis.py:752
+#: lab/admin.py:574 lab/models/analysis.py:752
 msgid "Analyse state"
 msgstr "Test aşaması"
 
-#: lab/admin.py:682 lab/models/analysis.py:180
+#: lab/admin.py:694 lab/models/analysis.py:176
 msgid "Analyse Types"
 msgstr "Test Tipleri"
 
-#: lab/models/analysis.py:24
+#: lab/models/analysis.py:23
 msgid "Biography"
 msgstr "Biyografi"
 
-#: lab/models/analysis.py:25 lab/models/patient.py:66
+#: lab/models/analysis.py:24 lab/models/patient.py:68
 msgid "Title"
 msgstr "Ünvan"
 
-#: lab/models/analysis.py:26
+#: lab/models/analysis.py:25
 msgid "Title prefix"
 msgstr "Ünvan önek"
 
-#: lab/models/analysis.py:28 lab/models/patient.py:28
+#: lab/models/analysis.py:27 lab/models/patient.py:30
 msgid "Phone"
 msgstr "Telefon"
 
-#: lab/models/analysis.py:29
+#: lab/models/analysis.py:28
 msgid "Signature image"
 msgstr "İmza görseli"
 
-#: lab/models/analysis.py:33
+#: lab/models/analysis.py:32
 msgid "Person"
 msgstr "Personel"
 
-#: lab/models/analysis.py:34
+#: lab/models/analysis.py:33
 msgid "Persons"
 msgstr "Personeller"
 
-#: lab/models/analysis.py:45 lab/models/analysis.py:63
-#: lab/models/analysis.py:83 lab/models/analysis.py:95 lab/models/patient.py:26
-#: lab/models/patient.py:52
+#: lab/models/analysis.py:44 lab/models/analysis.py:62
+#: lab/models/analysis.py:82 lab/models/analysis.py:94 lab/models/patient.py:28
+#: lab/models/patient.py:54
 msgid "Code"
 msgstr "Kod"
 
-#: lab/models/analysis.py:46 lab/models/analysis.py:481
-#: lab/models/patient.py:182
+#: lab/models/analysis.py:45 lab/models/analysis.py:479
+#: lab/models/patient.py:184
 msgid "Order"
 msgstr "Sıra"
 
-#: lab/models/analysis.py:50 lab/models/analysis.py:65
+#: lab/models/analysis.py:49 lab/models/analysis.py:64
 msgid "Medium Type"
 msgstr "Taşıma Ortamı"
 
-#: lab/models/analysis.py:51
+#: lab/models/analysis.py:50
 msgid "Medium Types"
 msgstr "Taşıma Ortamları"
 
-#: lab/models/analysis.py:66 lab/models/analysis.py:154
+#: lab/models/analysis.py:65 lab/models/analysis.py:153
 msgid "Sort order"
 msgstr "Gösterim sırası"
 
-#: lab/models/analysis.py:70 lab/models/analysis.py:135
+#: lab/models/analysis.py:69 lab/models/analysis.py:134
 msgid "Sample Type"
 msgstr "Örnek Türü"
 
-#: lab/models/analysis.py:71
+#: lab/models/analysis.py:70
 msgid "Sample Types"
 msgstr "Örnek Türleri"
 
-#: lab/models/analysis.py:86
+#: lab/models/analysis.py:85
 msgid "Analyse Method"
 msgstr "Test Yöntemi"
 
-#: lab/models/analysis.py:87
+#: lab/models/analysis.py:86
 msgid "Analyse Methods"
 msgstr "Test Yöntemleri "
 
-#: lab/models/analysis.py:96
+#: lab/models/analysis.py:95
 msgid "State Definitions"
 msgstr "Aşama Tanımları"
 
-#: lab/models/analysis.py:99
+#: lab/models/analysis.py:98 lab/models/analysis.py:236
 msgid "Analyse Group"
 msgstr "Test Grubu"
 
-#: lab/models/analysis.py:100
+#: lab/models/analysis.py:99
 msgid "Analyse Groups"
 msgstr "Test Grupları"
 
-#: lab/models/analysis.py:111
+#: lab/models/analysis.py:110
 msgid "Process logic code"
 msgstr "Sonuç hesaplama kodu"
 
-#: lab/models/analysis.py:112
+#: lab/models/analysis.py:111
 msgid ""
 "This code will be used to calculate the analyse result according to entered "
 "data"
@@ -385,166 +385,163 @@ msgstr ""
 "Bu kod girilen sonuç verileri ile nihai test sonucunun hesaplanması için "
 "kullanılır"
 
-#: lab/models/analysis.py:116
+#: lab/models/analysis.py:115
 msgid "Process Logic Code"
 msgstr "Sonuç Hesaplama Kodu"
 
-#: lab/models/analysis.py:117
+#: lab/models/analysis.py:116
 msgid "Process Logic Codes"
 msgstr "Sonuç Hesaplama Kodları"
 
-#: lab/models/analysis.py:124
+#: lab/models/analysis.py:123
 msgid "Sub types"
 msgstr "Alt tipler"
 
-#: lab/models/analysis.py:127 lab/models/analysis.py:514
+#: lab/models/analysis.py:126 lab/models/analysis.py:513
 msgid "Group"
 msgstr "Grup"
 
-#: lab/models/analysis.py:129
+#: lab/models/analysis.py:128
 msgid "This is a group type, consist of other analyse types"
 msgstr "Bu diğer test tiplerini içeren bir test grubudur."
 
-#: lab/models/analysis.py:131
+#: lab/models/analysis.py:130
 msgid "Category"
 msgstr "Kategori"
 
-#: lab/models/analysis.py:133
+#: lab/models/analysis.py:132
 msgid "Method"
 msgstr "Yöntem"
 
-#: lab/models/analysis.py:137 lab/models/analysis.py:662
+#: lab/models/analysis.py:136 lab/models/analysis.py:662
 #: lab/models/analysis.py:714 lab/models/analysis.py:786
 msgid "Code name"
 msgstr "Kod adı"
 
-#: lab/models/analysis.py:138
+#: lab/models/analysis.py:137
 msgid "Report footnote"
 msgstr "Rapor altnotu"
 
-#: lab/models/analysis.py:139
+#: lab/models/analysis.py:138
 msgid "This will be shown under the report"
 msgstr "Bu metin raporun altında gösterilecektir."
 
-#: lab/models/analysis.py:140 lab/models/analysis.py:273
+#: lab/models/analysis.py:139 lab/models/analysis.py:271
 msgid "Goes to external lab"
 msgstr "Dış laba gider"
 
-#: lab/models/analysis.py:141 lab/models/analysis.py:274
+#: lab/models/analysis.py:140 lab/models/analysis.py:272
 msgid "Analysed by an external lab"
 msgstr "Dış lab tarafından test edilir"
 
-#: lab/models/analysis.py:143 lab/models/analysis.py:276
+#: lab/models/analysis.py:142 lab/models/analysis.py:274
 msgid "External lab"
 msgstr "Dış Laboratuvar"
 
-#: lab/models/analysis.py:144
+#: lab/models/analysis.py:143
 msgid "External lab price"
 msgstr "Dış lab fiyatı"
 
-#: lab/models/analysis.py:146
+#: lab/models/analysis.py:145
 msgid "Price"
 msgstr "Fiyat"
 
-#: lab/models/analysis.py:147
+#: lab/models/analysis.py:146
 msgid "Alternative price"
 msgstr "Alternatif fiyat"
 
-#: lab/models/analysis.py:148
+#: lab/models/analysis.py:147
 msgid "Alternative price definition. Can be used for foregeign currencies etc."
 msgstr "Alternatif fiyat tanımı. Başka para birimleri için kullanılabilir."
 
-#: lab/models/analysis.py:152 lab/models/analysis.py:586
+#: lab/models/analysis.py:151 lab/models/analysis.py:586
 msgid "Process logic"
 msgstr "Sonuç hesaplama kodu"
 
-#: lab/models/analysis.py:153
+#: lab/models/analysis.py:152
 msgid "Process Time"
 msgstr "İşlem Süresi"
 
-#: lab/models/analysis.py:156
+#: lab/models/analysis.py:155
 msgid "Barcode count"
 msgstr "Barkod sayısı"
 
-#: lab/models/analysis.py:157
+#: lab/models/analysis.py:156
 msgid "Number of barcodes to print"
 msgstr "Basılacak barkod sayısı"
 
-#: lab/models/analysis.py:158 lab/models/analysis.py:197
-#: lab/models/analysis.py:243
+#: lab/models/analysis.py:157 lab/models/analysis.py:194
+#: lab/models/analysis.py:239
 msgid "Work group #"
 msgstr "Çalışma grubu sayısı"
 
-#: lab/models/analysis.py:160 lab/models/analysis.py:199
-#: lab/models/analysis.py:245
+#: lab/models/analysis.py:159 lab/models/analysis.py:196
+#: lab/models/analysis.py:241
 msgid "Number of work groups"
 msgstr "Analiz işlemi kaç grup halinde yürütülecek"
 
-#: lab/models/analysis.py:195
-#| msgid "Analyse Type"
+#: lab/models/analysis.py:192
 msgid "Analyse type"
 msgstr "Test tipi"
 
-#: lab/models/analysis.py:202
-#| msgid "Analyse State Definition"
+#: lab/models/analysis.py:199
 msgid "Analyse Type for Institution"
 msgstr "Kurum için Test Tipi"
 
-#: lab/models/analysis.py:203
-#| msgid "Analyse State Definition"
+#: lab/models/analysis.py:200
 msgid "Analyse Types for Institution"
 msgstr "Kurum için Test Tipleri"
 
-#: lab/models/analysis.py:215
+#: lab/models/analysis.py:209
 msgid "Priority"
 msgstr "Öncelik"
 
-#: lab/models/analysis.py:218
+#: lab/models/analysis.py:212
 msgid "Report title"
 msgstr "Rapor başlığı"
 
-#: lab/models/analysis.py:219
+#: lab/models/analysis.py:213
 msgid "Combo"
 msgstr "Kombine"
 
-#: lab/models/analysis.py:220
+#: lab/models/analysis.py:214
 msgid "Supports combined reporting of multiple analyses"
 msgstr "Birden çok testin tek rapor olarak çıkarılmasını destekler"
 
-#: lab/models/analysis.py:221
+#: lab/models/analysis.py:215
 msgid "Generic"
 msgstr "Jenerik"
 
-#: lab/models/analysis.py:222
+#: lab/models/analysis.py:216
 msgid "Use generic reporting"
 msgstr "Jenerik raporlamayı kullan"
 
-#: lab/models/analysis.py:223
+#: lab/models/analysis.py:217
 msgid "Template"
 msgstr "Şablon"
 
-#: lab/models/analysis.py:228
+#: lab/models/analysis.py:222
 msgid "Report Template"
 msgstr "Rapor Şablonu"
 
-#: lab/models/analysis.py:229
+#: lab/models/analysis.py:223
 msgid "Report Templates"
 msgstr "Rapor Şablonları"
 
-#: lab/models/analysis.py:242 lab/models/patient.py:168
-#: lab/models/patient.py:211
+#: lab/models/analysis.py:238 lab/models/patient.py:170
+#: lab/models/patient.py:213
 msgid "Patient Admission"
 msgstr "Hasta Kabülü"
 
-#: lab/models/analysis.py:246
+#: lab/models/analysis.py:242
 msgid "Copy of result"
 msgstr "Sonuç kopyası"
 
-#: lab/models/analysis.py:247
+#: lab/models/analysis.py:243
 msgid "Result parameters"
 msgstr "Sonuç parametreleri"
 
-#: lab/models/analysis.py:248
+#: lab/models/analysis.py:244
 msgid ""
 "Can be used to override entered/calculated result parameters<br>Format:<br> "
 "key=val<br />key2=val2"
@@ -553,148 +550,158 @@ msgstr ""
 "kullanılabilir<br>Format:<br> anahtar=deger<br /"
 ">baska_bir_anahtar=başka_deger"
 
-#: lab/models/analysis.py:250
+#: lab/models/analysis.py:246
 msgid "Interpretation"
 msgstr "Yorum"
 
-#: lab/models/analysis.py:251
+#: lab/models/analysis.py:247
 msgid "Interpretation of analyse results"
 msgstr "Test sonuçlarının yorumu"
 
-#: lab/models/analysis.py:252
+#: lab/models/analysis.py:248
 msgid "Result"
 msgstr "Sonuç"
 
-#: lab/models/analysis.py:253
+#: lab/models/analysis.py:249
 msgid "Normal Karyotype, Trisomy 21"
 msgstr "Normal Karyotip, Trizomi 21"
 
-#: lab/models/analysis.py:254
+#: lab/models/analysis.py:250
 msgid "Analyse result dict"
 msgstr "Test sonucu sözlüğü"
 
-#: lab/models/analysis.py:255
+#: lab/models/analysis.py:251
 msgid "Sample Amount"
 msgstr "Örnek Miktarı"
 
-#: lab/models/analysis.py:259 lab/models/analysis.py:509
-#: lab/models/patient.py:215
+#: lab/models/analysis.py:255 lab/models/analysis.py:508
+#: lab/models/patient.py:217
 msgid "Sample type"
 msgstr "Örnek Türü"
 
-#: lab/models/analysis.py:261
+#: lab/models/analysis.py:257
 msgid "Medium Amount"
 msgstr "Taşıma ortamı sayısı"
 
-#: lab/models/analysis.py:263
+#: lab/models/analysis.py:259
 msgid "Medium type"
 msgstr "Taşıma ortamı"
 
-#: lab/models/analysis.py:265
+#: lab/models/analysis.py:261
+#, fuzzy
+#| msgid "Report title"
+msgid "Report override"
+msgstr "Raporun üzerine yaz"
+
+#: lab/models/analysis.py:262
+msgid "Raporun üzerine yazmak için kullanabilirisiniz"
+msgstr ""
+
+#: lab/models/analysis.py:263
 msgid "Report template"
 msgstr "Rapor şablonu"
 
-#: lab/models/analysis.py:267
+#: lab/models/analysis.py:265
 msgid "Instead of default one, use this template to create the analyse report."
 msgstr "Test raporunu varsayılan yerine seçilen şablon ile oluştur."
 
-#: lab/models/analysis.py:270
+#: lab/models/analysis.py:268
 msgid "Finished"
 msgstr "Tamamlandı"
 
-#: lab/models/analysis.py:278
+#: lab/models/analysis.py:276
 msgid "Completion time"
 msgstr "Tamamlanma zamanı"
 
-#: lab/models/analysis.py:279
+#: lab/models/analysis.py:277
 msgid "Approve time"
 msgstr "Onaylanma zamanı"
 
-#: lab/models/analysis.py:280
+#: lab/models/analysis.py:278
 msgid "Analyser"
 msgstr "Test Eden"
 
-#: lab/models/analysis.py:282
+#: lab/models/analysis.py:280
 msgid "Approved"
 msgstr "Onaylandı"
 
-#: lab/models/analysis.py:283
+#: lab/models/analysis.py:281
 msgid "Accepted"
 msgstr "Kabul edildi"
 
-#: lab/models/analysis.py:284
+#: lab/models/analysis.py:282
 msgid "Approver"
 msgstr "Onaylayan"
 
-#: lab/models/analysis.py:322
+#: lab/models/analysis.py:320
 msgid "You don't have required permissions to  mark an analyse as finished"
 msgstr "Testi tamamlandı olarak işaretleme yetkiniz yok"
 
-#: lab/models/analysis.py:435
+#: lab/models/analysis.py:433
 msgid "Following sample types can be selected;"
 msgstr "Şu örnek tiplerinden biri seçilebilir;"
 
-#: lab/models/analysis.py:444
+#: lab/models/analysis.py:442
 msgid "Analysis"
 msgstr "Testler"
 
-#: lab/models/analysis.py:475 lab/models/patient.py:177
+#: lab/models/analysis.py:473 lab/models/patient.py:179
 msgid "Explanation"
 msgstr "Açıklama"
 
-#: lab/models/analysis.py:476
+#: lab/models/analysis.py:474
 msgid "Finished state"
 msgstr "Tamamlanma durumu"
 
-#: lab/models/analysis.py:477
+#: lab/models/analysis.py:475
 msgid "Approved state"
 msgstr "Onaylanma durumu"
 
-#: lab/models/analysis.py:478
+#: lab/models/analysis.py:476
 msgid "Accepted state"
 msgstr "Kabul edilme durumu"
 
-#: lab/models/analysis.py:479 lab/models/patient.py:179
+#: lab/models/analysis.py:477 lab/models/patient.py:181
 msgid "First state"
 msgstr "İlk durum"
 
-#: lab/models/analysis.py:480
+#: lab/models/analysis.py:478
 msgid "Requires double check"
 msgstr "İki kere kontrol gerektirir."
 
-#: lab/models/analysis.py:496
+#: lab/models/analysis.py:495
 msgid "Analyse State Definition"
 msgstr "Test Durum Tanımı"
 
-#: lab/models/analysis.py:497
+#: lab/models/analysis.py:496
 msgid "Analyse State Definitions"
 msgstr "Test Aşama Tanımları"
 
-#: lab/models/analysis.py:506 lab/models/patient.py:195
+#: lab/models/analysis.py:505 lab/models/patient.py:197
 msgid "State"
 msgstr "Aşama"
 
-#: lab/models/analysis.py:507
+#: lab/models/analysis.py:506
 msgid "Notes"
 msgstr "Notlar"
 
-#: lab/models/analysis.py:510 lab/models/patient.py:30 lab/models/patient.py:72
-#: lab/models/patient.py:73 lab/models/patient.py:98 lab/models/patient.py:99
-#: lab/models/patient.py:141 lab/models/patient.py:197
-#: lab/models/patient.py:213
+#: lab/models/analysis.py:509 lab/models/patient.py:32 lab/models/patient.py:74
+#: lab/models/patient.py:75 lab/models/patient.py:100 lab/models/patient.py:101
+#: lab/models/patient.py:143 lab/models/patient.py:199
+#: lab/models/patient.py:215
 msgid "Timestamp"
 msgstr "Zaman damgası"
 
-#: lab/models/analysis.py:511 lab/models/analysis.py:582
-#: lab/models/patient.py:31 lab/models/patient.py:198
+#: lab/models/analysis.py:510 lab/models/analysis.py:582
+#: lab/models/patient.py:33 lab/models/patient.py:200
 msgid "Update date"
 msgstr "Güncellme "
 
-#: lab/models/analysis.py:512
+#: lab/models/analysis.py:511
 msgid "Personnel"
 msgstr "Personel"
 
-#: lab/models/analysis.py:513
+#: lab/models/analysis.py:512
 msgid "Current state"
 msgstr "Son durum"
 
@@ -702,7 +709,7 @@ msgstr "Son durum"
 msgid "All"
 msgstr "Tümü"
 
-#: lab/models/analysis.py:519 lab/models/patient.py:165
+#: lab/models/analysis.py:519 lab/models/patient.py:167
 msgid "Analyse State"
 msgstr "Test Aşaması"
 
@@ -869,205 +876,213 @@ msgstr "Uygulama Ayarı"
 msgid "Application Settings"
 msgstr "Uygulama Ayarları"
 
-#: lab/models/patient.py:5
+#: lab/models/patient.py:7
 msgid "Female"
 msgstr "Kadın"
 
-#: lab/models/patient.py:6
+#: lab/models/patient.py:8
 msgid "Male"
 msgstr "Erkek"
 
-#: lab/models/patient.py:9
+#: lab/models/patient.py:11
 msgid "Self"
 msgstr "Kendi"
 
-#: lab/models/patient.py:10
+#: lab/models/patient.py:12
 msgid "Father"
 msgstr "Baba"
 
-#: lab/models/patient.py:11
+#: lab/models/patient.py:13
 msgid "Mother"
 msgstr "Anne"
 
-#: lab/models/patient.py:15
+#: lab/models/patient.py:17
 msgid "Government Hospital"
 msgstr "Devlet Hastanesi"
 
-#: lab/models/patient.py:16
+#: lab/models/patient.py:18
 msgid "Private Hospital"
 msgstr "Özel Hastane"
 
-#: lab/models/patient.py:17
+#: lab/models/patient.py:19
 msgid "Clinic"
 msgstr "Klinik"
 
-#: lab/models/patient.py:18
+#: lab/models/patient.py:20
 msgid "Lab"
 msgstr "Laboratuvar"
 
-#: lab/models/patient.py:19
+#: lab/models/patient.py:21
 msgid "Supplier"
 msgstr "Tedarikçi"
 
-#: lab/models/patient.py:20
+#: lab/models/patient.py:22
 msgid "Internal"
 msgstr "Dahili"
 
-#: lab/models/patient.py:27
+#: lab/models/patient.py:29
 msgid "Institution type"
 msgstr "Kurum"
 
-#: lab/models/patient.py:29
+#: lab/models/patient.py:31
 msgid "Cellular phone"
 msgstr "Cep telefonu"
 
-#: lab/models/patient.py:32 lab/models/patient.py:74
+#: lab/models/patient.py:34 lab/models/patient.py:76
 msgid "Email"
 msgstr "Eposta"
 
-#: lab/models/patient.py:34
+#: lab/models/patient.py:36
 msgid "Tax no"
 msgstr "Vergi no"
 
-#: lab/models/patient.py:35
+#: lab/models/patient.py:37
 msgid "Tax office"
 msgstr "Vergi dairesi"
 
-#: lab/models/patient.py:41
+#: lab/models/patient.py:43
 msgid "Institutions"
 msgstr "Kurumlar"
 
-#: lab/models/patient.py:56
+#: lab/models/patient.py:58
 msgid "External Lab"
 msgstr "Dış Laboratuvar"
 
-#: lab/models/patient.py:57
+#: lab/models/patient.py:59
 msgid "External Labs"
 msgstr "Dış Laboratuvarlar"
 
-#: lab/models/patient.py:68 lab/models/patient.py:96
+#: lab/models/patient.py:70 lab/models/patient.py:98
 msgid "Surname"
 msgstr "Soyadı"
 
-#: lab/models/patient.py:71
+#: lab/models/patient.py:73
 msgid "If left blank, an institution record will be created for this doctor"
 msgstr "Boş bırakılırsa otomatik olarak bir kurum kaydı oluşturulur."
 
-#: lab/models/patient.py:81 lab/models/patient.py:132
+#: lab/models/patient.py:83 lab/models/patient.py:134
 msgid "Doctor"
 msgstr "Doktor"
 
-#: lab/models/patient.py:82
+#: lab/models/patient.py:84
 msgid "Doctors"
 msgstr "Doktorlar"
 
-#: lab/models/patient.py:93
+#: lab/models/patient.py:95
 msgid "TC No"
 msgstr "TC No"
 
-#: lab/models/patient.py:95
+#: lab/models/patient.py:97
 msgid "Is newborn?"
 msgstr "Yenidoğan mı?"
 
-#: lab/models/patient.py:97
+#: lab/models/patient.py:99
 msgid "Sex"
 msgstr "Cinsiyet"
 
-#: lab/models/patient.py:100
+#: lab/models/patient.py:102
 msgid "Patient Relation"
 msgstr "Hasta Yakınlığı"
 
-#: lab/models/patient.py:101
+#: lab/models/patient.py:103
 msgid "Birthdate"
 msgstr "Doğum tarihi"
 
-#: lab/models/patient.py:119
+#: lab/models/patient.py:121
 msgid "Patients"
 msgstr "Hastalar"
 
-#: lab/models/patient.py:134
+#: lab/models/patient.py:136
 msgid "Urgent"
 msgstr "Acil"
 
-#: lab/models/patient.py:135
+#: lab/models/patient.py:137
 msgid "Indications"
 msgstr "Endikasyon"
 
-#: lab/models/patient.py:136
+#: lab/models/patient.py:138
 msgid "Reproductive story / Family Tree"
 msgstr "Üreme geçmişi / Soy Ağacı"
 
-#: lab/models/patient.py:137
+#: lab/models/patient.py:139
 msgid "Pregnancy week"
 msgstr "Gebelik haftası"
 
-#: lab/models/patient.py:138
+#: lab/models/patient.py:140
 msgid "UPD"
 msgstr "USG"
 
-#: lab/models/patient.py:139
+#: lab/models/patient.py:141
 msgid "LMP"
 msgstr "SAT"
 
-#: lab/models/patient.py:140
+#: lab/models/patient.py:142
 msgid "Admission date"
 msgstr "Hasta Kabul tarihi"
 
-#: lab/models/patient.py:169
+#: lab/models/patient.py:171
 msgid "Patient Admissions"
 msgstr "Hasta Kabülleri"
 
-#: lab/models/patient.py:178
+#: lab/models/patient.py:180
 msgid "Cannot be deleted"
 msgstr "Silinemez"
 
-#: lab/models/patient.py:180
+#: lab/models/patient.py:182
 msgid "Reject state"
 msgstr "Red durumu"
 
-#: lab/models/patient.py:181
+#: lab/models/patient.py:183
 msgid "Finish state"
 msgstr "Tamamlanma durumu"
 
-#: lab/models/patient.py:185
+#: lab/models/patient.py:187
 msgid "Admission State Definition"
 msgstr "Hasta Kabul Aşaması Tanımı"
 
-#: lab/models/patient.py:186
+#: lab/models/patient.py:188
 msgid "Admission State Definitions"
 msgstr "Hasta Kabul Aşaması Tanımları"
 
-#: lab/models/patient.py:196
+#: lab/models/patient.py:198
 msgid "Comment"
 msgstr "Yorum"
 
-#: lab/models/patient.py:201
+#: lab/models/patient.py:203
 msgid "Admission State"
 msgstr "Hasta Kabul Aşaması"
 
-#: lab/models/patient.py:202
+#: lab/models/patient.py:204
 msgid "Admission States"
 msgstr "Hasta Kabul Aşamaları"
 
-#: lab/models/patient.py:212
+#: lab/models/patient.py:214
 msgid "Creation Date"
 msgstr "Oluşturulma tarihi"
 
-#: lab/models/patient.py:220
+#: lab/models/patient.py:222
 msgid "Sample"
 msgstr "Örnek"
 
-#: lab/models/patient.py:221
+#: lab/models/patient.py:223
 msgid "Samples"
 msgstr "Örnekler"
 
-#: lab/views/api.py:68
+#: lab/views/api.py:71
 msgid "Selected anaylse type and given analyse does not match"
 msgstr "Seçilen test tipi ve kodu okutulan test uyuşmuyor."
 
-#: lab/views/api.py:75
+#: lab/views/api.py:78
 msgid "No analyse found for given admission in selected analyse type"
 msgstr "Bu hasta için seçilen tipte bir test bulunamadı."
+
+#: lab/views/api.py:85
+msgid "Missing data received"
+msgstr "Eksik veri alındı"
+
+#: lab/views/api.py:96
+msgid "You don't have the required permissions to complete this action."
+msgstr "Bu işlemi yapma yetkiniz yok"
 
 #: lab/views/public.py:23
 msgid "Wrong patient information. No record found"
@@ -1107,15 +1122,15 @@ msgstr "Belgeler"
 msgid "Home"
 msgstr "Ana Ekran"
 
-#: templates/admin/index.html:132
+#: templates/admin/index.html:157
 msgid "Add"
 msgstr "Ekle"
 
-#: templates/admin/index.html:142
+#: templates/admin/index.html:167
 msgid "You don´t have permission to edit anything."
 msgstr "Yetkiniz yok"
 
-#: templates/admin/index.html:147
+#: templates/admin/index.html:172
 msgid "Custom Views"
 msgstr "Özel Görünümler"
 

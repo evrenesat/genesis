@@ -87,7 +87,8 @@ class AdminParameterValue(admin.ModelAdmin):
     actions = [finish_selected_value, approve_selected_value]
     list_display = (
         'code', 'patient_name', 'analyse_name', 'key', 'value', 'analyse_state', 'keyid')
-    search_fields = ('analyse__group_relation', 'analyse__type__name', 'analyse__admission__id')
+    # search_fields = ('analyse__group_relation', 'analyse__type__name', 'analyse__admission__id')
+    search_fields = ('analyse__group_relation', )
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -95,13 +96,13 @@ class AdminParameterValue(admin.ModelAdmin):
             del actions['delete_selected']
         return actions
 
-    def get_search_results(self, request, queryset, search_term):
-        # integer search_term means we want to list values of a certain admission
-        try:
-            search_term_as_int = int(search_term)
-            return ParameterValue.objects.filter(analyse__admission=search_term_as_int), False
-        except ValueError:
-            return super().get_search_results(request, queryset, search_term)
+    # def get_search_results(self, request, queryset, search_term):
+    #     # integer search_term means we want to list values of a certain admission
+    #     try:
+    #         search_term_as_int = int(search_term)
+    #         return ParameterValue.objects.filter(analyse__admission=search_term_as_int), False
+    #     except ValueError:
+    #         return super().get_search_results(request, queryset, search_term)
 
     def message_user(self, *args, **kwargs):
         super().message_user(*args, **kwargs)
@@ -231,12 +232,12 @@ class AdminAnalyseType(admin.ModelAdmin):
 
     def get_search_results(self, request, queryset, search_term):
         # integer search_term means we want to list values of a certain admission
-        return AnalyseType.objects.filter(Q(name__contains=tupper(search_term))|Q(name__contains=tlower(search_term))), False
+        return queryset.filter(Q(name__contains=tupper(search_term))|Q(name__contains=tlower(search_term))), False
 
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        if form.instance.subtypes.filter(group_type=True).count():
+        if form.instance.subtypes.exists():
             if not form.instance.group_type:
                 form.instance.group_type = True
                 form.instance.save()
@@ -328,13 +329,6 @@ class StateFormSet(BaseInlineFormSet):
         #             raise ValidationError('Error')
 
 
-class AnalyseAdminForm(forms.ModelForm):
-    class Meta:
-        model = Analyse
-        widgets = {
-            'group_relation': forms.HiddenInput()
-        }
-        fields = '__all__'
 
 
 class StateInline(admin.TabularInline):
@@ -370,6 +364,15 @@ class StateInline(admin.TabularInline):
                 field.queryset = field.queryset.none()
         return field
 
+class AnalyseAdminForm(forms.ModelForm):
+    class Meta:
+        model = Analyse
+        widgets = {
+            'group_relation': forms.HiddenInput()
+        }
+        fields = '__all__'
+
+
 
 @admin.register(Patient)
 class AdminPatient(admin.ModelAdmin):
@@ -397,7 +400,7 @@ class AdminAnalyse(admin.ModelAdmin):
          {'classes': ('grp-collapse analyse_box admission_info',),
           'fields': (('analyse_type', 'doctor_institution', 'patient'),
                      ('sample_type', 'sample_amount', 'sample_unit'),
-                     ('no_of_groups', 'medium_amount', 'medium_type')
+                     ('no_of_groups', 'medium_amount', 'medium_type', 'group_relation')
                      )
           },
          ),
@@ -413,6 +416,7 @@ class AdminAnalyse(admin.ModelAdmin):
         (_('Advanced'),
          {'classes': ('grp-collapse', 'grp-closed', 'analyse_box advanced_details'),
           'fields': (
+              'report_override',
               'result', 'result_json', 'template', 'admission', 'type',
               'external_lab')
           },
@@ -475,8 +479,8 @@ class AdminAnalyse(admin.ModelAdmin):
         super().save_related(request, form, formset, change)
         form.instance.save_result()
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).exclude(group_relation='GRP')
+    # def get_queryset(self, request):
+    #     return super().get_queryset(request).exclude(group_relation='GRP')
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "template":
@@ -495,6 +499,11 @@ class AdminAnalyse(admin.ModelAdmin):
         #     return super().changelist_view(request, extra_context=extra_context)
 
 
+    class Media:
+        js = [
+            '/static/tinymce/tinymce.min.js',
+            '/static/tinymce/setup.js',
+        ]
 
 
 @admin.register(ReportTemplate)
@@ -633,21 +642,24 @@ class AdminAdmission(admin.ModelAdmin):
         for analyse in analyses:
             if not analyse.type:
                 continue
+            is_new = not analyse.id
+            analyse.save()
             if analyse.type.group_type:
                 analyse.group_relation = 'GRP'  # this is a group
                 rand_group_code = uuid4().hex
                 for sub_analyse_type in analyse.type.subtypes.all():
                     anl = Analyse(type=sub_analyse_type,
                             sample_type=analyse.sample_type,
-                            group_relation=rand_group_code,
+                            grouper=analyse,
+                            group_relation=analyse.id,
                             external=sub_analyse_type.external,
                             external_lab=sub_analyse_type.external_lab,
-                            admission=admission).save()
-                    anl._set_state_for(self.request.user, first=True)
+                            admission=admission)
+                    anl.save()
+                    anl._set_state_for(self._request.user, first=True)
             if analyse.type.external:
                 analyse.external = analyse.type.external
                 analyse.external_lab = analyse.type.external_lab
-            is_new = not analyse.id
             analyse.save()
             if is_new:
                 analyse._set_state_for(self._request.user, first=True)
@@ -729,7 +741,7 @@ def create_payment_objects(sender, instance, **kwargs):
     # instance.analyse_set.filter(group_relation='GRP').delete()
     for analyse in instance.analyse_set.exclude(group_relation='GRP'):
         analyse.create_empty_values()
-    instance.analyse_set.filter(group_relation='GRP').delete()
+    # instance.analyse_set.filter(group_relation='GRP').delete()
 
 
 @admin.register(Setting)

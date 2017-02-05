@@ -30,7 +30,7 @@ def get_admissions_by_analyses(request):
         #     break
 
     data = {'admissions': []}
-    for admission in Admission.objects.filter(id__in=list(admissions)).order_by('-is_urgent'):
+    for admission in Admission.objects.filter(id__in=list(admissions)).order_by('-is_urgent', '-id'):
         data['admissions'].append({
             'title': admission.patient.full_name(),
             'state': admission.analyse_state(),

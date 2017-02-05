@@ -28,6 +28,7 @@ def get_base_context(analyse):
         'approved': analyse.approved,
         'approver': analyse.approver,
         'analyser': analyse.analyser,
+        'report_override': analyse.report_override,
         'finished': analyse.finished,
         'note': analyse.type.footnote,
     }
@@ -52,7 +53,7 @@ def render_report(pk, for_digital=False):
         cnt_dict['generic'] = True
     return tpl.render(Context(cnt_dict))
 
-def render_combo_report(ids, for_digital=False):
+def render_combo_report(ids, for_digital=False, grouper=None):
     analyse_results = []
     comment = ''
     short_result  = ''
@@ -64,8 +65,8 @@ def render_combo_report(ids, for_digital=False):
             comment = analyse.comment
         if analyse.short_result:
             short_result = analyse.short_result
-    tpl, tpl_object = load_analyse_template(analyse, combo=True)
-    cnt_dict = get_base_context(analyse)
+    tpl, tpl_object = load_analyse_template(grouper or analyse, combo=True)
+    cnt_dict = get_base_context(grouper or analyse)
     cnt_dict.update({'results': analyse_results,
                      'comment': comment,
                      'short_result': short_result,

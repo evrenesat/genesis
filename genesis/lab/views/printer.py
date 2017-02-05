@@ -80,7 +80,7 @@ def analyse_barcode(request, pk, group=1):
         'patient_name': analyse.admission.patient.full_name(),
         'admission_time': analyse.admission.timestamp,
         'institution': analyse.admission.institution,
-        'barcode': '9' + (str(analyse.id).zfill(12))[1:],
+        'barcode': '9%s%s' % (group, str(analyse.id).zfill(11)[1:]),
         'is_urgent': analyse.admission.is_urgent,
         'birthdate': analyse.admission.patient.birthdate,
         'analyse_set': _set,
@@ -100,6 +100,12 @@ def multiple_reports(request):
 def multiple_reports_for_panel(request, group_code):
     ids = Analyse.objects.filter(group_relation=group_code).values_list('id', flat=True)
     content = render_combo_report(ids)
+    return HttpResponse(content)
+
+@staff_member_required
+def multiple_reports_for_panel_grouper(request, pk):
+    ids = Analyse.objects.filter(grouper_id=pk).values_list('id', flat=True)
+    content = render_combo_report(ids, grouper=Analyse.objects.get(pk=pk))
     return HttpResponse(content)
 
 

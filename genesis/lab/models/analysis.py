@@ -232,6 +232,8 @@ MEDIUM_AMOUNT = [(i, i) for i in range(5)]
 
 
 class Analyse(models.Model):
+    grouper = models.ForeignKey('Analyse', models.SET_NULL, null=True, blank=True,
+                                verbose_name=_('Analyse Group'))
     type = models.ForeignKey(AnalyseType, models.PROTECT, verbose_name=_('Analyse Type'))
     admission = models.ForeignKey(Admission, models.CASCADE, verbose_name=_('Patient Admission'))
     no_of_groups = models.PositiveIntegerField(_('Work group #'), default=1, null=True,
@@ -256,6 +258,8 @@ class Analyse(models.Model):
                                                 null=True, blank=True)
     medium_type = models.ForeignKey(MediumType, models.PROTECT, verbose_name=_('Medium type'),
                                     null=True, blank=True)
+    report_override = models.TextField(blank=True, null=True, verbose_name=_('Report override'),
+                                        help_text=_('Raporun üzerine yazmak için kullanabilirisiniz'))
     template = models.ForeignKey(ReportTemplate, models.PROTECT, verbose_name=_('Report template'),
                                  null=True, blank=True, help_text=_(
             'Instead of default one, use this template to create the analyse report.'))
