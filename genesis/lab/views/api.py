@@ -5,6 +5,7 @@ from collections import defaultdict
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F, Sum, Max, Min, Avg, Count, Q
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
@@ -16,6 +17,14 @@ from django.contrib.auth import login, logout
 from lab.utils import tlower
 from lab.utils import tupper
 from django.utils import timezone
+
+
+class JsonError(Exception):
+    pass
+
+
+def _error(msg):
+    return JsonResponse({'result': 'Error', 'error': msg})
 
 
 # TODO: unused why???
@@ -59,6 +68,19 @@ def _list_analyse_type_states(**kw):
 @csrf_exempt
 @staff_member_required
 def set_analyse_state(request):
+    try:
+        data = _parse_request_data(request)
+        result = _save_state(data)
+        if data['analyse'].group_relation == 'GRP':
+            for analyse in data['analyse'].analyse_set.all():
+                data['analyse_id'] = analyse.id
+                _save_state(data)
+        return JsonResponse(result)
+    except JsonError as e:
+        return _error(str(e))
+
+
+def _parse_request_data(request):
     analyse_id = request.POST.get('analyse')
     analyse_type_id = request.POST.get('analyse_type', None)
     group = int(request.POST.get('group', 1))
@@ -66,38 +88,40 @@ def set_analyse_state(request):
     definition_id = request.POST.get('state_definition', 0) or None
     admission_id = request.POST.get('admission', None)
     comment = request.POST.get('comment', '')
-    if analyse_id and Analyse.objects.filter(pk=analyse_id, type_id=analyse_type_id).exists():
-        return JsonResponse({'result': 'Error',
-                             'error': _('Selected anaylse type and given analyse does not match')})
-    elif not analyse_id and admission_id:
-        try:  # to get the analyse from admission by selected type
-            analyse_id = Analyse.objects.filter(admission_id=admission_id, type_id=analyse_type_id,
-                                                external=False).values_list('id', flat=True)[0]
-        except IndexError:
-            return JsonResponse({'result': 'Error', 'error': _(
-                'No analyse found for given admission in selected analyse type')})
-
-    if state_id:
-        state = State.objects.get(pk=state_id)
-    elif definition_id:
-        state = State(definition_id=definition_id, analyse_id=analyse_id, group=group)
+    if analyse_id:
+        analyse = Analyse.objects.get(pk=analyse_id)
+        if analyse_type_id and not analyse.type_id != analyse_type_id:
+            raise JsonError(_('Selected anaylse type and given analyse does not match'))
     else:
-        return JsonResponse({'result': 'Error', 'error': _('Missing data received')})
-    if comment:
-        state.comment = comment
+        try:  # to get the analyse from admission by selected type
+            analyse = Analyse.objects.get(admission_id=admission_id, type_id=analyse_type_id,
+                                                external=False)
+            analyse_id = analyse.id
+        except ObjectDoesNotExist:
+            raise JsonError(_('No analyse found for given admission in selected analyse type'))
+    return locals()
+
+
+def _save_state(kw):
+    if kw.get('state_id'):
+        state = State.objects.get(pk=kw['state_id'])
+    elif kw.get('definition_id'):
+        state = State(definition_id=kw['definition_id'], analyse_id=kw['analyse_id'], group=kw['group'])
+    else:
+        raise JsonError(_('Incomplete data received'))
+    if kw.get('comment'):
+        state.comment = kw['comment']
     try:
         if state.definition.finish:
-            state.analyse.mark_finished(request)
+            state.analyse.mark_finished(kw['request'])
         if state.definition.approve:
-            state.analyse.mark_approved(request)
+            state.analyse.mark_approved(kw['request'])
     except ValidationError:
-        return JsonResponse({'result': 'Error',
-                             'error': _(
-                                 'You don\'t have the required permissions to complete this action.')})
+        raise JsonError(_("You don't have the required permissions to complete this action."))
 
-    state.personnel = request.user.profile
+    state.personnel = kw['request'].user.profile
     state.save()
-    return JsonResponse({'result': 'Success', 'state_id': state.id, 'analyse_id': analyse_id})
+    return {'result': 'Success', 'state_id': state.id, 'analyse_id': kw['analyse_id']}
 
 
 @staff_member_required
@@ -152,6 +176,8 @@ def _get_analyse(analyse, state_filter=None):
         'finished': analyse.finished,
         'approved': analyse.approved,
         'group_relation': analyse.group_relation,
+        'is_grouper': analyse.group_relation == 'GRP',
+        'grouper': analyse.grouper_id,
         'birthdate': analyse.admission.patient.birthdate,
         'timestamp': analyse.admission.timestamp,
         'category': analyse.type.category.name if analyse.type.category else '-',
@@ -219,13 +245,13 @@ def analyse_state_comments_for_statetype(request, pk):
 
 @staff_member_required
 def get_admission(request, pk):
-    return JsonResponse(_get_admission(pk))
+    return JsonResponse(_get_admission(pk, add_analyse=True))
 
 
 def _get_analysis(admission):
     analyses = []
     # .exclude(group_relation='GRP'):
-    for analyse in admission.analyse_set.all():
+    for analyse in admission.analyse_set.order_by('-grouper'):
         try:
             analyses.append(_get_analyse(analyse, {'current_state': True}))
         except AttributeError:
@@ -241,9 +267,11 @@ def _compile_timeseries(input):
         data[timestamp.strftime("%d/%m/%Y")] += 1
     return list(data.items())
 
+
 # FIXME: Expanding week and month to prevent empty charts
 A_W_EARLIER_DELTA = 20
 A_M_EARLIER_DELTA = 45
+
 
 def _most_popular():
     now = timezone.now()
@@ -283,7 +311,7 @@ def dashboard_stats(request):
     a_m_earlier = now - timedelta(days=A_M_EARLIER_DELTA)
 
     series_data = Analyse.objects.filter(timestamp__range=(a_m_earlier, now)).values_list('id',
-                                                                                       'timestamp')
+                                                                                          'timestamp')
     data['Günlük Toplamlar'] = {'data': _compile_timeseries(series_data), 'type': 'Bar'}
     data['chart_list'].append('Günlük Toplamlar')
     return JsonResponse(data)

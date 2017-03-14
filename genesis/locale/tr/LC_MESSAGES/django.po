@@ -1,4 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -7,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-10 14:50+0200\n"
+"POT-Creation-Date: 2017-03-11 23:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -253,44 +254,44 @@ msgstr "Tamamlandı yap"
 msgid "Mark as Approved"
 msgstr "Onaylandı yap"
 
-#: lab/admin.py:219 lab/admin.py:415
+#: lab/admin.py:220 lab/admin.py:416
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: lab/admin.py:295
+#: lab/admin.py:296
 msgid "Quick parameter definition"
 msgstr "Hızlı parametre tanımlama"
 
-#: lab/admin.py:398
+#: lab/admin.py:399
 msgid "Admission Information"
 msgstr "Hasta Kabul Bilgisi"
 
-#: lab/admin.py:408
+#: lab/admin.py:409
 msgid "Analyse Result"
 msgstr "Test Sonucu"
 
-#: lab/admin.py:452
+#: lab/admin.py:454
 msgid "Institution / Doctor"
 msgstr "Kurum / Doktor"
 
-#: lab/admin.py:460
+#: lab/admin.py:462
 msgid "Patient info"
 msgstr "Hasta bilgisi"
 
-#: lab/admin.py:464 lab/admin.py:580 lab/models/analysis.py:182
+#: lab/admin.py:466 lab/admin.py:587 lab/models/analysis.py:182
 msgid "Ext.Lab"
 msgstr "Dış.Lab"
 
-#: lab/admin.py:467 lab/models/analysis.py:441 lab/models/analysis.py:504
+#: lab/admin.py:469 lab/models/analysis.py:441 lab/models/analysis.py:504
 #: lab/models/analysis.py:713
 msgid "Analyse"
 msgstr "Test"
 
-#: lab/admin.py:574 lab/models/analysis.py:752
+#: lab/admin.py:581 lab/models/analysis.py:752
 msgid "Analyse state"
 msgstr "Test aşaması"
 
-#: lab/admin.py:694 lab/models/analysis.py:176
+#: lab/admin.py:704 lab/models/analysis.py:176
 msgid "Analyse Types"
 msgstr "Test Tipleri"
 
@@ -588,7 +589,6 @@ msgid "Medium type"
 msgstr "Taşıma ortamı"
 
 #: lab/models/analysis.py:261
-#, fuzzy
 #| msgid "Report title"
 msgid "Report override"
 msgstr "Raporun üzerine yaz"
@@ -1068,19 +1068,20 @@ msgstr "Örnek"
 msgid "Samples"
 msgstr "Örnekler"
 
-#: lab/views/api.py:71
+#: lab/views/api.py:73
 msgid "Selected anaylse type and given analyse does not match"
 msgstr "Seçilen test tipi ve kodu okutulan test uyuşmuyor."
 
-#: lab/views/api.py:78
+#: lab/views/api.py:79
 msgid "No analyse found for given admission in selected analyse type"
 msgstr "Bu hasta için seçilen tipte bir test bulunamadı."
 
-#: lab/views/api.py:85
-msgid "Missing data received"
+#: lab/views/api.py:86
+#| msgid "Missing data received"
+msgid "Incomplete data received"
 msgstr "Eksik veri alındı"
 
-#: lab/views/api.py:96
+#: lab/views/api.py:95
 msgid "You don't have the required permissions to complete this action."
 msgstr "Bu işlemi yapma yetkiniz yok"
 

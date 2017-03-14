@@ -423,7 +423,8 @@ class AdminAnalyse(admin.ModelAdmin):
          ))
 
     list_filter = ('finished', 'timestamp', 'type')
-    list_display = ('type', 'admission', 'timestamp', 'finished', 'approved')
+    list_display = ('id', 'type', 'admission', 'timestamp', 'finished', 'approved')
+    list_display_links = ('id', 'type')
     inlines = [
         StateInline, ParameterValueInline
     ]
@@ -521,7 +522,10 @@ class ReportTemplateAdmin(admin.ModelAdmin):
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     search_fields = ('name', 'surname')
-
+    raw_id_fields = ('institution',)
+    autocomplete_lookup_fields = {
+        'fk': ['institution', ],
+    }
     def save_model(self, request, obj, form, change):
         if not obj.institution:
             # create a clinic record for doctors who doesn't
@@ -530,6 +534,8 @@ class DoctorAdmin(admin.ModelAdmin):
             ins.save()
             obj.institution = ins
         obj.save()
+
+
 
 
 class InstitutePricingInline(admin.TabularInline):
@@ -600,7 +606,8 @@ post_admission_save = django.dispatch.Signal(providing_args=["instance", ])
 class AdminAdmission(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
     search_fields = ('patient__name', 'patient__surname')
-    list_display = ('patient', 'institution', 'analyse_state', 'timestamp')
+    list_display = ('id', 'patient', 'institution', 'analyse_state', 'timestamp')
+    list_display_links = ('id', 'patient')
     readonly_fields = ('id', ) #'timestamp'
     raw_id_fields = ('patient', 'institution', 'doctor')
     fields = (('id', 'timestamp'), ('patient', 'is_urgent'), ('doctor', 'institution'),
@@ -631,8 +638,10 @@ class AdminAdmission(admin.ModelAdmin):
         # integer search_term means we want to list values of a certain admission
         try:
             search_term_as_int = int(search_term)
-            queryset = (queryset.filter(pk=search_term_as_int) |
-                  queryset.filter(patient__tcno__contains=search_term_as_int))
+            if len(search_term) < 6:
+                queryset = queryset.filter(pk=search_term_as_int)
+            else:
+                queryset = queryset.filter(patient__tcno__contains=search_term_as_int)
         except ValueError:
             queryset = queryset.filter(Q(patient__name__icontains=search_term)|
                                             Q(patient__surname__icontains=search_term))

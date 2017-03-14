@@ -32,6 +32,7 @@ function get_editing_id() {
 }
 
 function add_value_span($obj, $sibling) {
+    // hides objecs, replaces them with their contents
     add_after = $sibling || $obj;
     add_after.after($('<span class="info_label"></span>').html($obj.text() || $obj.val())).addClass('hide_it_f');
 }
@@ -45,6 +46,7 @@ function lock_unlock_analyse_states() {
         $('div.grp-th.son-durum').hide();
         $('div.grp-th.grup').hide();
     } else if (no_of_wg == 2) {
+        // if we have just 2 workgroups, hide third one
         $('div.grp-td.group input[type=radio][value=3]').parent().hide();
     }
     $('div[id^=state_set].has_original div.grp-tr').each(function () {
@@ -54,10 +56,11 @@ function lock_unlock_analyse_states() {
             add_value_span(inrad, inrad.closest('ul'));
         });
         select = row.find('select');
+        row.find('a.grp-add-another').addClass('hide_it_f'); // remove + icon
         add_value_span(select.find('option:selected'), select);
         add_value_span(row.find('textarea'));
         row.dblclick(function () {
-            alert("Mecbur kalmadıkça değiştirmek yerine yeni bir kayıt eklemeyi tercih ediniz.");
+            alert("Çok gerekli değilse, değiştirmek yerine yeni bir kayıt eklemeyi tercih ediniz.");
             row.find('.hide_it_f').removeClass('hide_it_f');
             row.find('.info_label').addClass('hide_it_f');
         })
@@ -101,8 +104,8 @@ function modify_parameter_list_edit(selector, data_field_selector) {
 
         var tr = $(this);
         window.tr = tr;
-        console.log(tr);
-        console.log(tr.find('input.keydata').val());
+        // console.log(tr);
+        // console.log(tr.find('input.keydata').val());
         var keyData = JSON.parse(tr.find('input.keydata').val());
         if (keyData.presets.length) {
             var txt_field = tr.find('input.vTextField');
